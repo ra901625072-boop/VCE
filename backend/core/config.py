@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     CURRENCY_SYMBOL: str = "₹"
     DEFAULT_OPERATOR_ID: str = "akrajput2005"
     DEFAULT_OPERATOR_PASS: str = "Akshay@05"
+    FRONTEND_URL: str = "https://vce-xi.vercel.app"
+    SERVE_FRONTEND: bool = False
+
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

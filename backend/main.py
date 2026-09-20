@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse, RedirectResponse
 
 from backend.core.config import settings, FRONTEND_DIR
 from backend.database.migrations import init_db
@@ -135,9 +135,8 @@ async def get_apk_info():
     }
 
 
-# Serve Frontend static assets if FRONTEND_DIR exists
-if FRONTEND_DIR.exists():
-    # Mount frontend subdirectories (css, js, components, pages, assets)
+# Conditional Frontend Serving vs Dedicated Headless API Server
+if settings.SERVE_FRONTEND and FRONTEND_DIR.exists():
     for subdir in ["css", "js", "components", "pages", "assets"]:
         subpath = FRONTEND_DIR / subdir
         if subpath.exists():
@@ -149,6 +148,224 @@ if FRONTEND_DIR.exists():
         if index_file.exists():
             return FileResponse(str(index_file))
         return JSONResponse({"message": "Frontend index.html not found"})
+else:
+    # Dedicated Backend Mode: Hide / Ignore UI and display Backend Server Health
+    @app.get("/", tags=["System"])
+    async def backend_root(request: Request):
+        accept_header = request.headers.get("accept", "")
+        if "text/html" in accept_header:
+            html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VCE Pali — API Backend Gateway</title>
+  <link rel="icon" type="image/png" href="{settings.FRONTEND_URL}/assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {{
+      --bg: #09090b;
+      --card: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --accent: #f97316;
+      --success: #10b981;
+    }}
+    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+    body {{
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }}
+    .card {{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 580px;
+      width: 100%;
+      padding: 2.25rem;
+      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.6);
+    }}
+    .badge {{
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(16,185,129,0.12);
+      color: var(--success);
+      border: 1px solid rgba(16,185,129,0.3);
+      margin-bottom: 1.25rem;
+    }}
+    .pulse {{
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(16,185,129,0.7);
+      animation: pulse 2s infinite;
+    }}
+    @keyframes pulse {{
+      0% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16,185,129,0.7); }}
+      70% {{ transform: scale(1); box-shadow: 0 0 0 8px rgba(16,185,129,0); }}
+      100% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16,185,129,0); }}
+    }}
+    h1 {{
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }}
+    p.subtitle {{
+      color: var(--muted);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin-bottom: 1.75rem;
+    }}
+    .grid {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }}
+    .metric {{
+      background: #121214;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+    }}
+    .metric-label {{
+      font-size: 0.725rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }}
+    .metric-val {{
+      font-size: 0.925rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text);
+    }}
+    .btn-group {{
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }}
+    .btn {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }}
+    .btn-primary {{
+      background: var(--accent);
+      color: #fff;
+    }}
+    .btn-primary:hover {{
+      filter: brightness(1.1);
+    }}
+    .btn-secondary {{
+      background: #27272a;
+      color: var(--text);
+    }}
+    .btn-secondary:hover {{
+      background: #3f3f46;
+    }}
+    .footer-note {{
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: 0.75rem;
+      color: #71717a;
+    }}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">
+      <span class="pulse"></span>
+      API GATEWAY ONLINE
+    </div>
+    <h1>VCE Pali Backend Service</h1>
+    <p class="subtitle">
+      Dedicated FastAPI cloud backend powering e-Gram digital seva operations, Rojmel daybook, and financial ledgers.
+    </p>
+
+    <div class="grid">
+      <div class="metric">
+        <div class="metric-label">Server Health</div>
+        <div class="metric-val" style="color:var(--success);">200 OK Active</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Environment</div>
+        <div class="metric-val">{settings.APP_ENV}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">API Version</div>
+        <div class="metric-val">v2.0.0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Database</div>
+        <div class="metric-val">SQLite WAL</div>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <a href="{settings.FRONTEND_URL}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+        <span>🌐 Open Frontend Web App (Vercel)</span>
+      </a>
+      <a href="/docs" class="btn btn-secondary">
+        <span>📖 Interactive API Docs (Swagger)</span>
+      </a>
+      <a href="/api/health" class="btn btn-secondary">
+        <span>🩺 Health Check JSON (/api/health)</span>
+      </a>
+    </div>
+
+    <div class="footer-note">
+      User Interface is hosted on Vercel at <a href="{settings.FRONTEND_URL}" style="color:var(--accent); text-decoration:none;">{settings.FRONTEND_URL}</a>.
+    </div>
+  </div>
+</body>
+</html>"""
+            return HTMLResponse(content=html_content, status_code=200)
+
+        return {
+            "status": "ok",
+            "service": settings.APP_NAME,
+            "version": "2.0.0",
+            "environment": settings.APP_ENV,
+            "database": "connected",
+            "frontend_url": settings.FRONTEND_URL,
+            "health_check": "/api/health",
+            "documentation": "/docs"
+        }
+
+    # Redirect any direct UI page accesses on the backend to the Vercel frontend
+    @app.get("/pages/{path:path}", tags=["System"])
+    async def redirect_pages_to_frontend(path: str):
+        return RedirectResponse(url=f"{settings.FRONTEND_URL}/pages/{path}", status_code=307)
+
+    @app.get("/index.html", tags=["System"])
+    async def redirect_index_to_frontend():
+        return RedirectResponse(url=settings.FRONTEND_URL, status_code=307)
+
 
 
 if __name__ == "__main__":
