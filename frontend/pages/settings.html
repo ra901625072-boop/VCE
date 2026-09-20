@@ -182,6 +182,42 @@
           </div>
         </div>
 
+        <!-- Cloud & Backend Hosting Connection (Vercel & Render) -->
+        <div class="card" id="card-cloud-hosting" style="margin-bottom:1.65rem;">
+          <div class="card-header" style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span style="font-size:1.25rem;">☁️</span>
+              <h2 class="card-title">Cloud Backend Connection (Vercel &amp; Render)</h2>
+            </div>
+            <span id="backend-status-badge" class="badge" style="background:rgba(59,130,246,0.15); color:var(--accent-light); border:1px solid rgba(59,130,246,0.3); font-size:0.75rem; font-weight:700; padding:0.2rem 0.5rem; border-radius:var(--radius-xs);">Vercel Proxy (/api)</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:0.825rem; color:var(--text-muted); margin:0 0 1rem 0; line-height:1.45;">
+              By default, requests use Vercel's zero-CORS edge proxy (<code>/api/*</code>) routed straight to your Render backend. If your Render backend is hosted under a custom URL, configure it below.
+            </p>
+            <form id="form-backend-config">
+              <div class="form-row" style="align-items:flex-end;">
+                <div class="form-group" style="flex:1;">
+                  <label class="form-label" for="input-backend-url">Render Backend Base URL</label>
+                  <input type="url" id="input-backend-url" class="form-control font-tabular" placeholder="e.g. https://vce-pali-backend.onrender.com (leave blank for default Vercel proxy)" />
+                </div>
+                <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
+                  <button type="button" id="btn-test-backend" class="btn btn-outline" style="font-weight:600; white-space:nowrap;">
+                    ⚡ Test Connection
+                  </button>
+                  <button type="submit" class="btn btn-primary" style="font-weight:700; white-space:nowrap;">
+                    Save
+                  </button>
+                  <button type="button" id="btn-reset-backend" class="btn btn-outline" style="white-space:nowrap; color:var(--text-muted);" title="Reset to default Vercel proxy">
+                    Reset
+                  </button>
+                </div>
+              </div>
+              <div id="backend-test-result" style="display:none; font-size:0.8rem; padding:0.6rem 0.85rem; border-radius:var(--radius-sm); margin-top:0.35rem;"></div>
+            </form>
+          </div>
+        </div>
+
         <div class="two-col-grid">
           <!-- Work / Service Categories Management -->
           <div class="card">

@@ -12,6 +12,9 @@ DEFAULT_DB_PATH = DATABASE_DIR / "vce.db"
 FRONTEND_DIR = ROOT_DIR / "frontend"
 
 
+from typing import Union, List
+from pydantic import field_validator
+
 class Settings(BaseSettings):
     APP_NAME: str = "VCE Pali — e-Gram Seva & Financial Ledger"
     APP_ENV: str = "development"
@@ -20,11 +23,22 @@ class Settings(BaseSettings):
     PORT: int = 8000
     SECRET_KEY: str = "vce_tracker_secret_key_change_in_production_2026"
     DB_PATH: str = str(DEFAULT_DB_PATH)
-    CORS_ORIGINS: list[str] = ["http://localhost:8000", "http://127.0.0.1:8000", "http://localhost:3000"]
+    CORS_ORIGINS: Union[str, List[str]] = ["*"]
     TIMEZONE: str = "Asia/Kolkata"
     CURRENCY_SYMBOL: str = "₹"
     DEFAULT_OPERATOR_ID: str = "akrajput2005"
     DEFAULT_OPERATOR_PASS: str = "Akshay@05"
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            if not v or v.strip() == "*":
+                return ["*"]
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        elif isinstance(v, (list, tuple)):
+            return list(v)
+        return ["*"]
 
     model_config = {
         "env_file": str(ROOT_DIR / ".env"),
@@ -34,3 +48,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+

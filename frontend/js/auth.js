@@ -3,6 +3,8 @@
  * Manages token persistence, 8-hour shift expiry, and route authorization guards.
  */
 
+import { getApiBaseUrl } from './config.js';
+
 const TOKEN_KEY = 'vce_auth_token';
 const USER_KEY = 'vce_auth_user';
 const EXPIRES_AT_KEY = 'vce_auth_expires_at';
@@ -116,7 +118,8 @@ export const auth = {
    * Authenticate against /api/auth/login
    */
   async login(username, password) {
-    const res = await fetch('/api/auth/login', {
+    const url = `${getApiBaseUrl()}/auth/login`;
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: username.trim(), password })
@@ -139,7 +142,8 @@ export const auth = {
     try {
       const token = this.getToken();
       if (token) {
-        await fetch('/api/auth/logout', {
+        const url = `${getApiBaseUrl()}/auth/logout`;
+        await fetch(url, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         }).catch(() => {});

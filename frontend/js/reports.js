@@ -2,6 +2,7 @@
  * Reports & Export Controller
  */
 import { api, vceApi, formatINR, formatDate, paiseToRupees } from './api.js';
+import { getApiBaseUrl } from './config.js';
 import { notify } from '../components/notification.js';
 
 let currentReportData = null;
@@ -401,7 +402,8 @@ function triggerDownload(format) {
   const startDate = document.getElementById('report-date-start')?.value || '';
   const endDate = document.getElementById('report-date-end')?.value || '';
 
-  let url = `/api/reports/export?type=${type}&format=${format}&preset=${preset}`;
+  const apiBase = getApiBaseUrl().replace(/\/+$/, '');
+  let url = `${apiBase}/reports/export?type=${type}&format=${format}&preset=${preset}`;
   if (preset === 'custom' && startDate && endDate) {
     url += `&start_date=${startDate}&end_date=${endDate}`;
   }

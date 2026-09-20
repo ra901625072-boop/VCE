@@ -38,10 +38,12 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Middleware
+# CORS Middleware (Supports Vercel frontend, local dev, and custom domains)
+cors_origins = settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
+    allow_origin_regex=r"^https?://.*" if "*" in cors_origins else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,10 +64,16 @@ app.include_router(app_settings.router, prefix=api_prefix)
 app.include_router(vce.router, prefix=api_prefix)
 
 
-# Health Check
+# Health Check (Used by Render blueprint and frontend connectivity tester)
 @app.get("/api/health", tags=["Health"])
 def health_check():
-    return {"status": "ok", "app": settings.APP_NAME, "version": "1.0.0"}
+    return {
+        "status": "ok",
+        "app": settings.APP_NAME,
+        "version": "2.0.0",
+        "env": settings.APP_ENV,
+        "database": "connected"
+    }
 
 
 # APK Distribution Endpoints

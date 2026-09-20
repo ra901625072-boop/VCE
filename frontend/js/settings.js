@@ -2,6 +2,7 @@
  * Settings & Panchayat Profile Controller — VCE Pali e-Gram
  */
 import { api, vceApi } from './api.js';
+import { getCustomBackendUrl, getApiBaseUrl, setBackendUrl, testBackendConnection } from './config.js';
 import { notify } from '../components/notification.js';
 
 async function loadAllSettings() {
@@ -210,6 +211,85 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('vce:theme-change', () => {
     syncThemeRadios();
   });
+
+  // Cloud Backend Hosting (Vercel & Render) Integration
+  const inputBackendUrl = document.getElementById('input-backend-url');
+  const badgeBackendStatus = document.getElementById('backend-status-badge');
+  const resultBackendTest = document.getElementById('backend-test-result');
+  const btnTestBackend = document.getElementById('btn-test-backend');
+  const btnResetBackend = document.getElementById('btn-reset-backend');
+  const formBackendConfig = document.getElementById('form-backend-config');
+
+  function updateBackendBadge(customUrl) {
+    if (!badgeBackendStatus) return;
+    if (customUrl) {
+      badgeBackendStatus.textContent = 'Custom Render URL';
+      badgeBackendStatus.style.background = 'rgba(16,185,129,0.15)';
+      badgeBackendStatus.style.color = '#10b981';
+      badgeBackendStatus.style.border = '1px solid rgba(16,185,129,0.3)';
+    } else {
+      badgeBackendStatus.textContent = 'Vercel Proxy (/api)';
+      badgeBackendStatus.style.background = 'rgba(59,130,246,0.15)';
+      badgeBackendStatus.style.color = 'var(--accent-light)';
+      badgeBackendStatus.style.border = '1px solid rgba(59,130,246,0.3)';
+    }
+  }
+
+  if (inputBackendUrl) {
+    const currentCustom = getCustomBackendUrl();
+    inputBackendUrl.value = currentCustom;
+    updateBackendBadge(currentCustom);
+
+    formBackendConfig?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const val = inputBackendUrl.value.trim();
+      setBackendUrl(val);
+      updateBackendBadge(val);
+      notify.success(val ? 'Custom Render backend URL saved.' : 'Reset to default Vercel proxy.');
+      if (resultBackendTest) resultBackendTest.style.display = 'none';
+    });
+
+    btnResetBackend?.addEventListener('click', () => {
+      inputBackendUrl.value = '';
+      setBackendUrl('');
+      updateBackendBadge('');
+      if (resultBackendTest) resultBackendTest.style.display = 'none';
+      notify.info('Restored to default Vercel edge proxy (/api)');
+    });
+
+    btnTestBackend?.addEventListener('click', async () => {
+      const originalText = btnTestBackend.innerHTML;
+      btnTestBackend.disabled = true;
+      btnTestBackend.innerHTML = '<span>⏳ Testing...</span>';
+      if (resultBackendTest) {
+        resultBackendTest.style.display = 'block';
+        resultBackendTest.style.background = 'rgba(59,130,246,0.1)';
+        resultBackendTest.style.border = '1px solid rgba(59,130,246,0.25)';
+        resultBackendTest.style.color = 'var(--text-main)';
+        resultBackendTest.innerHTML = 'Connecting to backend... <em>(Render free tier may take up to 40s to spin up if sleeping)</em>';
+      }
+
+      const res = await testBackendConnection(inputBackendUrl.value.trim() || null);
+      btnTestBackend.disabled = false;
+      btnTestBackend.innerHTML = originalText;
+
+      if (!resultBackendTest) return;
+
+      if (res.ok) {
+        resultBackendTest.style.background = 'rgba(16,185,129,0.12)';
+        resultBackendTest.style.border = '1px solid rgba(16,185,129,0.3)';
+        resultBackendTest.style.color = '#10b981';
+        resultBackendTest.innerHTML = `<strong>Connected Online</strong> (${res.latencyMs}ms) — App: ${res.data?.app || 'VCE Pali'} (v${res.data?.version || '2.0.0'}, Env: ${res.data?.env || 'production'})`;
+        notify.success('Backend server is healthy and responding!');
+      } else {
+        resultBackendTest.style.background = 'rgba(239,68,68,0.12)';
+        resultBackendTest.style.border = '1px solid rgba(239,68,68,0.3)';
+        resultBackendTest.style.color = '#ef4444';
+        resultBackendTest.innerHTML = `<strong>Connection Failed:</strong> ${res.error}<br><small style="color:var(--text-dim);">If your Render instance is on the free tier, it spins down when idle. Send another request in 30 seconds after it wakes up.</small>`;
+        notify.error('Backend connection check failed.');
+      }
+    });
+  }
 
   // Remove APK distribution card if running inside Android native app
   const isNative = typeof window.AndroidBridge !== 'undefined' ||

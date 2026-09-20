@@ -125,3 +125,19 @@ pytest -v tests/
 ```powershell
 python scripts/seed_database.py
 ```
+
+---
+
+## 🌐 Cloud Hosting (Zero-Config Vercel + Render)
+
+The project includes ready-to-deploy **Infrastructure-as-Code** configurations:
+
+| Component | Platform | Configuration File | Description |
+| :--- | :--- | :--- | :--- |
+| **Frontend** | **Vercel** | [`vercel.json`](file:///d:/VCE/vercel.json) | Static edge hosting with zero-CORS proxy rewrites to Render |
+| **Backend** | **Render** | [`render.yaml`](file:///d:/VCE/render.yaml) | Automated Python Web Service with auto-migrations and SSL |
+
+1. **Deploy Backend on Render**: Connect your repo in Render and choose **Blueprint** (`render.yaml`). Render configures the Python web service, generates secret keys, and starts Uvicorn.
+2. **Deploy Frontend on Vercel**: Import your repo in Vercel. Vercel automatically detects `outputDirectory: "frontend"` from `vercel.json`. Zero manual configuration needed!
+3. **Full Step-by-Step Guide**: Read [`docs/DEPLOYMENT.md`](file:///d:/VCE/docs/DEPLOYMENT.md).
+

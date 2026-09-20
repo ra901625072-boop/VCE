@@ -1,6 +1,17 @@
 import { auth } from './auth.js';
+import { getApiBaseUrl } from './config.js';
 
-const API_BASE = '/api';
+function buildUrl(endpoint, params = {}) {
+  const base = getApiBaseUrl();
+  const fullEndpoint = base.replace(/\/+$/, '') + (endpoint.startsWith('/') ? endpoint : `/${endpoint}`);
+  const url = new URL(fullEndpoint, window.location.origin);
+  Object.keys(params).forEach(key => {
+    if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
+      url.searchParams.append(key, params[key]);
+    }
+  });
+  return url.toString();
+}
 
 function getHeaders(customHeaders = {}) {
   const headers = { ...customHeaders };
@@ -23,13 +34,8 @@ function handleAuthError(res) {
 
 export const api = {
   async get(endpoint, params = {}) {
-    const url = new URL(API_BASE + endpoint, window.location.origin);
-    Object.keys(params).forEach(key => {
-      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
-        url.searchParams.append(key, params[key]);
-      }
-    });
-    const res = await fetch(url.toString(), {
+    const url = buildUrl(endpoint, params);
+    const res = await fetch(url, {
       headers: getHeaders()
     });
     if (!res.ok) {
@@ -41,7 +47,8 @@ export const api = {
   },
 
   async post(endpoint, data = {}) {
-    const res = await fetch(API_BASE + endpoint, {
+    const url = buildUrl(endpoint);
+    const res = await fetch(url, {
       method: 'POST',
       headers: getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data)
@@ -55,7 +62,8 @@ export const api = {
   },
 
   async put(endpoint, data = {}) {
-    const res = await fetch(API_BASE + endpoint, {
+    const url = buildUrl(endpoint);
+    const res = await fetch(url, {
       method: 'PUT',
       headers: getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data)
@@ -69,7 +77,8 @@ export const api = {
   },
 
   async delete(endpoint) {
-    const res = await fetch(API_BASE + endpoint, {
+    const url = buildUrl(endpoint);
+    const res = await fetch(url, {
       method: 'DELETE',
       headers: getHeaders()
     });
