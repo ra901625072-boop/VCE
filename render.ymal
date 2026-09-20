@@ -22,7 +22,10 @@ services:
       - key: DEBUG
         value: "false"
       - key: SECRET_KEY
-        generateValue: true
+        value: "y8t79YBtdO3lnInztvHnSqGPBBG8PGuSBStYReZ14GPsAASEJeyT6a7zseaqQOQK"
+      - key: BACKEND_URL
+        value: "https://vce-pali-backend.onrender.com"
+
       - key: TIMEZONE
         value: "Asia/Kolkata"
       - key: CURRENCY_SYMBOL

@@ -8,6 +8,8 @@
  */
 
 const STORAGE_KEY = 'vce_backend_url';
+export const DEFAULT_BACKEND_URL = 'https://vce-pali-backend.onrender.com';
+
 
 /**
  * Returns the raw configured custom backend URL if set, or empty string.

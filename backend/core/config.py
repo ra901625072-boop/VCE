@@ -21,15 +21,17 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     HOST: str = "127.0.0.1"
     PORT: int = 8000
-    SECRET_KEY: str = "vce_tracker_secret_key_change_in_production_2026"
+    SECRET_KEY: str = "y8t79YBtdO3lnInztvHnSqGPBBG8PGuSBStYReZ14GPsAASEJeyT6a7zseaqQOQK"
     DB_PATH: str = str(DEFAULT_DB_PATH)
     CORS_ORIGINS: Union[str, List[str]] = ["*"]
     TIMEZONE: str = "Asia/Kolkata"
     CURRENCY_SYMBOL: str = "₹"
     DEFAULT_OPERATOR_ID: str = "akrajput2005"
     DEFAULT_OPERATOR_PASS: str = "Akshay@05"
+    BACKEND_URL: str = "https://vce-pali-backend.onrender.com"
     FRONTEND_URL: str = "https://vce-xi.vercel.app"
     SERVE_FRONTEND: bool = False
+
 
 
     @field_validator("CORS_ORIGINS", mode="before")
