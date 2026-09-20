@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=/pages/login.html" />
+  </noscript>
+  <title>VCE Pali — e-Gram Digital Center</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
+  <link rel="apple-touch-icon" href="/assets/vce-icon-256.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700&display=swap" rel="stylesheet" />
+  <script>
+    (function() {
+      const token = localStorage.getItem('vce_auth_token');
+      const expiresAt = localStorage.getItem('vce_auth_expires_at');
+      const isExpired = !expiresAt || Date.now() >= new Date(expiresAt).getTime();
+      if (token && !isExpired) {
+        window.location.replace('/pages/dashboard.html');
+      } else {
+        localStorage.removeItem('vce_auth_token');
+        localStorage.removeItem('vce_auth_user');
+        localStorage.removeItem('vce_auth_expires_at');
+        window.location.replace('/pages/login.html');
+      }
+    })();
+  </script>
+</head>
+<body style="background-color:#121214; color:#f4f4f5; font-family:'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0;">
+  <div style="text-align:center;">
+    <img src="/assets/vce-logo.svg" alt="VCE Logo" style="height:64px; width:auto; margin:0 auto 1.5rem; display:block; filter:drop-shadow(0 8px 24px rgba(249,115,22,0.45));" />
+    <div style="font-size:1.15rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:0.35rem;">VCE Pali</div>
+    <p style="font-size:0.825rem; color:#a1a1aa; margin:0;">Loading e-Gram Digital Center & Financial Ledger...</p>
+  </div>
+</body>
+</html>

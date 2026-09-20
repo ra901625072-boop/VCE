@@ -1,0 +1,460 @@
+/**
+ * Print Stylesheet — VCE Pali e-Gram Center & Financial Ledger
+ * Produces crisp, single-page auditor-ready A4 documentation.
+ * Completely immune to dark mode styles: forces pure white paper and high-contrast dark text.
+ * Hides all UI chrome (sidebars, fixed mobile navs, action buttons, modals).
+ */
+
+/* On screen: hide print-only elements */
+.print-only-header,
+.print-only-signatures {
+  display: none !important;
+}
+
+@media print {
+  /* -------------------------------------------------------------------------
+     1. Total Override of Dark Mode & Color System
+     ------------------------------------------------------------------------- */
+  :root,
+  html,
+  body,
+  [data-theme],
+  [data-theme="dark"],
+  [data-theme="light"] {
+    color-scheme: light !important;
+    --bg-canvas: #ffffff !important;
+    --bg-body: #ffffff !important;
+    --bg-main: #ffffff !important;
+    --bg-surface: #ffffff !important;
+    --bg-surface-elevated: #f8fafc !important;
+    --bg-surface-hover: #ffffff !important;
+    --bg-surface-active: #ffffff !important;
+    --bg-input: #ffffff !important;
+    --text-main: #0f172a !important;
+    --text-secondary: #334155 !important;
+    --text-muted: #475569 !important;
+    --text-dim: #64748b !important;
+    --text-inverse: #ffffff !important;
+    --border-subtle: #cbd5e1 !important;
+    --border-default: #94a3b8 !important;
+    --border-strong: #0f172a !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 8pt !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Universal print background & ink reset */
+  html,
+  body,
+  .app-container,
+  .main-wrapper,
+  .content-area,
+  .card,
+  .card-body,
+  .table-container,
+  table,
+  .data-table,
+  tbody,
+  tr,
+  td {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* -------------------------------------------------------------------------
+     2. Hide All UI Chrome & Non-Printable Elements
+     ------------------------------------------------------------------------- */
+  #sidebar-container,
+  .sidebar,
+  #mobile-bottom-nav-container,
+  .mobile-bottom-nav,
+  .mobile-nav-fab,
+  .topbar,
+  .topbar-right,
+  .btn,
+  button,
+  input,
+  select,
+  textarea,
+  .btn-theme-toggle,
+  #modal-container,
+  #quick-modals-root,
+  .modal-backdrop,
+  .modal-dialog,
+  #notification-container,
+  .toast,
+  .theme-icon,
+  .nav-kbd-hint,
+  .badge-action,
+  .btn-icon,
+  #report-custom-date-box,
+  #custom-range-inputs,
+  #btn-generate-report,
+  #dynamic-page-modal {
+    display: none !important;
+  }
+
+  /* -------------------------------------------------------------------------
+     3. Page Geometry (Optimized to fit on a single crisp A4 sheet)
+     ------------------------------------------------------------------------- */
+  @page {
+    size: A4 portrait;
+    margin: 6mm 8mm 6mm 8mm;
+  }
+
+  .app-container {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .main-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    display: block !important;
+    min-height: auto !important;
+    background: #ffffff !important;
+  }
+
+  .content-area {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
+  }
+
+  /* -------------------------------------------------------------------------
+     4. Official Gujarat e-Gram Print Header Banner
+     ------------------------------------------------------------------------- */
+  .print-only-header {
+    display: block !important;
+    border-bottom: 2px solid #0f172a !important;
+    padding-bottom: 4px !important;
+    margin-bottom: 8px !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+
+  .print-header-top {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 2px !important;
+    background: transparent !important;
+  }
+
+  .print-header-title {
+    font-size: 11pt !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+  }
+
+  .print-header-sub {
+    font-size: 7.5pt !important;
+    color: #334155 !important;
+    font-weight: 600 !important;
+  }
+
+  .print-header-meta {
+    display: flex !important;
+    justify-content: space-between !important;
+    font-size: 7.5pt !important;
+    color: #1e293b !important;
+    margin-top: 2px !important;
+    padding-top: 2px !important;
+    border-top: 1px dotted #94a3b8 !important;
+    background: transparent !important;
+  }
+
+  /* -------------------------------------------------------------------------
+     5. Cards & Section Formatting
+     ------------------------------------------------------------------------- */
+  .card {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    border-radius: 3px !important;
+    margin-bottom: 6px !important;
+    margin-top: 0 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .card-header {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+    padding: 3px 8px !important;
+  }
+
+  .card-title {
+    color: #0f172a !important;
+    font-size: 8.5pt !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+  }
+
+  .card-body {
+    padding: 4px 8px !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+
+  /* Deficit Alert Banner in Print: Hide if suppressed, format cleanly if active */
+  #rojmel-deficit-banner[style*="display: none"],
+  #rojmel-deficit-banner[style*="display:none"],
+  #rojmel-deficit-banner.hidden {
+    display: none !important;
+  }
+
+  #rojmel-deficit-banner:not([style*="display: none"]):not([style*="display:none"]) {
+    display: flex !important;
+    background: #fef2f2 !important;
+    background-color: #fef2f2 !important;
+    border: 1.5px solid #dc2626 !important;
+    color: #991b1b !important;
+    padding: 3px 8px !important;
+    margin-bottom: 6px !important;
+    font-size: 7pt !important;
+    border-radius: 3px !important;
+  }
+
+  #rojmel-deficit-banner * {
+    color: #991b1b !important;
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+
+  #rojmel-deficit-banner svg {
+    width: 13px !important;
+    height: 13px !important;
+    color: #dc2626 !important;
+    stroke: #dc2626 !important;
+  }
+
+  /* -------------------------------------------------------------------------
+     6. Summary Metrics Grid
+     ------------------------------------------------------------------------- */
+  .metrics-grid,
+  .rojmel-summary-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 5px !important;
+    margin-bottom: 6px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .stat-card {
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+    padding: 4px 6px !important;
+    border-radius: 3px !important;
+  }
+
+  .stat-card-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 2px !important;
+    background: transparent !important;
+  }
+
+  .stat-label {
+    font-size: 6.5pt !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+  }
+
+  .stat-value {
+    font-size: 10.5pt !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    line-height: 1.15 !important;
+  }
+
+  .stat-subtext {
+    font-size: 6.5pt !important;
+    color: #64748b !important;
+    margin-top: 1px !important;
+  }
+
+  /* Deficit text in stat card */
+  #val-closing-cash[style*="color"] {
+    color: #b91c1c !important;
+  }
+
+  /* -------------------------------------------------------------------------
+     7. Table Formatting (Crisp white rows, legible dark ink, clean borders)
+     ------------------------------------------------------------------------- */
+  .table-container {
+    overflow: visible !important;
+    border: none !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  table,
+  .data-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tbody {
+    display: table-row-group !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+
+  th,
+  .data-table th {
+    background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid #94a3b8 !important;
+    font-size: 7pt !important;
+    font-weight: 700 !important;
+    padding: 3px 5px !important;
+    text-align: left !important;
+    line-height: 1.15 !important;
+  }
+
+  td,
+  .data-table td {
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    font-size: 7pt !important;
+    padding: 2.5px 5px !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    line-height: 1.15 !important;
+  }
+
+  .data-table td div,
+  .data-table td span,
+  td div,
+  td span {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+
+  /* High contrast text inside table cells */
+  .data-table td div[style*="var(--text-main)"],
+  .data-table td div[style*="--text-main"] {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+  }
+
+  .data-table td div[style*="var(--text-muted)"],
+  .data-table td div[style*="--text-muted"],
+  .data-table td[style*="var(--text-muted)"],
+  .data-table td[style*="--text-muted"] {
+    color: #475569 !important;
+  }
+
+  /* Badges in Print */
+  .badge {
+    border: 1px solid #94a3b8 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 6.5pt !important;
+    padding: 0.5px 3px !important;
+    border-radius: 2px !important;
+  }
+
+  /* Tabular numbers */
+  .font-tabular {
+    font-family: monospace, Courier, sans-serif !important;
+    font-weight: 700 !important;
+  }
+
+  /* High-contrast financial indicators in print */
+  td[style*="#10b981"],
+  td[style*="rgb(16, 185, 129)"],
+  td[style*="var(--revenue)"],
+  span[style*="#10b981"],
+  span[style*="var(--revenue)"] {
+    color: #047857 !important; /* Rich Dark Emerald */
+  }
+
+  td[style*="#ef4444"],
+  td[style*="rgb(239, 68, 68)"],
+  td[style*="var(--expense)"],
+  span[style*="#ef4444"],
+  span[style*="var(--expense)"] {
+    color: #b91c1c !important; /* Rich Dark Crimson */
+  }
+
+  /* -------------------------------------------------------------------------
+     8. Dual Sign-off Block at Bottom of Page
+     ------------------------------------------------------------------------- */
+  .print-only-signatures {
+    display: flex !important;
+    justify-content: space-between !important;
+    margin-top: 14px !important;
+    padding-top: 4px !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .print-sig-box {
+    width: 44% !important;
+    text-align: center !important;
+    border-top: 1px solid #0f172a !important;
+    padding-top: 4px !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+
+  .print-sig-title {
+    font-size: 7.5pt !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+  }
+
+  .print-sig-sub {
+    font-size: 6pt !important;
+    color: #334155 !important;
+    margin-top: 1px !important;
+  }
+}

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_canvas"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Top Header with Back Navigation -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
+
+            <ImageButton
+                android:id="@+id/btn_config_back"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_arrow_back"
+                android:contentDescription="Back"
+                app:tint="@color/text_main" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/server_config_title"
+                android:textColor="@color/text_main"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginStart="12dp" />
+        </LinearLayout>
+
+        <!-- Informational Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_elevated_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="VCE Pali Workstation Connection"
+                android:textColor="@color/accent_light"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/server_config_desc"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:lineSpacingMultiplier="1.2" />
+        </LinearLayout>
+
+        <!-- Server URL Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_server_url"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/server_url_label"
+            android:textColorHint="@color/text_muted"
+            app:boxStrokeColor="@color/accent"
+            app:boxStrokeWidth="1.5dp"
+            app:boxBackgroundColor="@color/bg_surface"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_server_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textUri"
+                android:textColor="@color/text_main"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:text="http://10.212.82.62:8000" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Preset Fast Chips Label -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quick Environment Presets:"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Preset 1: Local Wi-Fi (Host Machine) -->
+        <Button
+            android:id="@+id/btn_preset_wifi"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/preset_wifi"
+            android:textAllCaps="false"
+            android:textColor="@color/text_secondary"
+            android:gravity="start|center_vertical"
+            app:strokeColor="@color/border_subtle"
+            android:layout_marginBottom="6dp" />
+
+        <!-- Preset 2: Android Emulator -->
+        <Button
+            android:id="@+id/btn_preset_emulator"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/preset_emulator"
+            android:textAllCaps="false"
+            android:textColor="@color/text_secondary"
+            android:gravity="start|center_vertical"
+            app:strokeColor="@color/border_subtle"
+            android:layout_marginBottom="6dp" />
+
+        <!-- Preset 3: USB Debugging (localhost via adb reverse) -->
+        <Button
+            android:id="@+id/btn_preset_usb"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/preset_usb"
+            android:textAllCaps="false"
+            android:textColor="@color/text_secondary"
+            android:gravity="start|center_vertical"
+            app:strokeColor="@color/border_subtle"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Test Connection Button -->
+        <Button
+            android:id="@+id/btn_test_connection"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="@string/btn_test_connection"
+            android:textAllCaps="false"
+            android:textColor="@color/text_main"
+            android:textStyle="bold"
+            app:strokeColor="@color/border_strong"
+            android:layout_marginBottom="10dp" />
+
+        <!-- Ping Status Result Container -->
+        <LinearLayout
+            android:id="@+id/layout_test_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_elevated_card"
+            android:padding="12dp"
+            android:visibility="gone"
+            android:layout_marginBottom="20dp">
+
+            <ProgressBar
+                android:id="@+id/progress_test"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:indeterminateTint="@color/accent"
+                android:layout_marginEnd="10dp" />
+
+            <TextView
+                android:id="@+id/tv_test_result"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Pinging server…"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+
+        <!-- Save & Connect Button -->
+        <Button
+            android:id="@+id/btn_save_connect"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="@string/btn_save_connect"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:backgroundTint="@color/accent" />
+    </LinearLayout>
+</ScrollView>

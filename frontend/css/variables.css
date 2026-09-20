@@ -1,0 +1,213 @@
+/* ==========================================================================
+   Design Tokens & CSS Variables — VCE Pali (e-Gram Digital Center)
+   Authentic Institutional Workstation & Double-Entry Ledger System
+   Zero AI Clichés: Grounded Slate Surfaces, Crisp Hairline Dividers, Solid Ink
+   ========================================================================== */
+
+:root {
+  /* Color Scheme declaration */
+  color-scheme: dark;
+
+  /* Surface Hierarchy — Pure Neutral Carbon & Graphite (Zero Synthetic Blue Tint) */
+  --bg-canvas: #121214;
+  --bg-body: #121214;
+  --bg-surface: #18181b;
+  --bg-surface-elevated: #222226;
+  --bg-surface-hover: #2b2b30;
+  --bg-surface-active: #34343a;
+  --bg-input: #141416;
+  --bg-input-focus: #1c1c20;
+  --bg-backdrop: rgba(18, 18, 20, 0.85);
+
+  /* Hairline Border System — Crisp Stone & Graphite Dividers (No Blue Cast) */
+  --border-subtle: #27272a;
+  --border-default: #333338;
+  --border-strong: #494952;
+  --border-focus: #c2410c;
+
+  /* Typographic Contrast Hierarchy — Clean Neutral Zinc */
+  --text-main: #f4f4f5;
+  --text-secondary: #d4d4d8;
+  --text-muted: #a1a1aa;
+  --text-dim: #71717a;
+  --text-inverse: #18181b;
+
+  /* Brand Colors — Grounded Gujarat Terracotta / Saffron */
+  --accent: #c2410c;
+  --accent-hover: #9a3412;
+  --accent-light: #ea580c;
+  --accent-bg: rgba(194, 65, 12, 0.12);
+  --accent-border: #7c2d12;
+
+  --brand-neutral: #52525b;
+  --brand-neutral-bg: rgba(113, 113, 122, 0.12);
+
+  /* Semantic Financial Colors — Muted, Real-World Ledger Pigments */
+  --revenue: #059669;
+  --revenue-light: #10b981;
+  --revenue-bg: rgba(5, 150, 105, 0.12);
+  --revenue-border: rgba(5, 150, 105, 0.35);
+
+  --expense: #dc2626;
+  --expense-light: #ef4444;
+  --expense-bg: rgba(220, 38, 38, 0.12);
+  --expense-border: rgba(220, 38, 38, 0.35);
+
+  --pending: #d97706;
+  --pending-light: #f59e0b;
+  --pending-bg: rgba(217, 119, 6, 0.12);
+  --pending-border: rgba(217, 119, 6, 0.35);
+
+  --gov-mandate: #b45309;
+  --gov-mandate-bg: rgba(180, 83, 9, 0.12);
+  --gov-mandate-border: rgba(180, 83, 9, 0.35);
+
+  --info: #0f766e;
+  --info-bg: rgba(15, 118, 110, 0.12);
+  --info-border: rgba(15, 118, 110, 0.35);
+
+  --purple: #7c3aed;
+  --purple-bg: rgba(124, 58, 237, 0.12);
+
+  /* Typography Stack — Authentic, Clear Screen Reading */
+  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Roboto Mono', Consolas, Menlo, monospace;
+  --font-gujarati: 'Noto Sans Gujarati', 'Shruti', sans-serif;
+
+  /* Tactile Physical Shadows (Dark Mode) — Controlled & Crisp */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.65);
+  --shadow-xl: 0 12px 28px rgba(0, 0, 0, 0.75);
+
+  /* Radii — Precision 4px-6px Institutional Workstation */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-full: 9999px;
+
+  /* Spacing Scale (4px base) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Mechanical Fast Transitions */
+  --duration-instant: 80ms;
+  --duration-fast: 140ms;
+  --duration-normal: 200ms;
+  --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Structural Dimensions */
+  --sidebar-width: 252px;
+  --topbar-height: 60px;
+  --bottom-bar-height: 62px;
+  --mobile-topbar-height: 56px;
+  --touch-target-min: 44px;
+  --content-max-width: 1440px;
+
+  /* Mobile Safe Area Insets */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+/* ==========================================================================
+   Daytime Light Mode — Authentic Government Office Workstation
+   Clean Neutral Warm Gray & Pure Paper White (Zero Cool Slate-Blue Tint)
+   ========================================================================== */
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surface Hierarchy — Clean Neutral Gray & Pure White */
+  --bg-canvas: #f4f4f5;
+  --bg-body: #f4f4f5;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #fafafa;
+  --bg-surface-hover: #f0f0f2;
+  --bg-surface-active: #e4e4e7;
+  --bg-input: #ffffff;
+  --bg-input-focus: #ffffff;
+  --bg-backdrop: rgba(24, 24, 27, 0.6);
+
+  /* Hairline Border System — Crisp Neutral Zinc Dividers */
+  --border-subtle: #e4e4e7;
+  --border-default: #d4d4d8;
+  --border-strong: #a1a1aa;
+  --border-focus: #c2410c;
+
+  /* Typographic Contrast Hierarchy — Carbon Black & Charcoal Ink (No Navy Cast) */
+  --text-main: #18181b;
+  --text-secondary: #3f3f46;
+  --text-muted: #71717a;
+  --text-dim: #a1a1aa;
+  --text-inverse: #ffffff;
+
+  /* Brand Colors — Grounded Terracotta */
+  --accent: #c2410c;
+  --accent-hover: #9a3412;
+  --accent-light: #ea580c;
+  --accent-bg: rgba(194, 65, 12, 0.08);
+  --accent-border: #9a3412;
+
+  --brand-neutral: #52525b;
+  --brand-neutral-bg: rgba(113, 113, 122, 0.08);
+
+  /* Muted Institutional Ledger Colors */
+  --revenue: #047857;
+  --revenue-light: #059669;
+  --revenue-bg: rgba(4, 120, 87, 0.08);
+  --revenue-border: #047857;
+
+  --expense: #be123c;
+  --expense-light: #dc2626;
+  --expense-bg: rgba(190, 18, 60, 0.08);
+  --expense-border: #be123c;
+
+  --pending: #b45309;
+  --pending-light: #d97706;
+  --pending-bg: rgba(180, 83, 9, 0.08);
+  --pending-border: #b45309;
+
+  --gov-mandate: #b45309;
+  --gov-mandate-bg: rgba(180, 83, 9, 0.08);
+  --gov-mandate-border: #b45309;
+
+  --info: #0f766e;
+  --info-bg: rgba(15, 118, 110, 0.08);
+  --info-border: #0f766e;
+
+  --purple: #6d28d9;
+  --purple-bg: rgba(109, 40, 217, 0.08);
+
+  /* Subtle Mechanical Shadows (Light Mode) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 4px 10px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Tabular figures for ledger precision */
+.font-tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* Gujarati script helper */
+.font-gujarati {
+  font-family: var(--font-gujarati), var(--font-sans);
+}
+
+/* Crisp focus ring */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

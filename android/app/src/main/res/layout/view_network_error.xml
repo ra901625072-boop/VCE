@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_canvas"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- Error State Badge Icon -->
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/ic_server_offline"
+        android:contentDescription="Server Offline"
+        app:tint="@color/expense"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Error Title -->
+    <TextView
+        android:id="@+id/tv_error_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/error_connection_title"
+        android:textColor="@color/text_main"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Current Server URL Display -->
+    <TextView
+        android:id="@+id/tv_error_current_url"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="http://10.212.82.62:8000"
+        android:textColor="@color/accent_light"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:fontFamily="monospace"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:background="@drawable/bg_code_snippet"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Explanatory message -->
+    <TextView
+        android:id="@+id/tv_error_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/error_connection_message"
+        android:textColor="@color/text_muted"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.2"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Retry Connection Button -->
+    <Button
+        android:id="@+id/btn_error_retry"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="@string/btn_retry"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:backgroundTint="@color/accent"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Configure Server IP Button -->
+    <Button
+        android:id="@+id/btn_error_change_server"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="@string/btn_change_server"
+        android:textAllCaps="false"
+        android:textColor="@color/text_secondary"
+        app:strokeColor="@color/border_strong" />
+</LinearLayout>

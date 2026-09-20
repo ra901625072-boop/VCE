@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Govt Claims (₹20/Unit) — VCE Pali e-Gram</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
+  <link rel="apple-touch-icon" href="/assets/vce-icon-256.png" />
+  <!-- Curated Google Fonts: Plus Jakarta Sans + Inter + JetBrains Mono + Noto Sans Gujarati -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Noto+Sans+Gujarati:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/animations.css" />
+  <link rel="stylesheet" href="/css/layout.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+  <link rel="stylesheet" href="/css/print.css" />
+  <script>
+    (function() {
+      const saved = localStorage.getItem('vce_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+      if (typeof window.AndroidBridge !== 'undefined' || navigator.userAgent.includes('VCE-Android-Native') || window.location.search.includes('native=true')) {
+        document.documentElement.classList.add('is-native-app');
+      }
+    })();
+  </script>
+</head>
+<body data-page="gov_claims">
+  <div class="app-container">
+    <div id="sidebar-container"></div>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-title-group">
+            <h1 class="topbar-title">Govt Claims <span class="desktop-only-inline">(સરકારી કામગીરી)</span></h1>
+            <span class="topbar-subtitle">Mandated minimum ₹20/unit data entry and departmental campaign tracker</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-theme-toggle" id="btn-theme-switch-top" title="Toggle Theme" aria-label="Toggle Theme">
+            <span class="theme-icon sun-icon">☀️</span>
+            <span class="theme-icon moon-icon">🌙</span>
+            <span class="theme-text">Mode</span>
+          </button>
+          <button class="btn btn-primary" id="btn-add-dept-order" style="background:var(--gov-mandate); color:#ffffff; font-weight:700; border:1px solid #b45309;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>New Govt Task</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="content-area">
+        <!-- Notification Banner regarding Dec 2025 GR -->
+        <div class="gov-mandate-banner">
+          <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <div style="width:36px; height:36px; border-radius:var(--radius-sm); background:rgba(245,158,11,0.2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gov-mandate)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <div>
+              <div class="gov-mandate-banner-title" style="font-family:var(--font-display); font-weight: 700; color: var(--gov-mandate); font-size: 0.95rem;">Gujarat Govt Resolution: Mandated Min ₹20/- per Unit Payment</div>
+              <div class="gov-mandate-banner-sub" style="font-size: 0.825rem; color: var(--text-muted); margin-top:0.15rem;">Official mandate fixing minimum ₹20 per entry/survey for Village Computer Entrepreneurs (VCE) across all departments.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Cards — Grounded Workstation Cards -->
+        <section class="metrics-grid" style="margin-bottom:1.65rem;">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Units Completed</span>
+              <span class="stat-pill">Mandate Units (કુલ એન્ટ્રી)</span>
+            </div>
+            <span class="stat-value font-tabular" id="val-total-units">0</span>
+            <span class="stat-subtext">Entries / Surveys recorded</span>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Claim Amount</span>
+              <span class="stat-pill revenue">Billing Amount (દાવા રકમ)</span>
+            </div>
+            <span class="stat-value font-tabular" id="val-total-claim">₹0.00</span>
+            <span class="stat-subtext">Total billing at mandated rates</span>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Amount Disbursed</span>
+              <span class="stat-pill profit">Received (જમા થયેલ)</span>
+            </div>
+            <span class="stat-value font-tabular" id="val-total-received">₹0.00</span>
+            <span class="stat-subtext">Disbursed from taluka treasury</span>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Pending Claims</span>
+              <span class="stat-pill pending">Receivable (બાકી રકમ)</span>
+            </div>
+            <span class="stat-value font-tabular" id="val-total-pending">₹0.00</span>
+            <span class="stat-subtext">Awaiting taluka / dept clearance</span>
+          </div>
+        </section>
+
+        <!-- Department Work Orders Table & Mobile Cards -->
+        <div class="card">
+          <div class="card-header">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <h2 class="card-title">Government Work Orders</h2>
+              <span id="orders-count-badge" class="badge badge-waiting font-tabular">0 Tasks</span>
+            </div>
+          </div>
+          <div class="table-container hide-on-mobile">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Department & Scheme</th>
+                  <th>Order / Office Ref</th>
+                  <th>Progress (Done / Target)</th>
+                  <th>Unit Rate</th>
+                  <th>Total Claim</th>
+                  <th>Received</th>
+                  <th>TDS & Deductions</th>
+                  <th>Net Pending</th>
+                  <th>Status</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-dept-orders">
+                <tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:2.5rem;">No government work orders recorded</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Mobile Adaptive Feed Cards -->
+          <div class="mobile-card-list" id="mobile-orders-list" style="padding:0.75rem;"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="mobile-bottom-nav-container"></div>
+  <div id="modal-container"></div>
+  <div id="notification-container"></div>
+
+  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/gov_claims.js"></script>
+</body>
+</html>

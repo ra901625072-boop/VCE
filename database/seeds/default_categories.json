@@ -1,0 +1,40 @@
+{
+  "payment_methods": [
+    {"name": "Online", "is_system": true, "is_default": true},
+    {"name": "Cash", "is_system": true, "is_default": false},
+    {"name": "Udhar", "is_system": true, "is_default": false},
+    {"name": "UPI", "is_system": false, "is_default": false},
+    {"name": "Bank Transfer", "is_system": false, "is_default": false},
+    {"name": "Cheque", "is_system": false, "is_default": false}
+  ],
+  "work_statuses": [
+    {"name": "New", "color": "#3b82f6", "sort_order": 1, "is_default": true},
+    {"name": "In Progress", "color": "#f59e0b", "sort_order": 2, "is_default": false},
+    {"name": "Pending Approval", "color": "#8b5cf6", "sort_order": 3, "is_default": false},
+    {"name": "Ready / Printed", "color": "#06b6d4", "sort_order": 4, "is_default": false},
+    {"name": "Completed / Delivered", "color": "#10b981", "sort_order": 5, "is_default": false},
+    {"name": "Cancelled / Rejected", "color": "#ef4444", "sort_order": 6, "is_default": false}
+  ],
+  "work_categories": [
+    "AnyRoR Land Records (7/12 & 8-A)",
+    "Digital Gujarat Certificates",
+    "Farmer & iKhedut / PM-Kisan",
+    "Civil Supplies & Ration Card",
+    "Panchayat & Civic Services",
+    "Identity & Ayushman Card",
+    "Utility Bills & CSC Services",
+    "State Dept Work Orders (₹20/Unit)",
+    "General Digital Services"
+  ],
+  "expense_categories": [
+    "Paper Reams (A4 / Legal)",
+    "Printer Toner & Drum Refill",
+    "Broadband & Internet Recharge",
+    "Lamination Film & Stationery",
+    "Hardware & Scanner Maintenance",
+    "Electricity & Power Backup",
+    "Center Hospitality & Refreshments",
+    "Panchayat & Duty Travel",
+    "Other Center Expenses"
+  ]
+}

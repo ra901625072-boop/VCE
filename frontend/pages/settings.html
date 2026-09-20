@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — VCE Pali e-Gram</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
+  <link rel="apple-touch-icon" href="/assets/vce-icon-256.png" />
+  <!-- Curated Google Fonts: Plus Jakarta Sans + Inter + JetBrains Mono + Noto Sans Gujarati -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Noto+Sans+Gujarati:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/animations.css" />
+  <link rel="stylesheet" href="/css/layout.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+  <link rel="stylesheet" href="/css/print.css" />
+  <script>
+    (function() {
+      const saved = localStorage.getItem('vce_theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', saved);
+      if (typeof window.AndroidBridge !== 'undefined' || navigator.userAgent.includes('VCE-Android-Native') || window.location.search.includes('native=true')) {
+        document.documentElement.classList.add('is-native-app');
+      }
+    })();
+  </script>
+  <style>
+    .is-native-app .apk-download-option,
+    .is-native-app #card-apk-distribution,
+    .is-native-app [href*="/download/apk"],
+    .is-native-app [download*=".apk"] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+  </style>
+</head>
+<body data-page="settings">
+  <div class="app-container">
+    <div id="sidebar-container"></div>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-title-group">
+            <h1 class="topbar-title">Settings <span class="desktop-only-inline">(સેટિંગ્સ)</span></h1>
+            <span class="topbar-subtitle">Gram Panchayat profile, service categories, and display preferences</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-theme-toggle" id="btn-theme-switch-top" title="Toggle Theme" aria-label="Toggle Theme">
+            <span class="theme-icon sun-icon">☀️</span>
+            <span class="theme-icon moon-icon">🌙</span>
+            <span class="theme-text">Mode</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="content-area">
+        <!-- Gram Panchayat Center Profile Card -->
+        <div class="card" style="margin-bottom:1.65rem;">
+          <div class="card-header">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span style="font-size:1.25rem;">🏛️</span>
+              <h2 class="card-title">Gram Panchayat Center Profile (ગ્રામ પંચાયત પ્રોફાઇલ)</h2>
+            </div>
+          </div>
+          <div class="card-body">
+            <form id="form-panchayat-profile">
+              <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                  <label class="form-label">Gram Panchayat Name *</label>
+                  <input type="text" id="input-prof-gp" class="form-control" placeholder="e.g. Chikhodra Gram Panchayat" required />
+                </div>
+                <div class="form-group" style="flex:1;">
+                  <label class="form-label">e-Gram Center Code / ID *</label>
+                  <input type="text" id="input-prof-center-id" class="form-control font-tabular" placeholder="e.g. EGRAM-GJ-0142" required />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                  <label class="form-label">Taluka *</label>
+                  <input type="text" id="input-prof-taluka" class="form-control" required />
+                </div>
+                <div class="form-group" style="flex:1;">
+                  <label class="form-label">District *</label>
+                  <input type="text" id="input-prof-district" class="form-control" required />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                  <label class="form-label">VCE Full Name *</label>
+                  <input type="text" id="input-prof-vce-name" class="form-control" required />
+                </div>
+                <div class="form-group" style="flex:1;">
+                  <label class="form-label">VCE Mobile Number *</label>
+                  <input type="tel" id="input-prof-vce-phone" class="form-control font-tabular" required />
+                </div>
+                <div class="form-group" style="flex:1;">
+                  <label class="form-label">Talati-cum-Mantri Name</label>
+                  <input type="text" id="input-prof-talati" class="form-control" />
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:flex-end; margin-top:1.15rem;">
+                <button type="submit" class="btn btn-primary" style="font-weight:700;">
+                  Save Center Profile
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Appearance & Theme Card -->
+        <div class="card" style="margin-bottom:1.65rem;">
+          <div class="card-header">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span style="font-size:1.25rem;">🎨</span>
+              <h2 class="card-title">Display & Theme Preferences</h2>
+            </div>
+          </div>
+          <div class="card-body">
+            <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:1.15rem;">
+              Choose light or dark mode for your VCE workspace. Both modes provide high-contrast WCAG AAA compliance.
+            </p>
+            <div style="display:flex; flex-wrap:wrap; gap:1.15rem;">
+              <label class="theme-choice-card" style="display:flex; align-items:center; gap:0.85rem; padding:0.95rem 1.35rem; border:1px solid var(--border-default); border-radius:var(--radius-md); cursor:pointer; background:var(--bg-surface-elevated); min-width:220px; transition:border-color 0.15s ease;">
+                <input type="radio" name="vce-theme-radio" value="light" style="cursor:pointer;" />
+                <div>
+                  <div style="font-weight:700; font-size:0.925rem; color:var(--text-main);">☀️ Daytime Light Mode</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.15rem;">Optimized for daylight clarity in Gram Panchayat</div>
+                </div>
+              </label>
+              <label class="theme-choice-card" style="display:flex; align-items:center; gap:0.85rem; padding:0.95rem 1.35rem; border:1px solid var(--border-default); border-radius:var(--radius-md); cursor:pointer; background:var(--bg-surface-elevated); min-width:220px; transition:border-color 0.15s ease;">
+                <input type="radio" name="vce-theme-radio" value="dark" style="cursor:pointer;" />
+                <div>
+                  <div style="font-weight:700; font-size:0.925rem; color:var(--text-main);">🌙 Modern Dark Mode</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.15rem;">Comfortable for extended ledger tallies</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Android Mobile App & APK Distribution Card -->
+        <div class="card apk-download-option" id="card-apk-distribution" style="margin-bottom:1.65rem;">
+          <div class="card-header" style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span style="font-size:1.25rem;">📱</span>
+              <h2 class="card-title">Android Mobile App &amp; APK Distribution (મોબાઇલ એપ્લિકેશન)</h2>
+            </div>
+            <span class="badge badge-success" style="background:rgba(5,150,105,0.15); color:var(--revenue); border:1px solid rgba(5,150,105,0.3); font-size:0.75rem; font-weight:700; padding:0.2rem 0.5rem; border-radius:var(--radius-xs);">Latest v1.0.0</span>
+          </div>
+          <div class="card-body">
+            <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1.25rem;">
+              <div style="flex:1; min-width:260px;">
+                <h3 style="font-size:1rem; font-weight:700; margin:0 0 0.35rem 0; color:var(--text-main);">VCE Pali — e-Gram Official Companion</h3>
+                <p style="font-size:0.825rem; color:var(--text-muted); margin:0 0 0.85rem 0; line-height:1.45;">
+                  Dedicated Android workstation app connecting directly to this backend server. Features full Rojmel Daybook, Citizen directory, 1-click WhatsApp payment reminders, and PDF voucher downloads.
+                </p>
+                <div style="display:flex; flex-wrap:wrap; gap:0.75rem; font-size:0.75rem; color:var(--text-secondary); margin-bottom:0.5rem;">
+                  <span><strong>Package:</strong> <code>com.vcegujarat.app</code></span>
+                  <span>•</span>
+                  <span><strong>APK Size:</strong> 15.9 MB</span>
+                  <span>•</span>
+                  <span><strong>Download Route:</strong> <a href="/download/apk" style="color:var(--accent-light);">/download/apk</a></span>
+                </div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:0.45rem; align-items:flex-end;">
+                <a href="/download/apk" download="VCE_Pali.apk" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:0.5rem; font-weight:700; padding:0.6rem 1.25rem; text-decoration:none;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  <span>Download Latest APK</span>
+                </a>
+                <span style="font-size:0.7rem; color:var(--text-dim);">Updated automatically via build_apk.bat</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="two-col-grid">
+          <!-- Work / Service Categories Management -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                <span>Service Categories</span>
+              </h2>
+            </div>
+            <div class="card-body">
+              <form id="form-add-wcat" style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+                <input type="text" id="wcat-name" class="form-control" placeholder="New service category..." required />
+                <button type="submit" class="btn btn-primary btn-sm" style="flex-shrink:0;">Add</button>
+              </form>
+              <ul id="wcat-list" style="display:flex; flex-direction:column; gap:0.4rem;">
+                <!-- Injected by JS -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- Expense Categories Management -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                <span>Center Expense Types</span>
+              </h2>
+            </div>
+            <div class="card-body">
+              <form id="form-add-ecat" style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+                <input type="text" id="ecat-name" class="form-control" placeholder="New expense type (e.g. Lamination Sheets)..." required />
+                <button type="submit" class="btn btn-primary btn-sm" style="flex-shrink:0;">Add</button>
+              </form>
+              <ul id="ecat-list" style="display:flex; flex-direction:column; gap:0.4rem;">
+                <!-- Injected by JS -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- Payment Methods Management -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span>Payment Channels</span>
+              </h2>
+            </div>
+            <div class="card-body">
+              <form id="form-add-method" style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+                <input type="text" id="method-name" class="form-control" placeholder="New payment method..." required />
+                <button type="submit" class="btn btn-primary btn-sm" style="flex-shrink:0;">Add</button>
+              </form>
+              <ul id="method-list" style="display:flex; flex-direction:column; gap:0.4rem;">
+                <!-- Injected by JS -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- Work Statuses -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                <span>Workflow Statuses</span>
+              </h2>
+            </div>
+            <div class="card-body">
+              <ul id="status-list" style="display:flex; flex-direction:column; gap:0.4rem;">
+                <!-- Injected by JS -->
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="mobile-bottom-nav-container"></div>
+  <div id="modal-container"></div>
+  <div id="notification-container"></div>
+
+  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/settings.js"></script>
+</body>
+</html>

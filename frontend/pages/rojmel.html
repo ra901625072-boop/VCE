@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Rojmel — VCE Pali e-Gram</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
+  <link rel="apple-touch-icon" href="/assets/vce-icon-256.png" />
+  <!-- Curated Google Fonts: Plus Jakarta Sans + Inter + JetBrains Mono + Noto Sans Gujarati -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Noto+Sans+Gujarati:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/animations.css" />
+  <link rel="stylesheet" href="/css/layout.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+  <link rel="stylesheet" href="/css/print.css" />
+  <script>
+    (function() {
+      const saved = localStorage.getItem('vce_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+      if (typeof window.AndroidBridge !== 'undefined' || navigator.userAgent.includes('VCE-Android-Native') || window.location.search.includes('native=true')) {
+        document.documentElement.classList.add('is-native-app');
+      }
+    })();
+  </script>
+</head>
+<body data-page="rojmel">
+  <div class="app-container">
+    <div id="sidebar-container"></div>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left" style="min-width:0; flex:1; margin-right:0.5rem; overflow:hidden;">
+          <div class="topbar-title-group" style="overflow:hidden;">
+            <h1 class="topbar-title">Daily Rojmel <span class="desktop-only-inline">(રોજમેળ)</span></h1>
+            <span class="topbar-subtitle" id="rojmel-gp-header" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">e-Gram Vishwagram Center — Cash & Digital Daily Tally</span>
+          </div>
+        </div>
+        <div class="topbar-right" style="gap:0.35rem; flex-shrink:0; align-items:center;">
+          <button class="btn-theme-toggle" id="btn-theme-switch-top" title="Toggle Theme" aria-label="Toggle Theme">
+            <span class="theme-icon sun-icon">☀️</span>
+            <span class="theme-icon moon-icon">🌙</span>
+            <span class="theme-text">Mode</span>
+          </button>
+          <input type="date" id="rojmel-date-picker" class="form-control font-tabular" style="width:125px; padding:0.35rem 0.45rem; font-size:0.775rem; font-weight:600;" />
+          <div class="topbar-action-group desktop-only" style="display:flex; gap:0.4rem;">
+            <button class="btn btn-outline btn-sm" id="btn-open-remit-modal" style="font-weight:600; color:var(--accent); white-space:nowrap; padding:0.35rem 0.6rem; font-size:0.8rem;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <span>Remit GP</span>
+            </button>
+            <button class="btn btn-primary btn-sm" id="btn-open-day-close" style="font-weight:600; white-space:nowrap; padding:0.35rem 0.65rem; font-size:0.8rem;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>Close Day</span>
+            </button>
+            <button class="btn btn-outline btn-sm" id="btn-print-rojmel" title="Print Rojmel (Ctrl+P)" style="font-weight:600; white-space:nowrap; padding:0.35rem 0.65rem; font-size:0.8rem;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              <span>Print</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-area">
+        <!-- Mobile Quick Action Toolbar for Rojmel -->
+        <div class="rojmel-mobile-actions mobile-only" style="display:flex; gap:0.5rem; margin-bottom:0.85rem;">
+          <button class="btn btn-outline btn-sm" id="btn-mobile-remit" style="font-weight:600; color:var(--accent); flex:1;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span>Remit GP</span>
+          </button>
+          <button class="btn btn-primary btn-sm" id="btn-mobile-close-day" style="font-weight:600; flex:1;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Close Day</span>
+          </button>
+          <button class="btn btn-outline btn-sm" id="btn-mobile-print" style="font-weight:600;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <span>Print</span>
+          </button>
+        </div>
+        <!-- Official Printable Letterhead (visible ONLY in print) -->
+        <div class="print-only-header">
+          <div class="print-header-top">
+            <div>
+              <h1 class="print-header-title">ગુજરાત સરકાર • પંચાયત, ગ્રામ ગૃહનિર્માણ અને ગ્રામ વિકાસ વિભાગ</h1>
+              <div class="print-header-sub">e-Gram Vishwagram Project — VCE Digital Services Daily Cash Book (રોજમેળ)</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11pt; font-weight:800; color:#111827;" id="print-header-date">Date: 20-09-2026</div>
+              <div style="font-size:8pt; color:#4b5563;">Official Daybook Record</div>
+            </div>
+          </div>
+          <div class="print-header-meta">
+            <span id="print-meta-center">Gram Panchayat: — | Taluka: — | District: —</span>
+            <span id="print-meta-vce">Center ID: — | VCE: — | Talati: —</span>
+          </div>
+        </div>
+
+        <!-- Cash Deficit Warning Alert Banner -->
+        <div id="rojmel-deficit-banner" style="display:none; margin-bottom:1.5rem; background:rgba(239, 68, 68, 0.12); border:1px solid #ef4444; color:#ef4444; padding:0.9rem 1.25rem; border-radius:8px; display:flex; align-items:center; gap:0.75rem;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong style="font-size:0.925rem;">Cash Drawer Deficit Warning!</strong>
+            <span style="font-size:0.825rem; opacity:0.9; display:block;">Calculated closing cash in drawer is negative. Unrecorded citizen receipts or out-of-sequence payments detected.</span>
+          </div>
+        </div>
+
+        <!-- Day Close / Locked Status Banner -->
+        <div id="rojmel-lock-banner" style="display:none; margin-bottom:1.5rem; background:rgba(16, 185, 129, 0.12); border:1px solid #10b981; color:#10b981; padding:0.85rem 1.25rem; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span style="font-weight:600; font-size:0.875rem;" id="lock-banner-text">Daybook Closed & Verified</span>
+          </div>
+          <span class="badge badge-completed" id="lock-banner-variance">Variance: ₹0.00</span>
+        </div>
+
+        <!-- Daily Tally Statistics Cards — Grounded Workstation Cards -->
+        <section class="metrics-grid" style="margin-bottom:1.65rem;">
+          <!-- Opening Balances -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Opening Balances</span>
+              <span class="stat-pill">Morning (શરૂઆત)</span>
+            </div>
+            <div style="margin-top:0.35rem;">
+              <div style="display:flex; justify-content:space-between; font-size:0.775rem; color:var(--text-muted); margin-bottom:0.25rem;">
+                <span>Cash Drawer:</span>
+                <span class="font-tabular" id="val-open-cash" style="font-weight:700; color:var(--text-main);">₹0.00</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:0.775rem; color:var(--text-muted);">
+                <span>Bank / UPI:</span>
+                <span class="font-tabular" id="val-open-bank" style="font-weight:700; color:var(--text-main);">₹0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Today's Total Aavak (Inflow) -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Inflows</span>
+              <span class="stat-pill revenue">+ Aavak (આવક)</span>
+            </div>
+            <span class="stat-value font-tabular" id="val-today-aavak">₹0.00</span>
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;">
+              <span>Cash: <b id="sub-aavak-cash" class="font-tabular" style="color:var(--text-main);">₹0.00</b></span>
+              <span>UPI: <b id="sub-aavak-upi" class="font-tabular" style="color:var(--text-main);">₹0.00</b></span>
+            </div>
+          </div>
+
+          <!-- Today's Total Javak (Outflow) -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Outflows</span>
+              <span class="stat-pill expense">- Javak (જાવક)</span>
+            </div>
+            <span class="stat-value font-tabular" id="val-today-javak">₹0.00</span>
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;">
+              <span>Exp: <b id="sub-javak-exp" class="font-tabular" style="color:var(--text-main);">₹0.00</b></span>
+              <span>Wallets: <b id="sub-javak-wallet" class="font-tabular" style="color:var(--text-main);">₹0.00</b></span>
+            </div>
+          </div>
+
+          <!-- Closing Balance in Drawer -->
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Closing Drawer</span>
+              <span class="stat-pill profit" id="pill-closing-status">Akhar (આખર સિલક)</span>
+            </div>
+            <span class="stat-value font-tabular" id="val-closing-cash">₹0.00</span>
+            <span class="stat-subtext" id="sub-closing-note">Cash physically expected in drawer</span>
+          </div>
+        </section>
+
+        <!-- Mobile Segmented Tab Switcher (Inflows vs Outflows) -->
+        <div class="segmented-control show-on-mobile-only" id="rojmel-segmented-switch" style="display:none; margin-bottom:1.15rem;">
+          <button class="segmented-tab active" id="tab-btn-aavak" type="button">
+            <span style="width:8px; height:8px; border-radius:2px; background:var(--revenue);"></span>
+            <span>Inflows (આવક)</span>
+          </button>
+          <button class="segmented-tab" id="tab-btn-javak" type="button">
+            <span style="width:8px; height:8px; border-radius:2px; background:var(--expense);"></span>
+            <span>Outflows (જાવક)</span>
+          </button>
+        </div>
+
+        <!-- Two Column Ledger: Aavak vs Javak -->
+        <div class="rojmel-dual-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap:1.65rem;">
+          <!-- Aavak / Inflow Table -->
+          <div class="card" id="card-aavak">
+            <div class="card-header">
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <span style="display:inline-block; width:8px; height:8px; border-radius:2px; background:var(--revenue);"></span>
+                <h2 class="card-title">Inflows / Receipts (આવક)</h2>
+              </div>
+              <span class="badge badge-cash font-tabular" id="badge-total-aavak">₹0.00</span>
+            </div>
+            <div class="table-container hide-on-mobile">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Description / Citizen</th>
+                    <th>Method</th>
+                    <th style="text-align:right;">Amount (₹)</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-aavak">
+                  <tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:2.5rem;">No inflows recorded for this date</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Mobile Inflow Cards Feed -->
+            <div class="mobile-card-list" id="mobile-aavak-list" style="padding:0.75rem;"></div>
+          </div>
+
+          <!-- Javak / Outflow Table -->
+          <div class="card" id="card-javak">
+            <div class="card-header">
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <span style="display:inline-block; width:8px; height:8px; border-radius:2px; background:var(--expense);"></span>
+                <h2 class="card-title">Outflows / Payments (જાવક)</h2>
+              </div>
+              <span class="badge badge-cancelled font-tabular" id="badge-total-javak">₹0.00</span>
+            </div>
+            <div class="table-container hide-on-mobile">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Expense / Category</th>
+                    <th>Method</th>
+                    <th style="text-align:right;">Amount (₹)</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-javak">
+                  <tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:2.5rem;">No outflows recorded for this date</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Mobile Outflow Cards Feed -->
+            <div class="mobile-card-list" id="mobile-javak-list" style="padding:0.75rem;"></div>
+          </div>
+        </div>
+
+        <!-- Udhar Movement & Statutory Earnings for the day -->
+        <div class="card" style="margin-top:1.65rem;">
+          <div class="card-header">
+            <h2 class="card-title">Daily Movement & Earnings Summary (હિસાબ સારાંશ)</h2>
+          </div>
+          <div class="card-body" style="display:flex; flex-wrap:wrap; gap:2.5rem; padding:1.35rem 1.65rem;">
+            <div>
+              <span style="font-size:0.775rem; font-weight:600; color:var(--text-muted); display:block; margin-bottom:0.25rem;">New Udhar Extended Today:</span>
+              <span class="font-tabular" id="val-day-udhar-given" style="font-size:1.25rem; font-weight:700; color:var(--expense);">₹0.00</span>
+            </div>
+            <div style="border-left:1px solid var(--border-subtle); padding-left:2rem;">
+              <span style="font-size:0.775rem; font-weight:600; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Old Udhar Recovered Today:</span>
+              <span class="font-tabular" id="val-day-udhar-recovered" style="font-size:1.25rem; font-weight:700; color:var(--revenue);">₹0.00</span>
+            </div>
+            <div style="border-left:1px solid var(--border-subtle); padding-left:2rem;">
+              <span style="font-size:0.775rem; font-weight:600; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Gross Cash Inflow Surplus:</span>
+              <span class="font-tabular" id="val-day-net-profit" style="font-size:1.25rem; font-weight:700; color:var(--text-main);">₹0.00</span>
+            </div>
+            <div style="border-left:1px solid var(--border-subtle); padding-left:2rem;">
+              <span style="font-size:0.775rem; font-weight:600; color:var(--text-muted); display:block; margin-bottom:0.25rem;">VCE Net Service Commission:</span>
+              <span class="font-tabular" id="val-day-net-comm" style="font-size:1.25rem; font-weight:700; color:#10b981;">₹0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Official Dual Sign-off Block (visible ONLY in print) -->
+        <div class="print-only-signatures">
+          <div class="print-sig-box">
+            <div class="print-sig-title">વી.સી.ઈ. ની સહી (VCE Operator)</div>
+            <div class="print-sig-sub">Certified that all daily inflows, outflows & cash drawer tally are accurately recorded.</div>
+          </div>
+          <div class="print-sig-box">
+            <div class="print-sig-title">તલાટી કમ મંત્રી સહી અને સિક્કો (Talati-cum-Mantri)</div>
+            <div class="print-sig-sub">Verified Gram Panchayat revenue share and physical cash drawer closing balance.</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="mobile-bottom-nav-container"></div>
+  <div id="modal-container"></div>
+  <div id="notification-container"></div>
+
+  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/rojmel.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+# Python cache & virtualenv
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Android & Gradle
+.gradle/
+**/.gradle/
+**/build/
+.kotlin/
+**/.kotlin/
+local.properties
+**/local.properties
+*.iml
+
+# Database
+*.db
+*.db-wal
+*.db-shm
+database/vce.db
+database/*.db-wal
+database/*.db-shm
+database/backups/*.db
+!database/backups/.gitkeep
+
+# Environment secrets
+.env
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

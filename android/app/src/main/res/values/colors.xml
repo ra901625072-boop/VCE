@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- VCE Pali Official Institutional Carbon & Terracotta Tokens -->
+    <color name="bg_canvas">#121214</color>
+    <color name="bg_surface">#18181B</color>
+    <color name="bg_surface_elevated">#222226</color>
+    <color name="bg_surface_hover">#2B2B30</color>
+
+    <color name="border_subtle">#27272A</color>
+    <color name="border_default">#333338</color>
+    <color name="border_strong">#494952</color>
+
+    <!-- Brand Terracotta / Saffron -->
+    <color name="accent">#C2410C</color>
+    <color name="accent_hover">#9A3412</color>
+    <color name="accent_light">#EA580C</color>
+    <color name="accent_subtle">#331E17</color>
+
+    <!-- Semantic Financial Colors -->
+    <color name="revenue">#059669</color>
+    <color name="revenue_subtle">#102E22</color>
+    <color name="expense">#DC2626</color>
+    <color name="expense_subtle">#331515</color>
+    <color name="pending">#D97706</color>
+    <color name="pending_subtle">#33240F</color>
+
+    <!-- Connection Status Dots -->
+    <color name="status_connected">#059669</color>
+    <color name="status_disconnected">#DC2626</color>
+    <color name="status_checking">#D97706</color>
+
+    <!-- Typography Text Hierarchy -->
+    <color name="text_main">#F4F4F5</color>
+    <color name="text_secondary">#D4D4D8</color>
+    <color name="text_muted">#A1A1AA</color>
+    <color name="text_dim">#71717A</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>
