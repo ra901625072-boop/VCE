@@ -103,17 +103,6 @@
             android:contentDescription="@string/action_refresh"
             app:tint="@color/text_secondary"
             android:padding="6dp" />
-
-        <!-- Server Settings Action Button -->
-        <ImageButton
-            android:id="@+id/btn_native_settings"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_settings"
-            android:contentDescription="@string/action_settings"
-            app:tint="@color/text_secondary"
-            android:padding="6dp" />
     </LinearLayout>
 
     <!-- Native Page Loading Progress Bar -->

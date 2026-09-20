@@ -13,23 +13,29 @@ object NetworkUtils {
     private const val PREFS_NAME = "vce_settings"
     private const val KEY_SERVER_URL = "server_url"
 
-    // Default to the host Wi-Fi IP address detected on this machine
-    const val DEFAULT_SERVER_URL = "http://10.212.82.62:8000"
-    const val EMULATOR_SERVER_URL = "http://10.0.2.2:8000"
-    const val USB_SERVER_URL = "http://localhost:8000"
+    // Permanent Cloud Production URLs (Vercel Frontend + Render Backend)
+    const val DEFAULT_SERVER_URL = "https://vce-xi.vercel.app"
+    const val DEFAULT_BACKEND_URL = "https://vce-pali-backend.onrender.com"
 
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
 
     fun getServerUrl(context: Context): String {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return prefs.getString(KEY_SERVER_URL, DEFAULT_SERVER_URL) ?: DEFAULT_SERVER_URL
+        val saved = prefs.getString(KEY_SERVER_URL, DEFAULT_SERVER_URL) ?: DEFAULT_SERVER_URL
+        // Migrate any previously cached local IPs or localhost ports to the live cloud URL
+        return if (saved.contains("10.212.") || saved.contains("10.0.2.2") || saved.contains("localhost") || saved.contains("127.0.0.1")) {
+            saveServerUrl(context, DEFAULT_SERVER_URL)
+            DEFAULT_SERVER_URL
+        } else {
+            saved
+        }
     }
 
     fun saveServerUrl(context: Context, rawUrl: String) {
         var cleanUrl = rawUrl.trim()
         if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
-            cleanUrl = "http://$cleanUrl"
+            cleanUrl = "https://$cleanUrl"
         }
         if (cleanUrl.endsWith("/")) {
             cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1)
@@ -60,7 +66,7 @@ object NetworkUtils {
             try {
                 var target = serverBaseUrl.trim()
                 if (!target.startsWith("http://") && !target.startsWith("https://")) {
-                    target = "http://$target"
+                    target = "https://$target"
                 }
                 if (target.endsWith("/")) {
                     target = target.substring(0, target.length - 1)
@@ -68,8 +74,8 @@ object NetworkUtils {
                 val healthUrl = URL("$target/api/health")
 
                 connection = healthUrl.openConnection() as HttpURLConnection
-                connection.connectTimeout = 4000
-                connection.readTimeout = 4000
+                connection.connectTimeout = 12000
+                connection.readTimeout = 12000
                 connection.requestMethod = "GET"
                 connection.setRequestProperty("Accept", "application/json")
 

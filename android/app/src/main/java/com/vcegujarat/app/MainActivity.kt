@@ -34,11 +34,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var statusDot: View
     private lateinit var tvStatusLabel: TextView
     private lateinit var btnRefresh: ImageButton
-    private lateinit var btnSettings: ImageButton
     private lateinit var layoutErrorOverlay: View
     private lateinit var tvErrorCurrentUrl: TextView
     private lateinit var btnErrorRetry: Button
-    private lateinit var btnErrorChangeServer: Button
 
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
 
@@ -67,15 +65,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Register Server Config Activity Result
-    private val serverConfigLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            loadServerUrl()
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -95,12 +84,10 @@ class MainActivity : AppCompatActivity() {
         statusDot = findViewById(R.id.status_dot)
         tvStatusLabel = findViewById(R.id.tv_status_label)
         btnRefresh = findViewById(R.id.btn_native_refresh)
-        btnSettings = findViewById(R.id.btn_native_settings)
         layoutErrorOverlay = findViewById(R.id.layout_error_overlay)
 
         tvErrorCurrentUrl = layoutErrorOverlay.findViewById(R.id.tv_error_current_url)
         btnErrorRetry = layoutErrorOverlay.findViewById(R.id.btn_error_retry)
-        btnErrorChangeServer = layoutErrorOverlay.findViewById(R.id.btn_error_change_server)
 
         // Configure pull to refresh colors matching Terracotta
         swipeRefreshLayout.setColorSchemeColors(
@@ -264,17 +251,9 @@ class MainActivity : AppCompatActivity() {
             loadServerUrl()
         }
 
-        btnSettings.setOnClickListener {
-            openServerSettings()
-        }
-
         btnErrorRetry.setOnClickListener {
             layoutErrorOverlay.visibility = View.GONE
             loadServerUrl()
-        }
-
-        btnErrorChangeServer.setOnClickListener {
-            openServerSettings()
         }
     }
 
@@ -304,15 +283,15 @@ class MainActivity : AppCompatActivity() {
         tvErrorCurrentUrl.text = serverUrl
         setConnectionStatus(Status.CHECKING)
 
-        // Perform health check ping first for responsive diagnostic feedback
+        layoutErrorOverlay.visibility = View.GONE
+        webView.loadUrl(serverUrl)
+
+        // Perform health check ping in the background for live status feedback
         NetworkUtils.checkServerHealth(serverUrl) { isSuccess, latencyMs, message ->
             if (isSuccess) {
                 setConnectionStatus(Status.CONNECTED)
-                layoutErrorOverlay.visibility = View.GONE
-                webView.loadUrl(serverUrl)
             } else {
                 setConnectionStatus(Status.DISCONNECTED)
-                showErrorOverlay()
             }
         }
     }
@@ -321,11 +300,6 @@ class MainActivity : AppCompatActivity() {
         val serverUrl = NetworkUtils.getServerUrl(this)
         tvErrorCurrentUrl.text = serverUrl
         layoutErrorOverlay.visibility = View.VISIBLE
-    }
-
-    private fun openServerSettings() {
-        val intent = Intent(this, ServerConfigActivity::class.java)
-        serverConfigLauncher.launch(intent)
     }
 
     private enum class Status {

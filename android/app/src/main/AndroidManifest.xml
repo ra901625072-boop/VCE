@@ -42,13 +42,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Backend Server Configuration Activity -->
-        <activity
-            android:name=".ServerConfigActivity"
-            android:exported="false"
-            android:label="@string/server_config_title"
-            android:parentActivityName=".MainActivity" />
-
         <!-- FileProvider for Sharing Vouchers & Reports -->
         <provider
             android:name="androidx.core.content.FileProvider"

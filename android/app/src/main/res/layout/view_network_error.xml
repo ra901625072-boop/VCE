@@ -34,7 +34,7 @@
         android:id="@+id/tv_error_current_url"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="http://10.212.82.62:8000"
+        android:text="https://vce-xi.vercel.app"
         android:textColor="@color/accent_light"
         android:textSize="13sp"
         android:textStyle="bold"
@@ -67,17 +67,5 @@
         android:textAllCaps="false"
         android:textColor="@color/white"
         android:textStyle="bold"
-        android:backgroundTint="@color/accent"
-        android:layout_marginBottom="12dp" />
-
-    <!-- Configure Server IP Button -->
-    <Button
-        android:id="@+id/btn_error_change_server"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="@string/btn_change_server"
-        android:textAllCaps="false"
-        android:textColor="@color/text_secondary"
-        app:strokeColor="@color/border_strong" />
+        android:backgroundTint="@color/accent" />
 </LinearLayout>

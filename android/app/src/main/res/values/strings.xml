@@ -3,32 +3,20 @@
     <string name="app_name">VCE Pali</string>
     <string name="app_subtitle">e-Gram Digital Center</string>
     
-    <!-- Server Config -->
-    <string name="server_config_title">Backend Server Settings</string>
-    <string name="server_config_desc">Configure the FastAPI backend server URL for this e-Gram workstation.</string>
-    <string name="server_url_label">Server URL (e.g. http://10.212.82.62:8000)</string>
-    <string name="btn_test_connection">Test Connection</string>
-    <string name="btn_save_connect">Save &amp; Connect</string>
-    <string name="preset_emulator">Android Emulator (10.0.2.2:8000)</string>
-    <string name="preset_wifi">Local Wi-Fi (10.212.82.62:8000)</string>
-    <string name="preset_usb">USB Debugging (localhost:8000)</string>
-    
     <!-- Status Messages -->
-    <string name="status_connected">Connected to Backend</string>
-    <string name="status_disconnected">Server Offline / Unreachable</string>
-    <string name="status_connecting">Testing Connection…</string>
-    <string name="status_server_ok">Backend Server Online (200 OK)</string>
-    <string name="status_server_fail">Cannot connect to server. Check IP &amp; Wi-Fi.</string>
+    <string name="status_connected">Connected to Cloud</string>
+    <string name="status_disconnected">Cloud Offline</string>
+    <string name="status_connecting">Connecting…</string>
+    <string name="status_server_ok">Cloud Online (200 OK)</string>
+    <string name="status_server_fail">Cannot connect to cloud server.</string>
     
     <!-- Network Error View -->
-    <string name="error_connection_title">Unable to Reach VCE Server</string>
-    <string name="error_connection_message">Make sure the Python FastAPI backend is running via start_server_mobile.bat and your device is on the same Wi-Fi network.</string>
+    <string name="error_connection_title">Unable to Reach VCE Cloud</string>
+    <string name="error_connection_message">Please check your internet connection (Wi-Fi or Mobile Data). The cloud service may take 30–40 seconds to wake up if it was idle.</string>
     <string name="btn_retry">Retry Connection</string>
-    <string name="btn_change_server">Configure Server IP</string>
     
     <!-- Actions -->
-    <string name="action_refresh">Refresh Ledger</string>
-    <string name="action_settings">Server Settings</string>
+    <string name="action_refresh">Refresh</string>
     <string name="download_started">Downloading document…</string>
     <string name="download_complete">Document downloaded to Downloads folder.</string>
 </resources>

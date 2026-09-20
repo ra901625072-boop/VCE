@@ -29,8 +29,7 @@ class VceNativeBridge(private val activity: Activity) {
     @JavascriptInterface
     fun openServerSettings() {
         activity.runOnUiThread {
-            val intent = Intent(activity, ServerConfigActivity::class.java)
-            activity.startActivity(intent)
+            Toast.makeText(activity, "Connected to VCE Pali Cloud.", Toast.LENGTH_SHORT).show()
         }
     }
 
