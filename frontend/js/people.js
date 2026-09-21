@@ -130,8 +130,18 @@ function renderPeopleTable(people) {
           <td class="font-tabular" style="text-align:right; font-weight:600;">${formatINR(p.total_agreed)}</td>
           <td class="font-tabular" style="text-align:right; color:#10b981; font-weight:600;">${formatINR(p.total_received)}</td>
           <td class="font-tabular" style="text-align:right; font-weight:700; ${pendingColor}">${formatINR(pending)}</td>
-          <td style="text-align:center;">
-            <button class="btn btn-outline btn-sm btn-view-citizen" data-person-id="${p.id}">Ledger</button>
+          <td style="text-align:center; white-space:nowrap;">
+            <div style="display:inline-flex; gap:0.3rem; align-items:center;">
+              <button class="btn btn-outline btn-sm btn-view-citizen" data-person-id="${p.id}" title="View Ledger">Ledger</button>
+              <button class="btn btn-outline btn-sm btn-edit-citizen" data-person-id="${p.id}" title="Edit Citizen Profile" style="padding:0.25rem 0.45rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <span>Edit</span>
+              </button>
+              <button class="btn btn-outline btn-sm btn-delete-citizen" data-person-id="${p.id}" title="Delete Citizen" style="padding:0.25rem 0.45rem; color:var(--expense);">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Delete</span>
+              </button>
+            </div>
           </td>
         </tr>
       `;
@@ -191,11 +201,21 @@ function renderPeopleTable(people) {
             </div>
           </div>
 
-          <div class="mobile-card-actions">
-            <button class="btn btn-outline btn-sm btn-view-citizen" data-person-id="${p.id}">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-              <span>Ledger Statement</span>
-            </button>
+          <div class="mobile-card-actions" style="display:flex; flex-wrap:wrap; gap:0.4rem; justify-content:space-between; align-items:center;">
+            <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+              <button class="btn btn-outline btn-sm btn-view-citizen" data-person-id="${p.id}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <span>Ledger</span>
+              </button>
+              <button class="btn btn-outline btn-sm btn-edit-citizen" data-person-id="${p.id}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <span>Edit</span>
+              </button>
+              <button class="btn btn-outline btn-sm btn-delete-citizen" data-person-id="${p.id}" style="color:var(--expense);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Delete</span>
+              </button>
+            </div>
             ${cleanPhone.length >= 10 && pending > 0 ? `
               <a href="https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Namaste ${p.name}, your pending balance at Gram Panchayat e-Gram Center is ₹${(pending/100).toFixed(2)}. Please arrange for settlement.`)}" target="_blank" class="btn-whatsapp-civic" title="WhatsApp Reminder">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
@@ -211,6 +231,12 @@ function renderPeopleTable(people) {
   // Bind click handlers across desktop table and mobile cards
   document.querySelectorAll('.btn-view-citizen').forEach(btn => {
     btn.addEventListener('click', () => openPersonDetail(btn.dataset.personId));
+  });
+  document.querySelectorAll('.btn-edit-citizen').forEach(btn => {
+    btn.addEventListener('click', () => openEditPersonModal(btn.dataset.personId));
+  });
+  document.querySelectorAll('.btn-delete-citizen').forEach(btn => {
+    btn.addEventListener('click', () => deletePerson(btn.dataset.personId));
   });
 }
 
@@ -287,12 +313,180 @@ async function openPersonDetail(personId) {
       </div>
     `;
 
+    const actionsSlot = document.getElementById('person-detail-actions-slot');
+    if (actionsSlot) {
+      actionsSlot.innerHTML = `
+        <button class="btn btn-outline btn-sm btn-edit-citizen-detail" style="display:inline-flex; align-items:center; gap:0.35rem;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Edit Profile</span>
+        </button>
+        <button class="btn btn-outline btn-sm btn-delete-citizen-detail" style="display:inline-flex; align-items:center; gap:0.35rem; color:var(--expense);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span>Delete</span>
+        </button>
+      `;
+      actionsSlot.querySelector('.btn-edit-citizen-detail')?.addEventListener('click', () => {
+        openEditPersonModal(p.id);
+      });
+      actionsSlot.querySelector('.btn-delete-citizen-detail')?.addEventListener('click', () => {
+        deletePerson(p.id);
+      });
+    }
+
     const detailModal = document.getElementById('modal-person-detail');
     detailModal.classList.add('open');
     detailModal.classList.add('active');
   } catch (err) {
     console.error(err);
     notify.error('Failed to load citizen ledger');
+  }
+}
+
+async function openEditPersonModal(personId) {
+  let p = allCitizens.find(c => String(c.id) === String(personId));
+  if (!p) {
+    try {
+      p = await api.get(`/people/${personId}`);
+    } catch (e) {
+      notify.error('Could not load citizen details');
+      return;
+    }
+  }
+
+  document.getElementById('modal-edit-person-page')?.remove();
+  document.body.style.overflow = 'hidden';
+
+  const modalBackdrop = document.createElement('div');
+  modalBackdrop.className = 'modal-backdrop open';
+  modalBackdrop.id = 'modal-edit-person-page';
+  modalBackdrop.innerHTML = `
+    <div class="modal-dialog" style="max-width:520px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <span style="font-size:1.1rem;">✏️</span>
+          <h3 class="modal-title">Edit Citizen Profile</h3>
+        </div>
+        <button class="modal-close" id="btn-close-edit-p-modal">&times;</button>
+      </div>
+      <form id="edit-person-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="edit-p-name" class="form-control" value="${escapeHtml(p.name || '')}" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Mobile Number</label>
+              <input type="tel" id="edit-p-phone" class="form-control" value="${escapeHtml(p.phone || '')}" />
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Citizen Type</label>
+              <select id="edit-p-type" class="form-select">
+                <option value="Farmer" ${p.citizen_type === 'Farmer' ? 'selected' : ''}>Farmer</option>
+                <option value="General" ${p.citizen_type === 'General' ? 'selected' : ''}>General Citizen</option>
+                <option value="Pensioner" ${p.citizen_type === 'Pensioner' ? 'selected' : ''}>Pensioner</option>
+                <option value="Student" ${p.citizen_type === 'Student' ? 'selected' : ''}>Student</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Village / Locality</label>
+              <input type="text" id="edit-p-village" class="form-control" value="${escapeHtml(p.village || '')}" />
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Land Khata No.</label>
+              <input type="text" id="edit-p-khata" class="form-control" value="${escapeHtml(p.khata_no || '')}" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Ration Card No.</label>
+              <input type="text" id="edit-p-ration" class="form-control" value="${escapeHtml(p.ration_card_no || '')}" />
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Aadhaar (Last 4 Digits)</label>
+              <input type="text" id="edit-p-aadhaar" class="form-control" maxlength="4" value="${escapeHtml(p.aadhaar_last4 || '')}" />
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Notes</label>
+            <textarea id="edit-p-notes" class="form-control" rows="2">${escapeHtml(p.notes || '')}</textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+          <button type="button" class="btn btn-outline" id="btn-cancel-edit-p-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="font-weight:700;">Update Profile</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modalBackdrop);
+
+  const closeEditModal = () => {
+    modalBackdrop.remove();
+    document.body.style.overflow = '';
+  };
+
+  document.getElementById('btn-close-edit-p-modal').addEventListener('click', closeEditModal);
+  document.getElementById('btn-cancel-edit-p-modal').addEventListener('click', closeEditModal);
+  modalBackdrop.addEventListener('click', (e) => {
+    if (e.target === modalBackdrop) closeEditModal();
+  });
+
+  document.getElementById('edit-person-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      name: document.getElementById('edit-p-name').value.trim(),
+      phone: document.getElementById('edit-p-phone').value.trim(),
+      citizen_type: document.getElementById('edit-p-type').value,
+      village: document.getElementById('edit-p-village').value.trim(),
+      khata_no: document.getElementById('edit-p-khata').value.trim(),
+      ration_card_no: document.getElementById('edit-p-ration').value.trim(),
+      aadhaar_last4: document.getElementById('edit-p-aadhaar').value.trim(),
+      notes: document.getElementById('edit-p-notes').value.trim()
+    };
+
+    try {
+      await api.put(`/people/${personId}`, payload);
+      closeEditModal();
+      notify.success('Citizen details updated successfully!');
+      loadPeople();
+    } catch (err) {
+      notify.error('Failed to update citizen: ' + err.message);
+    }
+  });
+}
+
+async function deletePerson(personId) {
+  const p = allCitizens.find(c => String(c.id) === String(personId));
+  const name = p ? p.name : 'this citizen';
+  const pending = p ? (p.total_pending || 0) : 0;
+  const workCount = p ? (p.work_count || 0) : 0;
+
+  let msg = `Are you sure you want to remove citizen "${name}"?`;
+  if (workCount > 0 || pending > 0) {
+    msg += `\n\n⚠️ This citizen has ${workCount} application(s) and ₹${(pending/100).toFixed(2)} in balance.\n\nClick OK to delete this citizen and all associated records.`;
+  }
+
+  if (!confirm(msg)) return;
+
+  try {
+    await api.delete(`/people/${personId}?cascade=true`);
+    notify.success(`Citizen "${name}" removed successfully.`);
+    const detailModal = document.getElementById('modal-person-detail');
+    if (detailModal) {
+      detailModal.classList.remove('open');
+      detailModal.classList.remove('active');
+    }
+    loadPeople();
+  } catch (err) {
+    notify.error('Failed to remove citizen: ' + err.message);
   }
 }
 

@@ -221,12 +221,16 @@ class WorkService:
 
         return self.get_by_id(work_id)
 
-    def delete(self, work_id: int) -> None:
-        """Deletes work safely, preventing loss of financial history if payments exist."""
+    def delete(self, work_id: int, cascade: bool = False) -> None:
+        """Deletes work safely. If cascade=True, deletes linked payments as well."""
         existing = self.get_by_id(work_id)
         with get_db(self.db_path) as conn:
             p_count = conn.execute("SELECT COUNT(*) AS c FROM payments WHERE work_id = ?", (work_id,)).fetchone()["c"]
-            if p_count > 0:
+            if cascade:
+                conn.execute("DELETE FROM payments WHERE work_id = ?", (work_id,))
+                conn.execute("DELETE FROM work WHERE id = ?", (work_id,))
+                log_activity(conn, "work", work_id, "deleted", f"Hard deleted work and linked payments: '{existing['title']}'")
+            elif p_count > 0:
                 conn.execute("UPDATE work SET is_archived = 1, updated_at = ? WHERE id = ?", (now_utc_iso(), work_id))
                 log_activity(conn, "work", work_id, "archived", f"Archived work '{existing['title']}' because {p_count} payments are linked.")
             else:

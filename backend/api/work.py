@@ -69,8 +69,8 @@ def update_work(work_id: int, payload: WorkUpdate):
 
 
 @router.delete("/{work_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_work(work_id: int):
+def delete_work(work_id: int, cascade: bool = Query(False)):
     try:
-        service.delete(work_id)
+        service.delete(work_id, cascade=cascade)
     except NotFoundException as e:
         raise HTTPException(status_code=404, detail=e.message)

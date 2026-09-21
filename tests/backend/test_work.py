@@ -27,3 +27,36 @@ def test_work_creation_and_lifecycle(temp_db):
     updated = w_service.update(work["id"], WorkUpdate(status="Completed"))
     assert updated["status"] == "Completed"
     assert updated["completed_date"] is not None
+
+
+def test_cascade_delete_work(temp_db):
+    from backend.services.payment_service import PaymentService
+    from backend.schemas.payment import PaymentCreate
+
+    p_service = PersonService(temp_db)
+    w_service = WorkService(temp_db)
+    pay_service = PaymentService(temp_db)
+
+    person = p_service.create(PersonCreate(name="Client B"))
+    work = w_service.create(WorkCreate(
+        person_id=person["id"],
+        title="Income Certificate",
+        agreed_amount=5000
+    ))
+    pay_service.create(PaymentCreate(
+        person_id=person["id"],
+        work_id=work["id"],
+        amount=5000,
+        payment_method="Cash",
+        payment_date="2026-03-31",
+        payment_time="11:00:00"
+    ))
+
+    # Cascade delete work
+    w_service.delete(work["id"], cascade=True)
+
+    # Work and linked payment should be deleted, but person should remain
+    assert len(w_service.list_all(person_id=person["id"])) == 0
+    assert len(pay_service.list_all(work_id=work["id"])) == 0
+    assert len(p_service.list_all(query="Client B")) == 1
+

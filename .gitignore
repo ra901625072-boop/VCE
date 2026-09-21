@@ -35,3 +35,5 @@ database/backups/*.db
 Thumbs.db
 .vscode/
 .idea/
+.agents/
+skills-lock.json

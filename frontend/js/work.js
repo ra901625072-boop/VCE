@@ -7,6 +7,7 @@ import { notify } from '../components/notification.js';
 let serviceCatalog = [];
 let citizensList = [];
 let currentActiveWork = null;
+let currentWorkItems = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initWorkPage();
@@ -32,6 +33,22 @@ async function initWorkPage() {
     // Print Token Receipt
     document.getElementById('btn-print-token-receipt')?.addEventListener('click', () => {
       if (currentActiveWork) printCitizenReceipt(currentActiveWork);
+    });
+
+    // Timeline Edit and Delete handlers
+    document.getElementById('btn-timeline-edit-work')?.addEventListener('click', () => {
+      if (currentActiveWork) {
+        const modal = document.getElementById('modal-work-timeline');
+        modal?.classList.remove('active');
+        modal?.classList.remove('open');
+        openEditWorkModal(currentActiveWork.id);
+      }
+    });
+
+    document.getElementById('btn-timeline-delete-work')?.addEventListener('click', () => {
+      if (currentActiveWork) {
+        deleteWork(currentActiveWork.id);
+      }
     });
 
     // Close Modal triggers
@@ -87,6 +104,7 @@ async function loadWork() {
     const category = document.getElementById('work-category-filter')?.value;
 
     const items = await api.get('/work', { query: q, status, category });
+    currentWorkItems = items;
     renderWorkTable(items);
   } catch (err) {
     console.error(err);
@@ -140,10 +158,18 @@ function renderWorkTable(items) {
           <td class="font-tabular" style="text-align:right; font-weight:600;">${formatINR(w.agreed_amount)}</td>
           <td class="font-tabular" style="text-align:right; color:#10b981; font-weight:600;">${formatINR(w.received_amount)}</td>
           <td class="font-tabular" style="text-align:right; font-weight:700; ${pendingColor}">${formatINR(pending)}</td>
-          <td style="text-align:center;">
-            <div style="display:flex; justify-content:center; gap:0.35rem;">
-              <button class="btn btn-outline btn-sm btn-view-timeline" data-work-id="${w.id}">Details</button>
+          <td style="text-align:center; white-space:nowrap;">
+            <div style="display:inline-flex; justify-content:center; gap:0.3rem; align-items:center;">
+              <button class="btn btn-outline btn-sm btn-view-timeline" data-work-id="${w.id}" title="Details">Details</button>
               <button class="btn btn-outline btn-sm btn-quick-receipt" data-work-id="${w.id}" title="Receipt">Receipt</button>
+              <button class="btn btn-outline btn-sm btn-edit-work" data-work-id="${w.id}" title="Edit Application" style="padding:0.25rem 0.45rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <span>Edit</span>
+              </button>
+              <button class="btn btn-outline btn-sm btn-delete-work" data-work-id="${w.id}" title="Delete Application" style="padding:0.25rem 0.45rem; color:var(--expense);">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Delete</span>
+              </button>
             </div>
           </td>
         </tr>
@@ -211,15 +237,25 @@ function renderWorkTable(items) {
             </div>
           </div>
 
-          <div class="mobile-card-actions">
-            <button class="btn btn-outline btn-sm btn-view-timeline" data-work-id="${w.id}">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <span>Details</span>
-            </button>
-            <button class="btn btn-outline btn-sm btn-quick-receipt" data-work-id="${w.id}">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              <span>Receipt</span>
-            </button>
+          <div class="mobile-card-actions" style="display:flex; flex-wrap:wrap; gap:0.35rem; justify-content:space-between; align-items:center;">
+            <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+              <button class="btn btn-outline btn-sm btn-view-timeline" data-work-id="${w.id}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Details</span>
+              </button>
+              <button class="btn btn-outline btn-sm btn-quick-receipt" data-work-id="${w.id}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                <span>Receipt</span>
+              </button>
+              <button class="btn btn-outline btn-sm btn-edit-work" data-work-id="${w.id}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <span>Edit</span>
+              </button>
+              <button class="btn btn-outline btn-sm btn-delete-work" data-work-id="${w.id}" style="color:var(--expense);">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Delete</span>
+              </button>
+            </div>
             ${cleanPhone.length >= 10 && pending > 0 ? `
               <a href="https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Namaste ${w.person_name || ''}, your application for "${w.title}" at Gram Panchayat e-Gram Center has an unpaid balance of ₹${(pending/100).toFixed(2)}. Token: ${token}.`)}" target="_blank" class="btn-whatsapp-civic" title="WhatsApp Reminder">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
@@ -232,7 +268,7 @@ function renderWorkTable(items) {
     }).join('');
   }
 
-  // Bind View Timeline & Receipt across desktop table and mobile cards
+  // Bind View Timeline, Receipt, Edit, and Delete across desktop table and mobile cards
   document.querySelectorAll('.btn-view-timeline').forEach(btn => {
     btn.addEventListener('click', () => openTimeline(btn.dataset.workId));
   });
@@ -243,6 +279,14 @@ function renderWorkTable(items) {
       const data = await api.get(`/work/${wId}/timeline`);
       printCitizenReceipt(data);
     });
+  });
+
+  document.querySelectorAll('.btn-edit-work').forEach(btn => {
+    btn.addEventListener('click', () => openEditWorkModal(btn.dataset.workId));
+  });
+
+  document.querySelectorAll('.btn-delete-work').forEach(btn => {
+    btn.addEventListener('click', () => deleteWork(btn.dataset.workId));
   });
 }
 
@@ -345,6 +389,188 @@ async function openTimeline(workId) {
   } catch (err) {
     console.error(err);
     notify.error('Failed to load details');
+  }
+}
+
+async function openEditWorkModal(workId) {
+  let w = currentWorkItems.find(item => String(item.id) === String(workId));
+  try {
+    const detail = await api.get(`/work/${workId}`);
+    if (detail) w = { ...w, ...detail };
+  } catch (e) {
+    // fallback
+  }
+
+  if (!w) {
+    notify.error('Application not found');
+    return;
+  }
+
+  document.getElementById('modal-edit-work-page')?.remove();
+  document.body.style.overflow = 'hidden';
+
+  const modalBackdrop = document.createElement('div');
+  modalBackdrop.className = 'modal-backdrop open';
+  modalBackdrop.id = 'modal-edit-work-page';
+  modalBackdrop.innerHTML = `
+    <div class="modal-dialog" style="max-width:560px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <span style="font-size:1.1rem;">✏️</span>
+          <h3 class="modal-title">Edit Application</h3>
+        </div>
+        <button class="modal-close" id="btn-close-edit-work-modal">&times;</button>
+      </div>
+      <form id="edit-work-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Application / Service Title *</label>
+            <input type="text" id="edit-work-title" class="form-control" value="${escapeHtml(w.title || '')}" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Category</label>
+              <input type="text" id="edit-work-category" class="form-control" value="${escapeHtml(w.service_category || w.category || 'General')}" />
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Portal Name</label>
+              <input type="text" id="edit-work-portal" class="form-control" value="${escapeHtml(w.portal_name || '')}" placeholder="AnyRoR, Digital Gujarat..." />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Portal Ack / Application No.</label>
+              <input type="text" id="edit-work-ack" class="form-control" value="${escapeHtml(w.ack_no || '')}" />
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Status</label>
+              <select id="edit-work-status" class="form-select">
+                <option value="New" ${w.status === 'New' ? 'selected' : ''}>New</option>
+                <option value="In Progress" ${w.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                <option value="Ready / Printed" ${w.status === 'Ready / Printed' ? 'selected' : ''}>Ready / Printed</option>
+                <option value="Completed / Delivered" ${w.status === 'Completed / Delivered' ? 'selected' : ''}>Completed / Delivered</option>
+                <option value="Rejected / Cancelled" ${w.status === 'Rejected / Cancelled' ? 'selected' : ''}>Rejected / Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="background:var(--bg-subtle); padding:0.85rem; border-radius:6px; margin-bottom:1rem;">
+            <div style="font-weight:700; font-size:0.85rem; margin-bottom:0.5rem; color:#f97316;">Fee & Commission Split (₹)</div>
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label class="form-label">Total Fee Charged (₹) *</label>
+                <input type="number" id="edit-work-fee" class="form-control" min="0" step="1" value="${(w.agreed_amount || 0) / 100}" required />
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label class="form-label">Portal Cost (₹)</label>
+                <input type="number" id="edit-work-portal-cost" class="form-control" min="0" step="1" value="${(w.portal_cost || 0) / 100}" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label class="form-label">Panchayat Share (₹)</label>
+                <input type="number" id="edit-work-gp-share" class="form-control" min="0" step="1" value="${(w.panchayat_share || 0) / 100}" />
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label class="form-label">VCE Earning (₹)</label>
+                <input type="number" id="edit-work-vce-share" class="form-control" min="0" step="1" value="${(w.vce_commission || 0) / 100}" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Deadline / Target Date</label>
+              <input type="date" id="edit-work-deadline" class="form-control" value="${w.deadline ? w.deadline.split('T')[0] : ''}" />
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Internal Notes</label>
+            <textarea id="edit-work-notes" class="form-control" rows="2">${escapeHtml(w.notes || '')}</textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+          <button type="button" class="btn btn-outline" id="btn-cancel-edit-work-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="font-weight:700;">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modalBackdrop);
+
+  const closeEditModal = () => {
+    modalBackdrop.remove();
+    document.body.style.overflow = '';
+  };
+
+  document.getElementById('btn-close-edit-work-modal').addEventListener('click', closeEditModal);
+  document.getElementById('btn-cancel-edit-work-modal').addEventListener('click', closeEditModal);
+  modalBackdrop.addEventListener('click', (e) => {
+    if (e.target === modalBackdrop) closeEditModal();
+  });
+
+  document.getElementById('edit-work-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const feeRupees = Number(document.getElementById('edit-work-fee').value) || 0;
+    const portalCostRupees = Number(document.getElementById('edit-work-portal-cost').value) || 0;
+    const gpShareRupees = Number(document.getElementById('edit-work-gp-share').value) || 0;
+    const vceShareRupees = Number(document.getElementById('edit-work-vce-share').value) || 0;
+
+    const payload = {
+      title: document.getElementById('edit-work-title').value.trim(),
+      category: document.getElementById('edit-work-category').value.trim(),
+      service_category: document.getElementById('edit-work-category').value.trim(),
+      portal_name: document.getElementById('edit-work-portal').value.trim(),
+      ack_no: document.getElementById('edit-work-ack').value.trim(),
+      status: document.getElementById('edit-work-status').value,
+      agreed_amount: rupeesToPaise(feeRupees),
+      portal_cost: rupeesToPaise(portalCostRupees),
+      panchayat_share: rupeesToPaise(gpShareRupees),
+      vce_commission: rupeesToPaise(vceShareRupees),
+      deadline: document.getElementById('edit-work-deadline').value || null,
+      notes: document.getElementById('edit-work-notes').value.trim()
+    };
+
+    try {
+      await api.put(`/work/${workId}`, payload);
+      closeEditModal();
+      notify.success('Application updated successfully!');
+      loadWork();
+    } catch (err) {
+      notify.error('Failed to update application: ' + err.message);
+    }
+  });
+}
+
+async function deleteWork(workId) {
+  const item = currentWorkItems.find(w => String(w.id) === String(workId));
+  const title = item ? item.title : `Application #${workId}`;
+  const pending = item ? (item.pending_amount || 0) : 0;
+  const received = item ? (item.received_amount || 0) : 0;
+
+  let msg = `Are you sure you want to delete application "${title}"?`;
+  if (received > 0 || pending > 0) {
+    msg += `\n\n⚠️ This application has ₹${formatINR(received)} in received payments and ₹${formatINR(pending)} pending.\nDeleting will also remove all associated payment transactions.`;
+  }
+  msg += `\n\nClick OK to permanently delete.`;
+
+  if (!confirm(msg)) return;
+
+  try {
+    await api.delete(`/work/${workId}?cascade=true`);
+    notify.success('Application deleted successfully.');
+    const timelineModal = document.getElementById('modal-work-timeline');
+    if (timelineModal) {
+      timelineModal.classList.remove('open');
+      timelineModal.classList.remove('active');
+    }
+    loadWork();
+  } catch (err) {
+    notify.error('Failed to delete application: ' + err.message);
   }
 }
 

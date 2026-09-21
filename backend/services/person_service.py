@@ -98,15 +98,18 @@ class PersonService:
 
         return self.get_by_id(person_id)
 
-    def delete(self, person_id: int) -> None:
-        """Protects financial data integrity: warns/prevents hard deletion if linked records exist; archives instead."""
+    def delete(self, person_id: int, cascade: bool = False) -> None:
+        """Deletes or archives a person. If cascade=True, hard-deletes linked payments and work as well."""
         existing = self.get_by_id(person_id)
         with get_db(self.db_path) as conn:
-            # Check for linked work or payments
             w_count = conn.execute("SELECT COUNT(*) AS c FROM work WHERE person_id = ?", (person_id,)).fetchone()["c"]
             p_count = conn.execute("SELECT COUNT(*) AS c FROM payments WHERE person_id = ?", (person_id,)).fetchone()["c"]
-            if w_count > 0 or p_count > 0:
-                # Soft delete / archive to protect financial history
+            if cascade:
+                conn.execute("DELETE FROM payments WHERE person_id = ?", (person_id,))
+                conn.execute("DELETE FROM work WHERE person_id = ?", (person_id,))
+                conn.execute("DELETE FROM people WHERE id = ?", (person_id,))
+                log_activity(conn, "person", person_id, "deleted", f"Hard deleted person and all linked records: {existing['name']}")
+            elif w_count > 0 or p_count > 0:
                 conn.execute("UPDATE people SET is_archived = 1, updated_at = ? WHERE id = ?", (now_utc_iso(), person_id))
                 log_activity(conn, "person", person_id, "archived", f"Archived person {existing['name']} because {w_count} work and {p_count} payments are linked.")
             else:

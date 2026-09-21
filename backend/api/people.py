@@ -52,8 +52,8 @@ def update_person(person_id: int, payload: PersonUpdate):
 
 
 @router.delete("/{person_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_person(person_id: int):
+def delete_person(person_id: int, cascade: bool = Query(False)):
     try:
-        service.delete(person_id)
+        service.delete(person_id, cascade=cascade)
     except NotFoundException as e:
         raise HTTPException(status_code=404, detail=e.message)
