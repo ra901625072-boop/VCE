@@ -241,8 +241,9 @@ async function openEditTransactionModal(id, rawType) {
   document.body.style.overflow = 'hidden';
 
   const modalBackdrop = document.createElement('div');
-  modalBackdrop.className = 'modal-backdrop open';
+  modalBackdrop.className = 'modal-backdrop open active';
   modalBackdrop.id = 'modal-edit-trans-page';
+  modalBackdrop.style.zIndex = '100';
 
   if (rawType === 'payment') {
     let p = null;
@@ -463,7 +464,7 @@ async function deleteTransaction(id, rawType) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initTransactionsPage() {
   loadTransactions();
 
   // Filter Tabs
@@ -573,6 +574,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-add-exp-top')?.addEventListener('click', () => {
     document.getElementById('qa-btn-expense')?.click();
   });
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => initTransactionsPage());
+} else {
+  initTransactionsPage();
+}
 
 window.addEventListener('vce:refresh', () => loadTransactions());

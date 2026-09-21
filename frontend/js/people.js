@@ -6,9 +6,11 @@ import { notify } from '../components/notification.js';
 
 let allCitizens = [];
 
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => initPeoplePage());
+} else {
   initPeoplePage();
-});
+}
 
 function initPeoplePage() {
   document.getElementById('people-search-input')?.addEventListener('input', debounce(filterAndRender, 250));
@@ -353,12 +355,19 @@ async function openEditPersonModal(personId) {
     }
   }
 
+  const detailModal = document.getElementById('modal-person-detail');
+  if (detailModal) {
+    detailModal.classList.remove('open');
+    detailModal.classList.remove('active');
+  }
+
   document.getElementById('modal-edit-person-page')?.remove();
   document.body.style.overflow = 'hidden';
 
   const modalBackdrop = document.createElement('div');
-  modalBackdrop.className = 'modal-backdrop open';
+  modalBackdrop.className = 'modal-backdrop open active';
   modalBackdrop.id = 'modal-edit-person-page';
+  modalBackdrop.style.zIndex = '100';
   modalBackdrop.innerHTML = `
     <div class="modal-dialog" style="max-width:520px;">
       <div class="modal-header">

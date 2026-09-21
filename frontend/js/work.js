@@ -9,9 +9,11 @@ let citizensList = [];
 let currentActiveWork = null;
 let currentWorkItems = [];
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await initWorkPage();
-});
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => initWorkPage());
+} else {
+  initWorkPage();
+}
 
 async function initWorkPage() {
   try {
@@ -386,6 +388,27 @@ async function openTimeline(workId) {
       modal.classList.remove('open');
       openCollectPaymentModal(data, pending);
     });
+
+    // Directly bind Edit and Delete in modal footer for active application
+    const btnTimelineEdit = document.getElementById('btn-timeline-edit-work');
+    if (btnTimelineEdit) {
+      btnTimelineEdit.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        modal.classList.remove('active');
+        modal.classList.remove('open');
+        openEditWorkModal(data.id || workId);
+      };
+    }
+
+    const btnTimelineDelete = document.getElementById('btn-timeline-delete-work');
+    if (btnTimelineDelete) {
+      btnTimelineDelete.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        deleteWork(data.id || workId);
+      };
+    }
   } catch (err) {
     console.error(err);
     notify.error('Failed to load details');
@@ -394,11 +417,16 @@ async function openTimeline(workId) {
 
 async function openEditWorkModal(workId) {
   let w = currentWorkItems.find(item => String(item.id) === String(workId));
-  try {
-    const detail = await api.get(`/work/${workId}`);
-    if (detail) w = { ...w, ...detail };
-  } catch (e) {
-    // fallback
+  if (!w && currentActiveWork && String(currentActiveWork.id) === String(workId)) {
+    w = { ...currentActiveWork };
+  }
+  if (!w) {
+    try {
+      const detail = await api.get(`/work/${workId}`);
+      if (detail) w = detail;
+    } catch (e) {
+      // fallback
+    }
   }
 
   if (!w) {
@@ -406,12 +434,20 @@ async function openEditWorkModal(workId) {
     return;
   }
 
+  // Close timeline modal if open
+  const timelineModal = document.getElementById('modal-work-timeline');
+  if (timelineModal) {
+    timelineModal.classList.remove('open');
+    timelineModal.classList.remove('active');
+  }
+
   document.getElementById('modal-edit-work-page')?.remove();
   document.body.style.overflow = 'hidden';
 
   const modalBackdrop = document.createElement('div');
-  modalBackdrop.className = 'modal-backdrop open';
+  modalBackdrop.className = 'modal-backdrop open active';
   modalBackdrop.id = 'modal-edit-work-page';
+  modalBackdrop.style.zIndex = '100';
   modalBackdrop.innerHTML = `
     <div class="modal-dialog" style="max-width:560px;">
       <div class="modal-header">
@@ -547,7 +583,10 @@ async function openEditWorkModal(workId) {
 }
 
 async function deleteWork(workId) {
-  const item = currentWorkItems.find(w => String(w.id) === String(workId));
+  let item = currentWorkItems.find(w => String(w.id) === String(workId));
+  if (!item && currentActiveWork && String(currentActiveWork.id) === String(workId)) {
+    item = currentActiveWork;
+  }
   const title = item ? item.title : `Application #${workId}`;
   const pending = item ? (item.pending_amount || 0) : 0;
   const received = item ? (item.received_amount || 0) : 0;

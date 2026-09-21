@@ -164,8 +164,9 @@ async function openEditExpenseModal(expId) {
   document.body.style.overflow = 'hidden';
 
   const modalBackdrop = document.createElement('div');
-  modalBackdrop.className = 'modal-backdrop open';
+  modalBackdrop.className = 'modal-backdrop open active';
   modalBackdrop.id = 'modal-edit-expense-page';
+  modalBackdrop.style.zIndex = '100';
   modalBackdrop.innerHTML = `
     <div class="modal-dialog" style="max-width:500px;">
       <div class="modal-header">
@@ -314,7 +315,7 @@ async function loadExpenseCategories() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initExpensesPage() {
   loadExpenseCategories();
   loadExpenses();
 
@@ -325,6 +326,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-add-exp-top')?.addEventListener('click', () => {
     document.getElementById('qa-btn-expense')?.click();
   });
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => initExpensesPage());
+} else {
+  initExpensesPage();
+}
 
 window.addEventListener('vce:refresh', () => loadExpenses());
