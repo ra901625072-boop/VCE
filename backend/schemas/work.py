@@ -60,5 +60,6 @@ class WorkResponse(WorkBase):
     updated_at: str
     person_name: Optional[str] = None
     person_phone: Optional[str] = None
+    person_village: Optional[str] = None
     received_amount: int = 0
     pending_amount: int = 0

@@ -255,22 +255,27 @@ function renderTodayWorkTable(workList) {
 
   if (tbody) {
     tbody.innerHTML = workList.map(w => {
-      const statusClass = `badge-${w.status.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+      let statusClass = 'badge-waiting';
+      if (w.status === 'Ready / Printed') statusClass = 'badge-planned';
+      else if (w.status === 'Completed / Delivered' || w.status === 'Completed') statusClass = 'badge-completed';
+      else if (w.status === 'In Progress') statusClass = 'badge-in-progress';
+      else if (w.status && (w.status.includes('Cancelled') || w.status.includes('Rejected'))) statusClass = 'badge-cancelled';
+
       const token = w.token_no || `TK-${w.id}`;
       const pending = Math.max(0, (w.agreed_amount || 0) - (w.received_amount || 0));
 
       return `
         <tr>
-          <td style="font-family:var(--font-mono); font-size:0.8rem; color:#f97316; font-weight:700;">${escapeHtml(token)}</td>
-          <td style="font-weight:600;">${escapeHtml(w.person_name || 'Citizen')}</td>
+          <td style="white-space:nowrap;"><span class="token-pill">${escapeHtml(token)}</span></td>
+          <td style="font-weight:600; font-family:var(--font-gujarati), var(--font-sans);">${escapeHtml(w.person_name || 'Citizen')}</td>
           <td>
-            <div>${escapeHtml(w.title)}</div>
-            <div style="font-size:0.75rem; color:var(--text-dim);">${escapeHtml(w.service_category || w.category || '')}</div>
+            <div style="font-weight:600; font-size:0.835rem;">${escapeHtml(w.title)}</div>
+            <div style="font-size:0.725rem; color:var(--text-dim); margin-top:0.15rem;">${escapeHtml(w.service_category || w.category || '')}</div>
           </td>
-          <td><span class="badge badge-planned" style="font-size:0.7rem;">${escapeHtml(w.portal_name || 'General')}</span></td>
-          <td><span class="badge ${statusClass}">${escapeHtml(w.status)}</span></td>
-          <td style="text-align:right; font-weight:700;" class="font-tabular">${formatINR(w.agreed_amount)}</td>
-          <td style="text-align:right; font-weight:700; color:${pending > 0 ? '#ef4444' : '#10b981'};" class="font-tabular">
+          <td><span class="portal-tag">${escapeHtml(w.portal_name || 'General')}</span></td>
+          <td style="white-space:nowrap;"><span class="badge ${statusClass}">${escapeHtml(w.status)}</span></td>
+          <td style="text-align:right; font-weight:600; color:var(--text-main); white-space:nowrap;" class="font-tabular">${formatINR(w.agreed_amount)}</td>
+          <td style="text-align:right; font-weight:700; color:${pending > 0 ? '#ef4444' : '#10b981'}; white-space:nowrap;" class="font-tabular">
             ${formatINR(pending)}
           </td>
         </tr>

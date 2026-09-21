@@ -19,6 +19,7 @@ def get_work_with_balances(conn: sqlite3.Connection, work_id: int) -> Optional[D
         w.*,
         p.name AS person_name,
         p.phone AS person_phone,
+        p.village AS person_village,
         COALESCE(SUM(CASE WHEN pay.payment_status = 'received' AND LOWER(pay.payment_method) != 'udhar' THEN pay.amount ELSE 0 END), 0) AS received_amount,
         COALESCE(SUM(CASE WHEN LOWER(pay.payment_method) = 'udhar' THEN pay.amount ELSE 0 END), 0) AS udhar_payments_amount
     FROM work w

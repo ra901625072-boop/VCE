@@ -194,11 +194,18 @@
   --shadow-xl: 0 10px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Tabular figures for ledger precision */
+/* Tabular figures for clean financial & ledger precision */
 .font-tabular {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums lining-nums;
   font-feature-settings: "tnum" 1, "lnum" 1;
+  letter-spacing: -0.01em;
+}
+
+/* Monospace token / code figures */
+.font-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "liga" 0;
 }
 
 /* Gujarati script helper */

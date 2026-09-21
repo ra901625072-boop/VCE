@@ -140,37 +140,48 @@ function renderWorkTable(items) {
 
       return `
         <tr>
-          <td>
-            <span style="font-family:var(--font-mono); font-weight:700; color:#f97316; font-size:0.8rem;">${escapeHtml(token)}</span>
-            ${w.ack_no ? `<div style="font-size:0.7rem; color:var(--text-dim);">Ack: ${escapeHtml(w.ack_no)}</div>` : ''}
+          <td style="white-space:nowrap;">
+            <span class="token-pill">${escapeHtml(token)}</span>
+            ${w.ack_no ? `<div class="token-sub">Ack: ${escapeHtml(w.ack_no)}</div>` : ''}
           </td>
           <td>
-            <div style="font-weight:600; color:var(--text-main);">${escapeHtml(w.person_name || 'Citizen')}</div>
-            <div style="font-size:0.75rem; color:var(--text-dim);">${escapeHtml(w.person_phone || '')}</div>
-          </td>
-          <td>
-            <div style="font-weight:500;">${escapeHtml(w.title)}</div>
-            <div style="font-size:0.75rem; color:var(--text-dim); display:flex; gap:0.5rem;">
-              <span>${escapeHtml(w.service_category || w.category || '')}</span>
-              ${w.portal_name ? `<span>&bull;</span><span style="color:#f59e0b; font-weight:600;">${escapeHtml(w.portal_name)}</span>` : ''}
+            <div class="citizen-cell">
+              <div class="citizen-name">${escapeHtml(w.person_name || 'Citizen')}</div>
+              <div class="citizen-meta">
+                ${w.person_village ? `<span class="citizen-meta-item"><span>📍</span>${escapeHtml(w.person_village)}</span>` : ''}
+                ${w.person_phone ? `<span class="citizen-meta-item"><span>📞</span>${escapeHtml(w.person_phone)}</span>` : ''}
+              </div>
             </div>
           </td>
-          <td><span class="badge ${statusClass}">${escapeHtml(w.status)}</span></td>
-          <td style="font-size:0.8rem; color:var(--text-dim);">${formatDate(w.start_date || w.created_at)}</td>
-          <td class="font-tabular" style="text-align:right; font-weight:600;">${formatINR(w.agreed_amount)}</td>
-          <td class="font-tabular" style="text-align:right; color:#10b981; font-weight:600;">${formatINR(w.received_amount)}</td>
-          <td class="font-tabular" style="text-align:right; font-weight:700; ${pendingColor}">${formatINR(pending)}</td>
-          <td style="text-align:center; white-space:nowrap;">
-            <div style="display:inline-flex; justify-content:center; gap:0.3rem; align-items:center;">
-              <button class="btn btn-outline btn-sm btn-view-timeline" data-work-id="${w.id}" title="Details">Details</button>
-              <button class="btn btn-outline btn-sm btn-quick-receipt" data-work-id="${w.id}" title="Receipt">Receipt</button>
-              <button class="btn btn-outline btn-sm btn-edit-work" data-work-id="${w.id}" title="Edit Application" style="padding:0.25rem 0.45rem;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                <span>Edit</span>
+          <td>
+            <div class="service-cell">
+              <div class="service-title">${escapeHtml(w.title)}</div>
+              <div class="service-meta">
+                <span>${escapeHtml(w.service_category || w.category || '')}</span>
+                ${w.portal_name ? `<span class="portal-tag">${escapeHtml(w.portal_name)}</span>` : ''}
+              </div>
+            </div>
+          </td>
+          <td style="white-space:nowrap;"><span class="badge ${statusClass}">${escapeHtml(w.status)}</span></td>
+          <td style="white-space:nowrap; font-size:0.8rem; color:var(--text-secondary);">${formatDate(w.start_date || w.created_at)}</td>
+          <td class="font-tabular" style="text-align:right; font-weight:600; color:var(--text-main); white-space:nowrap;">${formatINR(w.agreed_amount)}</td>
+          <td class="font-tabular" style="text-align:right; font-weight:600; ${w.received_amount > 0 ? 'color:#10b981;' : 'color:var(--text-dim);'}; white-space:nowrap;">${formatINR(w.received_amount)}</td>
+          <td class="font-tabular" style="text-align:right; font-weight:700; ${pending > 0 ? 'color:#ef4444;' : 'color:#10b981;'}; white-space:nowrap;">${formatINR(pending)}</td>
+          <td style="text-align:right; white-space:nowrap;">
+            <div class="table-actions">
+              <button class="btn-table-action btn-table-receipt btn-quick-receipt" data-work-id="${w.id}" title="View / Print Receipt">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>Receipt</span>
               </button>
-              <button class="btn btn-outline btn-sm btn-delete-work" data-work-id="${w.id}" title="Delete Application" style="padding:0.25rem 0.45rem; color:var(--expense);">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                <span>Delete</span>
+              <button class="btn-table-action btn-view-timeline" data-work-id="${w.id}" title="Details & Timeline">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>Details</span>
+              </button>
+              <button class="btn-table-action btn-table-icon btn-edit-work" data-work-id="${w.id}" title="Edit Application" aria-label="Edit Application">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="btn-table-action btn-table-icon btn-table-delete btn-delete-work" data-work-id="${w.id}" title="Delete Application" aria-label="Delete Application">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
               </button>
             </div>
           </td>

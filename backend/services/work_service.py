@@ -142,6 +142,7 @@ class WorkService:
                 w.*,
                 p.name AS person_name,
                 p.phone AS person_phone,
+                p.village AS person_village,
                 COALESCE(SUM(CASE WHEN pay.payment_status = 'received' AND LOWER(pay.payment_method) != 'udhar' THEN pay.amount ELSE 0 END), 0) AS received_amount
             FROM work w
             JOIN people p ON w.person_id = p.id
