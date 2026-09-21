@@ -7,7 +7,15 @@ function buildUrl(endpoint, params = {}) {
   const url = new URL(fullEndpoint, window.location.origin);
   Object.keys(params).forEach(key => {
     if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
-      url.searchParams.append(key, params[key]);
+      if (Array.isArray(params[key])) {
+        params[key].forEach(val => {
+          if (val !== undefined && val !== null && val !== '') {
+            url.searchParams.append(key, val);
+          }
+        });
+      } else {
+        url.searchParams.append(key, params[key]);
+      }
     }
   });
   return url.toString();

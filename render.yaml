@@ -40,6 +40,8 @@ services:
         value: "https://vce-xi.vercel.app"
       - key: SERVE_FRONTEND
         value: "false"
+      - key: DATABASE_URL
+        value: "postgresql://postgres.nvoikqwbtwtvybjsssss:Akshay%40161005@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
 
 
     # --------------------------------------------------------------------------

@@ -25,6 +25,11 @@ class SearchService:
         """Runs a combined, parameterized search across people, work, payments, and expenses."""
         if not entity_types:
             entity_types = ["work", "payment", "expense", "person"]
+        else:
+            flat_types = []
+            for t in entity_types:
+                flat_types.extend([x.strip().lower() for x in t.split(",") if x.strip()])
+            entity_types = flat_types
 
         start_d, end_d = get_date_range(preset or "all", date_from, date_to)
 
@@ -87,7 +92,7 @@ class SearchService:
                     w_sql += " AND (w.deadline <= ? OR w.start_date <= ? OR w.created_at <= ?)"
                     w_params.extend([end_d, end_d, f"{end_d} 23:59:59"])
 
-                w_sql += " GROUP BY w.id ORDER BY w.created_at DESC LIMIT 50"
+                w_sql += " GROUP BY w.id, p.id ORDER BY w.created_at DESC LIMIT 50"
                 work_rows = conn.execute(w_sql, w_params).fetchall()
                 for r in work_rows:
                     r["pending_amount"] = max(0, r["agreed_amount"] - r["received_amount"])

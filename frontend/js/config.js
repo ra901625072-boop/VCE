@@ -1,36 +1,29 @@
 /**
  * VCE Pali — Cloud Backend & Environment Configuration
  * 
- * Manages dynamic resolution between:
- * 1. Default Vercel Edge Proxy (/api -> Render) — Zero CORS, zero setup required.
- * 2. Custom Render Backend URL (stored in localStorage or window.__VCE_BACKEND_URL__)
- * 3. Local Development Server (http://127.0.0.1:8000)
+ * Vercel connects directly to the Render backend (https://vce-pali-backend.onrender.com)
+ * by default through Vercel's zero-CORS edge proxy rewrites (/api/*).
+ * No manual connection setup or configuration is required.
  */
 
-const STORAGE_KEY = 'vce_backend_url';
+// Purge any legacy/stale custom backend URLs in localStorage so default connection is always used
+try {
+  localStorage.removeItem('vce_backend_url');
+} catch (e) {}
+
 export const DEFAULT_BACKEND_URL = 'https://vce-pali-backend.onrender.com';
-
-
-/**
- * Returns the raw configured custom backend URL if set, or empty string.
- */
-export function getCustomBackendUrl() {
-  try {
-    const custom = localStorage.getItem(STORAGE_KEY) || window.__VCE_BACKEND_URL__ || '';
-    return custom ? custom.trim().replace(/\/+$/, '') : '';
-  } catch {
-    return '';
-  }
-}
 
 /**
  * Resolves the active base URL for API requests.
- * Defaults to '/api' for seamless Vercel edge proxy routing.
+ * Defaults to '/api' for seamless Vercel edge proxy routing to the Render backend.
+ * Falls back to Render backend directly if opened via standalone file:// or unproxied local dev port.
  */
 export function getApiBaseUrl() {
-  const custom = getCustomBackendUrl();
-  if (custom) {
-    return custom.endsWith('/api') ? custom : `${custom}/api`;
+  if (typeof window !== 'undefined' && window.location) {
+    const { protocol, hostname, port } = window.location;
+    if (protocol === 'file:' || ((hostname === 'localhost' || hostname === '127.0.0.1') && port && port !== '8000' && port !== '3000')) {
+      return `${DEFAULT_BACKEND_URL}/api`;
+    }
   }
   return '/api';
 }
@@ -39,51 +32,40 @@ export function getApiBaseUrl() {
  * Resolves the download URL (e.g. for Android APK distribution).
  */
 export function getDownloadBaseUrl() {
-  const custom = getCustomBackendUrl();
-  if (custom) {
-    const rootUrl = custom.replace(/\/api$/, '');
-    return `${rootUrl}/download`;
+  if (typeof window !== 'undefined' && window.location) {
+    const { protocol, hostname, port } = window.location;
+    if (protocol === 'file:' || ((hostname === 'localhost' || hostname === '127.0.0.1') && port && port !== '8000' && port !== '3000')) {
+      return `${DEFAULT_BACKEND_URL}/download`;
+    }
   }
   return '/download';
 }
 
 /**
- * Saves or clears the custom backend URL.
- * Pass null or empty string to reset back to default Vercel proxy.
+ * Legacy compatibility helper
  */
-export function setBackendUrl(url) {
-  try {
-    if (!url || !url.trim()) {
-      localStorage.removeItem(STORAGE_KEY);
-      return '';
-    }
-    const cleanUrl = url.trim().replace(/\/+$/, '');
-    localStorage.setItem(STORAGE_KEY, cleanUrl);
-    return cleanUrl;
-  } catch (e) {
-    console.error('Failed to save backend URL to localStorage:', e);
-    return '';
-  }
+export function getCustomBackendUrl() {
+  return '';
 }
 
 /**
- * Tests connection to the specified or active backend URL.
- * Returns { ok: boolean, status: number, data: object|null, latencyMs: number, error: string|null }
+ * Legacy compatibility helper
+ */
+export function setBackendUrl() {
+  return '';
+}
+
+/**
+ * Helper to test connection to backend health endpoint.
  */
 export async function testBackendConnection(targetUrl = null) {
-  let endpoint;
-  if (targetUrl) {
-    const clean = targetUrl.trim().replace(/\/+$/, '');
-    const base = clean.endsWith('/api') ? clean : `${clean}/api`;
-    endpoint = `${base}/health`;
-  } else {
-    endpoint = `${getApiBaseUrl()}/health`;
-  }
+  const base = targetUrl ? targetUrl.replace(/\/+$/, '') : getApiBaseUrl();
+  const endpoint = base.endsWith('/api') ? `${base}/health` : `${base}/api/health`;
 
   const startTime = performance.now();
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout for cold start detection
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     const res = await fetch(endpoint, {
       method: 'GET',
@@ -103,8 +85,8 @@ export async function testBackendConnection(targetUrl = null) {
   } catch (err) {
     const latencyMs = Math.round(performance.now() - startTime);
     if (err.name === 'AbortError') {
-      return { ok: false, status: 0, data: null, latencyMs, error: 'Request timed out (Backend may be starting up)' };
+      return { ok: false, status: 0, data: null, latencyMs, error: 'Request timed out' };
     }
-    return { ok: false, status: 0, data: null, latencyMs, error: err.message || 'Unable to connect to backend server' };
+    return { ok: false, status: 0, data: null, latencyMs, error: err.message || 'Unable to connect' };
   }
 }

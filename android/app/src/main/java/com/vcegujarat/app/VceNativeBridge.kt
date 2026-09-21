@@ -26,12 +26,6 @@ class VceNativeBridge(private val activity: Activity) {
         }
     }
 
-    @JavascriptInterface
-    fun openServerSettings() {
-        activity.runOnUiThread {
-            Toast.makeText(activity, "Connected to VCE Pali Cloud.", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     /**
      * Natively opens WhatsApp with pre-filled Gujarati text for citizen Udhar payment reminders.

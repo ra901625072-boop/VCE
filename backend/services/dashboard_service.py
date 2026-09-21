@@ -116,7 +116,7 @@ class DashboardService:
             expected_profit = period_agreed - period_expenses
 
             # 3. Overall Outstanding / Udhar
-            # Calculated as sum of remaining balances for all non-cancelled work
+            # Calculated as sum of remaining balances for all non-cancelled work + direct unlinked udhar
             outstanding_sql = """
             SELECT 
                 COALESCE(SUM(
@@ -134,7 +134,12 @@ class DashboardService:
             ) paid ON paid.work_id = w.id
             WHERE w.is_archived = 0 AND w.status != 'Cancelled';
             """
-            total_pending_udhar = conn.execute(outstanding_sql).fetchone()["total_pending"]
+            work_pending_udhar = conn.execute(outstanding_sql).fetchone()["total_pending"]
+            direct_udhar_row = conn.execute(
+                "SELECT COALESCE(SUM(amount), 0) AS direct_pending FROM payments WHERE LOWER(payment_method) = 'udhar' AND work_id IS NULL"
+            ).fetchone()
+            direct_pending_udhar = direct_udhar_row["direct_pending"] if direct_udhar_row else 0
+            total_pending_udhar = work_pending_udhar + direct_pending_udhar
 
             # Active vs Completed Work
             work_counts = conn.execute(

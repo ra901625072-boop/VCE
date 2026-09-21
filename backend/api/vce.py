@@ -693,17 +693,27 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
         today_wallet_topups = today_wallet_recharges_cash + today_wallet_recharges_online
         today_panchayat_remitted = today_remit_cash + today_remit_online
 
-        # Today's Udhar
-        today_udhar_given = conn.execute(
+        # Today's Udhar: Work delivered today with pending balance + direct udhar payments
+        work_udhar = conn.execute(
             """SELECT COALESCE(SUM(agreed_amount), 0) AS total FROM work 
-               WHERE start_date = ? AND is_archived = 0 AND id NOT IN (SELECT work_id FROM payments WHERE payment_date = ?)""",
+               WHERE start_date = ? AND is_archived = 0 
+                 AND id NOT IN (SELECT work_id FROM payments WHERE payment_date = ? AND work_id IS NOT NULL AND LOWER(payment_method) != 'udhar')""",
             (date_str, date_str)
         ).fetchone()["total"]
 
+        direct_udhar = conn.execute(
+            """SELECT COALESCE(SUM(amount), 0) AS total FROM payments 
+               WHERE payment_date = ? AND LOWER(payment_method) = 'udhar' AND work_id IS NULL""",
+            (date_str,)
+        ).fetchone()["total"]
+
+        today_udhar_given = work_udhar + direct_udhar
+
         today_udhar_recovered = conn.execute(
             """SELECT COALESCE(SUM(amount), 0) AS total FROM payments 
-               WHERE payment_date = ? AND payment_status = 'received' AND LOWER(notes) LIKE '%udhar%'""",
-            (date_str,)
+               WHERE payment_date = ? AND payment_status = 'received' AND LOWER(payment_method) != 'udhar'
+                 AND (LOWER(notes) LIKE '%udhar%' OR (work_id IS NOT NULL AND work_id IN (SELECT id FROM work WHERE start_date < ?)))""",
+            (date_str, date_str)
         ).fetchone()["total"]
 
         total_aavak = today_cash_in + today_upi_in + today_dept_in
@@ -733,9 +743,10 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
             (date_str,)
         ).fetchall()
         for r in pay_rows:
+            is_udhar_item = (r["payment_method"] or "").lower() == "udhar"
             entries.append(RojmelDayRow(
                 type="aavak",
-                category="Citizen Collection",
+                category="Citizen Credit (બાકી ખાતું)" if is_udhar_item else "Citizen Collection",
                 title=f"{r['person_name']} — {r['work_title'] or 'Service Fee'}",
                 method=r["payment_method"],
                 amount=r["amount"],

@@ -336,10 +336,130 @@ def _migrate_columns(conn: sqlite3.Connection) -> None:
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_people_village ON people(village)")
 
 
+def is_postgres() -> bool:
+    return bool(settings.DATABASE_URL and (settings.DATABASE_URL.startswith("postgresql://") or settings.DATABASE_URL.startswith("postgres://")))
+
+
+def init_postgres(conn, now: str) -> None:
+    """Initializes tables and seeds default data in PostgreSQL/Supabase."""
+    from backend.core.security import hash_password
+    default_op_id = getattr(settings, "DEFAULT_OPERATOR_ID", "akrajput2005")
+    default_op_pass = getattr(settings, "DEFAULT_OPERATOR_PASS", "Akshay@05")
+    existing_user = conn.execute("SELECT id FROM users WHERE username = ?", (default_op_id,)).fetchone()
+    if not existing_user:
+        hashed_pw, salt = hash_password(default_op_pass)
+        conn.execute(
+            """INSERT INTO users (username, password_hash, salt, full_name, role, is_active, created_at)
+               VALUES (?, ?, ?, ?, ?, 1, ?) ON CONFLICT (username) DO NOTHING""",
+            (default_op_id, hashed_pw, salt, "Akshay Rajput", "VCE Operator", now)
+        )
+
+    default_methods = [
+        ("Online", 1, 1),
+        ("Cash", 1, 0),
+        ("Udhar", 1, 0),
+        ("UPI", 0, 0),
+        ("Bank Transfer", 0, 0),
+        ("Cheque", 0, 0),
+    ]
+    for name, is_system, is_def in default_methods:
+        conn.execute(
+            "INSERT INTO payment_methods (name, is_system, is_default) VALUES (?, ?, ?) ON CONFLICT (name) DO NOTHING",
+            (name, is_system, is_def)
+        )
+
+    default_statuses = [
+        ("New", "#3b82f6", 1, 1),
+        ("In Progress", "#f59e0b", 2, 0),
+        ("Pending Approval", "#8b5cf6", 3, 0),
+        ("Ready / Printed", "#06b6d4", 4, 0),
+        ("Completed / Delivered", "#10b981", 5, 0),
+        ("Cancelled / Rejected", "#ef4444", 6, 0),
+    ]
+    for name, color, order, is_def in default_statuses:
+        conn.execute(
+            "INSERT INTO work_statuses (name, color, sort_order, is_default) VALUES (?, ?, ?, ?) ON CONFLICT (name) DO NOTHING",
+            (name, color, order, is_def)
+        )
+
+    default_work_cats = [
+        "AnyRoR Land Records (7/12 & 8-A)",
+        "Digital Gujarat Certificates",
+        "Farmer & iKhedut / PM-Kisan",
+        "Civil Supplies & Ration Card",
+        "Panchayat & Civic Services",
+        "Identity & Ayushman Card",
+        "Utility Bills & CSC Services",
+        "State Dept Work Orders (₹20/Unit)",
+        "General Digital Services"
+    ]
+    for cat in default_work_cats:
+        conn.execute(
+            "INSERT INTO work_categories (name, is_default, created_at) VALUES (?, 1, ?) ON CONFLICT (name) DO NOTHING",
+            (cat, now)
+        )
+
+    default_exp_cats = [
+        "Paper Reams (A4 / Legal)",
+        "Printer Toner & Drum Refill",
+        "Broadband & Internet Recharge",
+        "Lamination Film & Stationery",
+        "Hardware & Scanner Maintenance",
+        "Electricity & Power Backup",
+        "Center Hospitality & Refreshments",
+        "Panchayat & Duty Travel",
+        "Other Center Expenses"
+    ]
+    for cat in default_exp_cats:
+        conn.execute(
+            "INSERT INTO expense_categories (name, is_default, created_at) VALUES (?, 1, ?) ON CONFLICT (name) DO NOTHING",
+            (cat, now)
+        )
+
+    default_wallets = [
+        ("Digital Gujarat Portal", 0, 10000),
+        ("AnyRoR Land Records", 0, 10000),
+        ("CSC Digital Seva", 0, 20000),
+        ("Discom Electricity Float", 0, 50000)
+    ]
+    for pname, bal, mbal in default_wallets:
+        conn.execute(
+            "INSERT INTO portal_wallets (portal_name, current_balance, min_alert_balance, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT (portal_name) DO NOTHING",
+            (pname, bal, mbal, now)
+        )
+
+    conn.execute(
+        """INSERT INTO panchayat_profile 
+           (id, district, taluka, gram_panchayat, center_id, vce_name, vce_phone, talati_name, updated_at)
+           VALUES (1, '', '', '', '', '', '', '', ?) ON CONFLICT (id) DO NOTHING""",
+        (now,)
+    )
+
+    default_settings = {
+        "app_title": "VCE Pali — e-Gram Seva & Financial Ledger",
+        "currency": "INR",
+        "currency_symbol": "₹",
+        "date_format": "YYYY-MM-DD",
+        "accounting_mode": "cash_flow",
+        "theme": "slate",
+        "vce_min_govt_rate": "20.00",
+        "state": "Gujarat",
+    }
+    for key, val in default_settings.items():
+        conn.execute(
+            "INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT (key) DO NOTHING",
+            (key, val, now)
+        )
+
+
 def init_db(db_path: str = None) -> None:
     """Initializes the database schema, handles column migrations, and inserts default lookup data."""
     now = now_utc_iso()
     with get_db(db_path) as conn:
+        if is_postgres():
+            init_postgres(conn, now)
+            return
+
         conn.executescript(SCHEMA_SQL)
         _migrate_columns(conn)
 

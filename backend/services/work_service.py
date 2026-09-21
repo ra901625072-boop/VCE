@@ -175,7 +175,7 @@ class WorkService:
                 like_term = f"%{query.strip()}%"
                 params.extend([like_term, like_term, like_term, like_term, like_term])
 
-            sql += " GROUP BY w.id ORDER BY w.created_at DESC"
+            sql += " GROUP BY w.id, p.id ORDER BY w.created_at DESC"
 
             rows = conn.execute(sql, params).fetchall()
             for r in rows:

@@ -12,7 +12,7 @@ DEFAULT_DB_PATH = DATABASE_DIR / "vce.db"
 FRONTEND_DIR = ROOT_DIR / "frontend"
 
 
-from typing import Union, List
+from typing import Union, List, Optional
 from pydantic import field_validator
 
 class Settings(BaseSettings):
@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     PORT: int = 8000
     SECRET_KEY: str = "y8t79YBtdO3lnInztvHnSqGPBBG8PGuSBStYReZ14GPsAASEJeyT6a7zseaqQOQK"
     DB_PATH: str = str(DEFAULT_DB_PATH)
+    DATABASE_URL: Optional[str] = None
     CORS_ORIGINS: Union[str, List[str]] = ["*"]
     TIMEZONE: str = "Asia/Kolkata"
     CURRENCY_SYMBOL: str = "₹"

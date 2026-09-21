@@ -20,28 +20,16 @@ object NetworkUtils {
     private val executor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    fun getServerUrl(context: Context): String {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val saved = prefs.getString(KEY_SERVER_URL, DEFAULT_SERVER_URL) ?: DEFAULT_SERVER_URL
-        // Migrate any previously cached local IPs or localhost ports to the live cloud URL
-        return if (saved.contains("10.212.") || saved.contains("10.0.2.2") || saved.contains("localhost") || saved.contains("127.0.0.1")) {
-            saveServerUrl(context, DEFAULT_SERVER_URL)
-            DEFAULT_SERVER_URL
-        } else {
-            saved
+    fun getServerUrl(context: Context? = null): String {
+        context?.let { ctx ->
+            try {
+                val prefs = ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                if (prefs.contains(KEY_SERVER_URL)) {
+                    prefs.edit().remove(KEY_SERVER_URL).apply()
+                }
+            } catch (_: Exception) {}
         }
-    }
-
-    fun saveServerUrl(context: Context, rawUrl: String) {
-        var cleanUrl = rawUrl.trim()
-        if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
-            cleanUrl = "https://$cleanUrl"
-        }
-        if (cleanUrl.endsWith("/")) {
-            cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1)
-        }
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().putString(KEY_SERVER_URL, cleanUrl).apply()
+        return DEFAULT_SERVER_URL
     }
 
     fun isNetworkAvailable(context: Context): Boolean {

@@ -116,7 +116,7 @@ class ReportService:
                 JOIN people p ON w.person_id = p.id
                 LEFT JOIN payments pay ON pay.work_id = w.id
                 WHERE w.is_archived = 0
-                GROUP BY w.id
+                GROUP BY w.id, p.id
                 ORDER BY w.created_at DESC
                 """
                 rows = conn.execute(sql).fetchall()
@@ -141,9 +141,9 @@ class ReportService:
                 JOIN people p ON w.person_id = p.id
                 LEFT JOIN payments pay ON pay.work_id = w.id
                 WHERE w.is_archived = 0 AND w.status != 'Cancelled'
-                GROUP BY w.id
-                HAVING (w.agreed_amount - received_amount) > 0
-                ORDER BY (w.agreed_amount - received_amount) DESC
+                GROUP BY w.id, p.id
+                HAVING (w.agreed_amount - COALESCE(SUM(CASE WHEN pay.payment_status = 'received' AND LOWER(pay.payment_method) != 'udhar' THEN pay.amount ELSE 0 END), 0)) > 0
+                ORDER BY (w.agreed_amount - COALESCE(SUM(CASE WHEN pay.payment_status = 'received' AND LOWER(pay.payment_method) != 'udhar' THEN pay.amount ELSE 0 END), 0)) DESC
                 """
                 rows = conn.execute(sql).fetchall()
                 for r in rows:

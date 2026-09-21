@@ -25,7 +25,7 @@ def get_work_with_balances(conn: sqlite3.Connection, work_id: int) -> Optional[D
     JOIN people p ON w.person_id = p.id
     LEFT JOIN payments pay ON pay.work_id = w.id
     WHERE w.id = ?
-    GROUP BY w.id;
+    GROUP BY w.id, p.id;
     """
     cur = conn.execute(query, (work_id,))
     row = cur.fetchone()
@@ -59,15 +59,17 @@ def get_person_financial_summary(conn: sqlite3.Connection, person_id: int) -> Di
     pay_query = """
     SELECT 
         COALESCE(SUM(CASE WHEN payment_status = 'received' AND LOWER(payment_method) != 'udhar' THEN amount ELSE 0 END), 0) AS total_received,
-        COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'udhar' THEN amount ELSE 0 END), 0) AS total_udhar_recorded,
+        COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'udhar' AND work_id IS NULL THEN amount ELSE 0 END), 0) AS direct_udhar,
         MAX(payment_date) AS last_payment_date
     FROM payments
     WHERE person_id = ?;
     """
     p_row = conn.execute(pay_query, (person_id,)).fetchone() or {}
     total_received = int(p_row.get("total_received") or 0)
+    direct_udhar = int(p_row.get("direct_udhar") or 0)
 
-    total_pending = max(0, total_agreed - total_received)
+    total_pending = max(0, total_agreed - total_received) + direct_udhar
+    total_agreed = total_agreed + direct_udhar
 
     return {
         "work_count": work_count,

@@ -35,7 +35,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvStatusLabel: TextView
     private lateinit var btnRefresh: ImageButton
     private lateinit var layoutErrorOverlay: View
-    private lateinit var tvErrorCurrentUrl: TextView
     private lateinit var btnErrorRetry: Button
 
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
@@ -86,7 +85,6 @@ class MainActivity : AppCompatActivity() {
         btnRefresh = findViewById(R.id.btn_native_refresh)
         layoutErrorOverlay = findViewById(R.id.layout_error_overlay)
 
-        tvErrorCurrentUrl = layoutErrorOverlay.findViewById(R.id.tv_error_current_url)
         btnErrorRetry = layoutErrorOverlay.findViewById(R.id.btn_error_retry)
 
         // Configure pull to refresh colors matching Terracotta
@@ -201,10 +199,10 @@ class MainActivity : AppCompatActivity() {
                             if (!style) {
                                 style = document.createElement('style');
                                 style.id = 'native-hide-apk-style';
-                                style.textContent = '.apk-download-option, #card-apk-distribution, [href*="/download/apk"], [download*=".apk"] { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }';
+                                style.textContent = '.apk-download-option, #card-apk-distribution, [href*="/download/apk"], [download*=".apk"], #card-cloud-hosting, #form-backend-config, [id*="backend-url"], .server-config-option { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }';
                                 (document.head || document.documentElement).appendChild(style);
                             }
-                            document.querySelectorAll('.apk-download-option, #card-apk-distribution, [href*="/download/apk"], [download*=".apk"]').forEach(function(el) {
+                            document.querySelectorAll('.apk-download-option, #card-apk-distribution, [href*="/download/apk"], [download*=".apk"], #card-cloud-hosting, #form-backend-config, .server-config-option').forEach(function(el) {
                                 el.remove();
                             });
                         } catch(e) {}
@@ -280,7 +278,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadServerUrl() {
         val serverUrl = NetworkUtils.getServerUrl(this)
-        tvErrorCurrentUrl.text = serverUrl
         setConnectionStatus(Status.CHECKING)
 
         layoutErrorOverlay.visibility = View.GONE
@@ -297,8 +294,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showErrorOverlay() {
-        val serverUrl = NetworkUtils.getServerUrl(this)
-        tvErrorCurrentUrl.text = serverUrl
         layoutErrorOverlay.visibility = View.VISIBLE
     }
 
