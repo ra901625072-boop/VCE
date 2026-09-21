@@ -67,12 +67,13 @@ app.include_router(vce.router, prefix=api_prefix)
 # Health Check (Used by Render blueprint and frontend connectivity tester)
 @app.get("/api/health", tags=["Health"])
 def health_check():
+    db_type = "postgresql" if (settings.DATABASE_URL and (settings.DATABASE_URL.startswith("postgresql://") or settings.DATABASE_URL.startswith("postgres://"))) else "sqlite"
     return {
         "status": "ok",
         "app": settings.APP_NAME,
         "version": "2.0.0",
         "env": settings.APP_ENV,
-        "database": "connected"
+        "database": db_type
     }
 
 

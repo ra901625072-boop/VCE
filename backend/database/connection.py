@@ -138,17 +138,10 @@ def get_sqlite_connection(db_path: str = None) -> sqlite3.Connection:
 @contextmanager
 def get_db(db_path: str = None) -> Generator[Any, None, None]:
     """Context manager for database operations supporting Supabase PostgreSQL and SQLite."""
-    if db_path:
-        conn = get_sqlite_connection(db_path)
-        try:
-            yield conn
-            conn.commit()
-        except Exception:
-            conn.rollback()
-            raise
-        finally:
-            conn.close()
-    elif settings.DATABASE_URL and (settings.DATABASE_URL.startswith("postgresql://") or settings.DATABASE_URL.startswith("postgres://")):
+    is_custom_test_sqlite = bool(db_path and db_path != settings.DB_PATH and db_path != str(settings.DB_PATH))
+    has_postgres = bool(settings.DATABASE_URL and (settings.DATABASE_URL.startswith("postgresql://") or settings.DATABASE_URL.startswith("postgres://")))
+
+    if has_postgres and not is_custom_test_sqlite:
         pool = get_pg_pool()
         raw_conn = pool.getconn()
         conn = PostgresConnectionAdapter(raw_conn, pool=pool)
