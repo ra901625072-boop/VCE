@@ -74,14 +74,6 @@ export function renderNavigation(activePage = 'dashboard') {
             <span class="nav-kbd-hint">C</span>
           </a>
 
-          <a href="/pages/gov_claims.html" class="nav-item ${activePage === 'gov_claims' ? 'active' : ''}">
-            <div class="nav-item-content">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              <span>Govt Claims (₹20/Unit)</span>
-            </div>
-            <span class="nav-rate-badge" style="background:rgba(217,119,6,0.15); color:var(--gov-mandate); font-weight:700; border:1px solid rgba(217,119,6,0.3); font-size:0.68rem; padding:0.1rem 0.35rem; border-radius:var(--radius-xs);">₹20</span>
-          </a>
-
           <div class="nav-section-title" style="margin-top:0.6rem;">Daily Financials</div>
           <a href="/pages/rojmel.html" class="nav-item ${activePage === 'rojmel' ? 'active' : ''}">
             <div class="nav-item-content">
@@ -97,14 +89,6 @@ export function renderNavigation(activePage = 'dashboard') {
               <span>Transactions Journal</span>
             </div>
             <span class="nav-kbd-hint">P</span>
-          </a>
-
-          <a href="/pages/expenses.html" class="nav-item ${activePage === 'expenses' ? 'active' : ''}">
-            <div class="nav-item-content">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              <span>Center Expenses (કેન્દ્ર ખર્ચ)</span>
-            </div>
-            <span class="nav-kbd-hint">E</span>
           </a>
 
           <div class="nav-section-title" style="margin-top:0.6rem;">Reports & Admin</div>

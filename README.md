@@ -68,9 +68,9 @@ This application is purpose-built to solve the exact operational, portal, and fi
 VCE/
 ├── frontend/          # Single Page App (Clean Minimal English UI)
 │   ├── index.html     # SPA Router
-│   ├── pages/         # dashboard, work (applications), people (citizens), rojmel, gov_claims, transactions, expenses, reports, settings
+│   ├── pages/         # dashboard, work (applications), people (citizens), rojmel, transactions, reports, settings
 │   ├── css/           # reset, variables, layout, components, responsive
-│   ├── js/            # api, app, dashboard, work, people, rojmel, gov_claims, expenses, reports, settings
+│   ├── js/            # api, app, dashboard, work, people, rojmel, transactions, reports, settings
 │   └── components/    # sidebar, navbar, modal, notification, empty_state
 │
 ├── backend/           # Python 3.12 + FastAPI + SQLite (WAL Mode)

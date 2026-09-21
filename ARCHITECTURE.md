@@ -200,7 +200,6 @@ frontend/
 │   ├── work.html
 │   ├── people.html
 │   ├── transactions.html
-│   ├── expenses.html
 │   ├── reports.html
 │   ├── savings.html
 │   └── settings.html
