@@ -57,6 +57,16 @@ class VceNativeBridge(private val activity: Activity) {
     }
 
     @JavascriptInterface
+    fun setSwipeRefreshEnabled(enabled: Boolean) {
+        activity.runOnUiThread {
+            try {
+                val swipeRefresh = activity.findViewById<androidx.swiperefreshlayout.widget.SwipeRefreshLayout>(R.id.swipe_refresh_layout)
+                swipeRefresh?.isEnabled = enabled
+            } catch (_: Exception) {}
+        }
+    }
+
+    @JavascriptInterface
     fun vibrate(durationMs: Long) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

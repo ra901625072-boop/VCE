@@ -9,6 +9,14 @@
       "destination": "https://vce-pali-backend.onrender.com/api/:path*"
     },
     {
+      "source": "/download/apk",
+      "destination": "/apk/VCE_Pali.apk"
+    },
+    {
+      "source": "/api/download/apk",
+      "destination": "/apk/VCE_Pali.apk"
+    },
+    {
       "source": "/download/:path*",
       "destination": "https://vce-pali-backend.onrender.com/download/:path*"
     },

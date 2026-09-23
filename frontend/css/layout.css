@@ -248,6 +248,51 @@ body {
   flex-wrap: nowrap;
 }
 
+/* Universal Live Connection Status Pill (Mobile & Desktop) */
+.topbar-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: var(--radius-pill, 9999px);
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  line-height: 1;
+  transition: all var(--duration-fast) ease;
+}
+
+.topbar-status-pill .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  background-color: var(--revenue);
+  box-shadow: 0 0 6px rgba(5, 150, 105, 0.4);
+  flex-shrink: 0;
+}
+
+.topbar-status-pill.offline .status-dot {
+  background-color: var(--expense);
+  box-shadow: 0 0 6px rgba(220, 38, 38, 0.4);
+}
+
+.topbar-status-pill.offline .status-label {
+  color: var(--expense);
+}
+
+.topbar-status-pill.checking .status-dot {
+  background-color: var(--pending);
+  box-shadow: 0 0 6px rgba(217, 119, 6, 0.4);
+}
+
+.topbar-status-pill.checking .status-label {
+  color: var(--pending);
+}
+
 .content-area {
   flex: 1;
   padding: 1.35rem 1.75rem;

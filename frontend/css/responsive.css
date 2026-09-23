@@ -196,6 +196,25 @@
     display: none !important;
   }
 
+  /* Compact status pill on mobile */
+  .topbar-status-pill {
+    padding: 0.25rem 0.45rem;
+    min-height: 32px;
+  }
+  .topbar-status-pill .status-label {
+    font-size: 0.65rem;
+  }
+  @media (max-width: 480px) {
+    .topbar-status-pill .status-label {
+      display: none !important;
+    }
+    .topbar-status-pill {
+      padding: 0.35rem;
+      min-width: 30px;
+      justify-content: center;
+    }
+  }
+
   /* Touch Screen Optimization: Hide physical desktop keyboard badges */
   .nav-kbd-hint,
   .desktop-shortcut-hint,

@@ -96,34 +96,38 @@ if APK_DIR.exists():
 @app.get("/api/download/apk", tags=["Mobile App"])
 async def download_latest_apk():
     """Download the latest compiled VCE Pali Android APK."""
-    # Check if primary VCE_Pali APK exists
-    if APK_FILE_PALI.exists():
-        return FileResponse(
-            path=str(APK_FILE_PALI),
-            filename="VCE_Pali.apk",
-            media_type="application/vnd.android.package-archive",
-            headers={"Content-Disposition": 'attachment; filename="VCE_Pali.apk"'}
-        )
-    # Check if debug build exists
-    fallback_apk = BASE_DIR / "android" / "app" / "build" / "outputs" / "apk" / "debug" / "app-debug.apk"
-    if fallback_apk.exists():
-        return FileResponse(
-            path=str(fallback_apk),
-            filename="VCE_Pali.apk",
-            media_type="application/vnd.android.package-archive",
-            headers={"Content-Disposition": 'attachment; filename="VCE_Pali.apk"'}
-        )
+    # Check if primary VCE_Pali APK exists in apk/ or frontend/apk/
+    candidates = [
+        APK_FILE_PALI,
+        BASE_DIR / "frontend" / "apk" / "VCE_Pali.apk",
+        BASE_DIR / "android" / "app" / "build" / "outputs" / "apk" / "debug" / "app-debug.apk"
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return FileResponse(
+                path=str(candidate),
+                filename="VCE_Pali.apk",
+                media_type="application/vnd.android.package-archive",
+                headers={"Content-Disposition": 'attachment; filename="VCE_Pali.apk"'}
+            )
     raise HTTPException(status_code=404, detail="VCE Pali APK not found. Please run build_apk.bat first.")
 
 
 @app.get("/api/apk/info", tags=["Mobile App"])
 async def get_apk_info():
     """Get metadata about the latest compiled APK."""
-    target_apk = (
-        APK_FILE_PALI if APK_FILE_PALI.exists()
-        else (BASE_DIR / "android" / "app" / "build" / "outputs" / "apk" / "debug" / "app-debug.apk")
-    )
-    if not target_apk.exists():
+    candidates = [
+        APK_FILE_PALI,
+        BASE_DIR / "frontend" / "apk" / "VCE_Pali.apk",
+        BASE_DIR / "android" / "app" / "build" / "outputs" / "apk" / "debug" / "app-debug.apk"
+    ]
+    target_apk = None
+    for candidate in candidates:
+        if candidate.exists():
+            target_apk = candidate
+            break
+
+    if not target_apk:
         return {"available": False, "message": "APK has not been built yet."}
 
     stat = target_apk.stat()
@@ -133,7 +137,7 @@ async def get_apk_info():
     return {
         "available": True,
         "filename": "VCE_Pali.apk",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "size_bytes": stat.st_size,
         "size_formatted": f"{size_mb} MB",
         "last_modified": mod_time,

@@ -14,10 +14,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
-import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,9 +28,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var progressBar: ProgressBar
-    private lateinit var statusDot: View
-    private lateinit var tvStatusLabel: TextView
-    private lateinit var btnRefresh: ImageButton
     private lateinit var layoutErrorOverlay: View
     private lateinit var btnErrorRetry: Button
 
@@ -80,9 +74,6 @@ class MainActivity : AppCompatActivity() {
         webView = findViewById(R.id.web_view)
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout)
         progressBar = findViewById(R.id.page_progress_bar)
-        statusDot = findViewById(R.id.status_dot)
-        tvStatusLabel = findViewById(R.id.tv_status_label)
-        btnRefresh = findViewById(R.id.btn_native_refresh)
         layoutErrorOverlay = findViewById(R.id.layout_error_overlay)
 
         btnErrorRetry = layoutErrorOverlay.findViewById(R.id.btn_error_retry)
@@ -245,10 +236,6 @@ class MainActivity : AppCompatActivity() {
             webView.reload()
         }
 
-        btnRefresh.setOnClickListener {
-            loadServerUrl()
-        }
-
         btnErrorRetry.setOnClickListener {
             layoutErrorOverlay.visibility = View.GONE
             loadServerUrl()
@@ -302,22 +289,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setConnectionStatus(status: Status) {
-        when (status) {
-            Status.CONNECTED -> {
-                statusDot.setBackgroundResource(R.drawable.shape_dot_connected)
-                tvStatusLabel.text = "Online"
-                tvStatusLabel.setTextColor(ContextCompat.getColor(this, R.color.revenue))
-            }
-            Status.DISCONNECTED -> {
-                statusDot.setBackgroundResource(R.drawable.shape_dot_disconnected)
-                tvStatusLabel.text = "Offline"
-                tvStatusLabel.setTextColor(ContextCompat.getColor(this, R.color.expense))
-            }
-            Status.CHECKING -> {
-                statusDot.setBackgroundResource(R.drawable.shape_dot_checking)
-                tvStatusLabel.text = "Connecting…"
-                tvStatusLabel.setTextColor(ContextCompat.getColor(this, R.color.pending))
-            }
+        val statusStr = when (status) {
+            Status.CONNECTED -> "online"
+            Status.DISCONNECTED -> "offline"
+            Status.CHECKING -> "checking"
+        }
+        runOnUiThread {
+            webView.evaluateJavascript("window.vceSetConnectionStatus?.('$statusStr')", null)
         }
     }
 }

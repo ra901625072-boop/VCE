@@ -11,9 +11,12 @@ echo.
 :: Configure environment
 call "%~dp0configure_env.bat"
 
-:: Ensure output directory exists
+:: Ensure output directories exist
 if not exist "%~dp0apk" (
     mkdir "%~dp0apk"
+)
+if not exist "%~dp0frontend\apk" (
+    mkdir "%~dp0frontend\apk"
 )
 
 echo.
@@ -31,22 +34,25 @@ if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
-:: Copy compiled APK to distribution folder
+:: Copy compiled APK to distribution and website folders
 set "SRC_APK=%~dp0android\app\build\outputs\apk\debug\app-debug.apk"
 set "DEST_APK=%~dp0apk\VCE_Pali.apk"
+set "FRONTEND_APK=%~dp0frontend\apk\VCE_Pali.apk"
 
 if exist "%SRC_APK%" (
     copy /y "%SRC_APK%" "%DEST_APK%" >nul
+    copy /y "%SRC_APK%" "%FRONTEND_APK%" >nul
     echo.
     echo ======================================================================
     echo   [SUCCESS] APK Generated Successfully!
     echo ======================================================================
-    echo   Location : %DEST_APK%
+    echo   Distribution Location : %DEST_APK%
+    echo   Website Static APK    : %FRONTEND_APK%
     
     :: Print File Details
     for %%F in ("%DEST_APK%") do (
-        echo   Size     : %%~zF bytes
-        echo   Modified : %%~tF
+        echo   Size                  : %%~zF bytes
+        echo   Modified              : %%~tF
     )
     
     echo.

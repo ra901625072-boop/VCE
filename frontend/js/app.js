@@ -7,7 +7,7 @@ import { auth } from './auth.js';
 import { notify } from '../components/notification.js';
 import { Modal } from '../components/modal.js';
 import { renderNavigation } from '../components/sidebar.js';
-import { shakeInput, triggerKbdShortcutFeedback } from './animations.js';
+import { shakeInput, triggerKbdShortcutFeedback, triggerHaptic } from './animations.js';
 
 class ThemeManager {
   constructor() {
@@ -550,21 +550,27 @@ class AppController {
   }
 
   bindQuickModalEvents() {
-    const openQuickSelect = () => this.selectModal.open();
+    const openQuickSelect = () => {
+      triggerHaptic('light');
+      this.selectModal.open();
+    };
     document.getElementById('btn-quick-add')?.addEventListener('click', openQuickSelect);
     document.getElementById('mobile-btn-quick-add')?.addEventListener('click', openQuickSelect);
 
     // Quick Select Buttons
     document.getElementById('qa-btn-person')?.addEventListener('click', () => {
+      triggerHaptic('light');
       this.selectModal.close();
       this.personModal.open();
     });
     document.getElementById('qa-btn-work')?.addEventListener('click', async () => {
+      triggerHaptic('light');
       this.selectModal.close();
       await this.populatePeopleDropdown('qw-person-select');
       this.workModal.open();
     });
     document.getElementById('qa-btn-payment')?.addEventListener('click', async () => {
+      triggerHaptic('light');
       this.selectModal.close();
       document.getElementById('qp-date').value = getTodayDateStr();
       document.getElementById('qp-time').value = getCurrentTimeStr();
@@ -572,6 +578,7 @@ class AppController {
       this.paymentModal.open();
     });
     document.getElementById('qa-btn-expense')?.addEventListener('click', async () => {
+      triggerHaptic('light');
       this.selectModal.close();
       document.getElementById('qe-date').value = getTodayDateStr();
       document.getElementById('qe-time').value = getCurrentTimeStr();
@@ -794,6 +801,14 @@ class AppController {
         this.helpModal.open();
       }
     });
+
+    // Universal tactile haptic feedback on interactive primary & mobile action triggers
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-primary, .mobile-nav-fab, .btn-mobile-hamburger, .topbar-status-pill, .qa-card-btn, .btn-whatsapp-civic');
+      if (btn) {
+        triggerHaptic('light');
+      }
+    }, { passive: true });
   }
 }
 

@@ -59,6 +59,9 @@ export class Modal {
 
   open() {
     if (!this.modalEl) return;
+    if (window.AndroidBridge && typeof window.AndroidBridge.setSwipeRefreshEnabled === 'function') {
+      try { window.AndroidBridge.setSwipeRefreshEnabled(false); } catch (_) {}
+    }
     this.isClosing = false;
     this.modalEl.classList.remove('closing');
     this.previouslyFocusedEl = document.activeElement;
@@ -81,6 +84,10 @@ export class Modal {
     this.isClosing = true;
     closeModalAnimated(this.modalEl, () => {
       this.isClosing = false;
+      const anyOtherOpen = document.querySelectorAll('.modal-backdrop.open, .modal-backdrop.active').length > 0;
+      if (!anyOtherOpen && window.AndroidBridge && typeof window.AndroidBridge.setSwipeRefreshEnabled === 'function') {
+        try { window.AndroidBridge.setSwipeRefreshEnabled(true); } catch (_) {}
+      }
       // Restore focus to opener element if applicable
       if (this.previouslyFocusedEl && typeof this.previouslyFocusedEl.focus === 'function') {
         this.previouslyFocusedEl.focus();

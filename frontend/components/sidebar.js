@@ -5,6 +5,7 @@
  */
 
 import { auth } from '../js/auth.js';
+import { triggerHaptic } from '../js/animations.js';
 
 export function renderNavigation(activePage = 'dashboard') {
   const isNative = typeof window.AndroidBridge !== 'undefined' ||
@@ -107,12 +108,12 @@ export function renderNavigation(activePage = 'dashboard') {
           </a>
 
           ${!isNative ? `
-          <a href="/download/apk" class="nav-item apk-download-option" download="VCE_Pali.apk" title="Download Android App (APK v1.0.0)">
+          <a href="/download/apk" class="nav-item apk-download-option" download="VCE_Pali.apk" title="Download Android App (APK v1.1.0)">
             <div class="nav-item-content">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
               <span>Android App (APK ડાઉનલોડ)</span>
             </div>
-            <span class="nav-rate-badge" style="background:rgba(5,150,105,0.15); color:var(--revenue); font-weight:700; border:1px solid rgba(5,150,105,0.3); font-size:0.68rem; padding:0.1rem 0.35rem; border-radius:var(--radius-xs);">v1.0</span>
+            <span class="nav-rate-badge" style="background:rgba(5,150,105,0.15); color:var(--revenue); font-weight:700; border:1px solid rgba(5,150,105,0.3); font-size:0.68rem; padding:0.1rem 0.35rem; border-radius:var(--radius-xs);">v1.1</span>
           </a>` : ''}
         </nav>
 
@@ -187,8 +188,63 @@ export function renderNavigation(activePage = 'dashboard') {
 
     hamburgerBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      triggerHaptic('light');
       toggleMobileDrawer();
     });
+  }
+
+  // Prepend Universal Live Connection Status Indicator to topbar-right if not already present
+  const topbarRight = document.querySelector('.topbar-right');
+  if (topbarRight && !document.getElementById('topbar-status-indicator')) {
+    const statusPill = document.createElement('div');
+    statusPill.id = 'topbar-status-indicator';
+    statusPill.className = 'topbar-status-pill connected';
+    statusPill.title = 'Server Status: Online';
+    statusPill.innerHTML = `
+      <span class="status-dot"></span>
+      <span class="status-label">Online</span>
+    `;
+    topbarRight.insertBefore(statusPill, topbarRight.firstChild);
+  }
+
+  // Register Global Connection Status Handler & Watchdog
+  if (typeof window.vceSetConnectionStatus === 'undefined') {
+    window.vceSetConnectionStatus = function(status) {
+      const pill = document.getElementById('topbar-status-indicator');
+      if (!pill) return;
+      const label = pill.querySelector('.status-label');
+      pill.classList.remove('connected', 'offline', 'checking');
+
+      if (status === 'online') {
+        pill.classList.add('connected');
+        pill.title = 'Server Status: Online';
+        if (label) label.textContent = 'Online';
+      } else if (status === 'offline') {
+        pill.classList.add('offline');
+        pill.title = 'Server Status: Offline';
+        if (label) label.textContent = 'Offline';
+      } else {
+        pill.classList.add('checking');
+        pill.title = 'Server Status: Connecting…';
+        if (label) label.textContent = 'Connecting…';
+      }
+    };
+
+    window.addEventListener('online', () => window.vceSetConnectionStatus('online'));
+    window.addEventListener('offline', () => window.vceSetConnectionStatus('offline'));
+
+    // Lightweight health ping for browser mobile view
+    const pingHealth = async () => {
+      try {
+        const res = await fetch('/api/health', { method: 'GET', cache: 'no-cache' });
+        if (res.ok) window.vceSetConnectionStatus('online');
+        else window.vceSetConnectionStatus('offline');
+      } catch (_) {
+        window.vceSetConnectionStatus('offline');
+      }
+    };
+    setTimeout(pingHealth, 1500);
+    setInterval(pingHealth, 30000);
   }
 
   // Drawer event helpers

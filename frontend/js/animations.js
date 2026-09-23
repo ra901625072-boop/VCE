@@ -12,6 +12,22 @@ export const isReducedMotion = () => {
 };
 
 /**
+ * Universal Haptic Tactile Feedback Engine.
+ * Supports Android Native Bridge (AndroidBridge.vibrate) and browser navigator.vibrate.
+ */
+export function triggerHaptic(type = 'light') {
+  if (isReducedMotion()) return;
+  const duration = type === 'error' ? 40 : type === 'medium' ? 25 : 14;
+  try {
+    if (typeof window !== 'undefined' && window.AndroidBridge && typeof window.AndroidBridge.vibrate === 'function') {
+      window.AndroidBridge.vibrate(duration);
+    } else if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      navigator.vibrate(duration);
+    }
+  } catch (_) {}
+}
+
+/**
  * Tabular number roll (180ms–220ms) with smooth cubic-bezier deceleration.
  * Cancels any active frame step to prevent animation collisions on rapid state changes.
  */
@@ -85,6 +101,7 @@ export function flashMetric(element, type = 'revenue') {
  */
 export function shakeInput(element) {
   if (!element) return;
+  triggerHaptic('error');
 
   const target = element.closest('.form-control') || element.closest('.form-group') || element;
   target.classList.remove('input-error-shake');
