@@ -168,16 +168,20 @@ function renderRojmelSummary(data) {
   const javakTotal = data.total_javak !== undefined ? data.total_javak : (data.today_outflow || 0);
   const todayJavakEl = document.getElementById('val-today-javak');
   const badgeJavak = document.getElementById('badge-total-javak');
-  const subJavakExp = document.getElementById('sub-javak-exp');
-  const subJavakWallet = document.getElementById('sub-javak-wallet');
+  const subJavakCash = document.getElementById('sub-javak-cash');
+  const subJavakUpi = document.getElementById('sub-javak-upi');
   if (todayJavakEl) todayJavakEl.textContent = formatINR(javakTotal);
   if (badgeJavak) badgeJavak.textContent = formatINR(javakTotal);
-  if (subJavakExp) subJavakExp.textContent = formatINR((data.today_expenses_cash || 0) + (data.today_expenses_online || 0));
-  if (subJavakWallet) subJavakWallet.textContent = formatINR((data.today_wallet_topups || 0) + (data.today_panchayat_remitted || 0));
+  const totalCashJavak = (data.today_expenses_cash || 0) + (data.today_wallet_recharges_cash || 0);
+  const totalUpiJavak = (data.today_expenses_online || 0) + (data.today_wallet_recharges_online || 0) + (data.today_panchayat_remitted || 0);
+  if (subJavakCash) subJavakCash.textContent = formatINR(totalCashJavak);
+  if (subJavakUpi) subJavakUpi.textContent = formatINR(totalUpiJavak);
 
   // Closing Balance
   const closingCashEl = document.getElementById('val-closing-cash');
   const pillStatus = document.getElementById('pill-closing-status');
+  const subClosingBank = document.getElementById('sub-closing-bank');
+  if (subClosingBank) subClosingBank.textContent = formatINR(data.closing_bank || 0);
   if (closingCashEl) {
     closingCashEl.textContent = formatINR(data.closing_cash || 0);
     if (data.closing_cash < 0) {

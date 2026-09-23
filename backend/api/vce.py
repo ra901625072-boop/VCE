@@ -722,13 +722,23 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
         closing_bank = opening_bank + today_upi_in + today_dept_in - (today_exp_online + today_wallet_recharges_online + today_remit_online)
         is_cash_deficit = closing_cash < 0
 
-        # Net commission earned today
+        # Net commission earned today (from completed work applications + direct citizen service fees)
         comm_today_row = conn.execute(
             """SELECT COALESCE(SUM(vce_commission), 0) AS comm FROM work 
                WHERE (start_date = ? OR completed_date = ?) AND status IN ('Completed', 'Completed / Delivered') AND is_archived = 0""",
             (date_str, date_str)
         ).fetchone()
-        net_commission_earned = (comm_today_row["comm"] if comm_today_row else 0) + today_dept_in
+
+        direct_fees_row = conn.execute(
+            """SELECT COALESCE(SUM(amount), 0) AS direct_comm FROM payments 
+               WHERE payment_date = ? AND payment_status = 'received' AND work_id IS NULL AND LOWER(payment_method) != 'udhar'""",
+            (date_str,)
+        ).fetchone()
+
+        net_commission_earned = (comm_today_row["comm"] if comm_today_row else 0) + (direct_fees_row["direct_comm"] if direct_fees_row else 0) + today_dept_in
+
+        # Net cash inflow surplus (cash inflows minus cash outflows)
+        today_cash_surplus = today_cash_in - (today_exp_cash + today_wallet_recharges_cash + today_remit_cash)
 
         # Build detailed journal entries
         entries = []
@@ -854,7 +864,7 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
             closing_cash=closing_cash,
             closing_bank=closing_bank,
             is_cash_deficit=is_cash_deficit,
-            today_net_earnings=max(0, total_aavak - total_javak),
+            today_net_earnings=today_cash_surplus,
             net_commission_earned=net_commission_earned,
             today_udhar_given=today_udhar_given,
             today_udhar_recovered=today_udhar_recovered,
