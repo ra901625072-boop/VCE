@@ -3,6 +3,8 @@
  */
 import { api, vceApi, formatINR, formatDate, paiseToRupees, rupeesToPaise, getTodayDateStr, getCurrentTimeStr } from './api.js';
 import { notify } from '../components/notification.js';
+import { closeModalAnimated } from '../components/modal.js';
+import { shakeInput, animateRowRemoval, triggerBadgePop } from './animations.js';
 
 let serviceCatalog = [];
 let citizensList = [];
@@ -56,9 +58,8 @@ async function initWorkPage() {
     // Close Modal triggers
     document.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.modal-backdrop').forEach(m => {
-          m.classList.remove('active');
-          m.classList.remove('open');
+        document.querySelectorAll('.modal-backdrop.open, .modal-backdrop.active').forEach(m => {
+          closeModalAnimated(m);
         });
       });
     });
@@ -66,8 +67,7 @@ async function initWorkPage() {
     const timelineModal = document.getElementById('modal-work-timeline');
     timelineModal?.addEventListener('click', (e) => {
       if (e.target === timelineModal) {
-        timelineModal.classList.remove('active');
-        timelineModal.classList.remove('open');
+        closeModalAnimated(timelineModal);
       }
     });
 
@@ -139,7 +139,7 @@ function renderWorkTable(items) {
       const pendingColor = pending > 0 ? 'color:#ef4444;' : 'color:#10b981;';
 
       return `
-        <tr>
+        <tr data-work-id="${w.id}">
           <td style="white-space:nowrap;">
             <span class="token-pill">${escapeHtml(token)}</span>
             ${w.ack_no ? `<div class="token-sub">Ack: ${escapeHtml(w.ack_no)}</div>` : ''}
@@ -205,7 +205,7 @@ function renderWorkTable(items) {
       const cleanPhone = (w.person_phone || '').replace(/[^0-9]/g, '');
 
       return `
-        <div class="mobile-card">
+        <div class="mobile-card" data-work-id="${w.id}">
           <div class="mobile-card-header">
             <div class="mobile-card-title-group">
               <span style="font-family:var(--font-mono); font-weight:700; color:var(--accent-light); font-size:0.825rem;">${escapeHtml(token)}</span>
@@ -550,8 +550,7 @@ async function openEditWorkModal(workId) {
   document.body.appendChild(modalBackdrop);
 
   const closeEditModal = () => {
-    modalBackdrop.remove();
-    document.body.style.overflow = '';
+    closeModalAnimated(modalBackdrop, () => modalBackdrop.remove());
   };
 
   document.getElementById('btn-close-edit-work-modal').addEventListener('click', closeEditModal);
@@ -562,6 +561,11 @@ async function openEditWorkModal(workId) {
 
   document.getElementById('edit-work-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const titleVal = document.getElementById('edit-work-title').value.trim();
+    if (!titleVal) {
+      shakeInput(document.getElementById('edit-work-title'));
+      return;
+    }
     const feeRupees = Number(document.getElementById('edit-work-fee').value) || 0;
     const portalCostRupees = Number(document.getElementById('edit-work-portal-cost').value) || 0;
     const gpShareRupees = Number(document.getElementById('edit-work-gp-share').value) || 0;
@@ -615,10 +619,16 @@ async function deleteWork(workId) {
     notify.success('Application deleted successfully.');
     const timelineModal = document.getElementById('modal-work-timeline');
     if (timelineModal) {
-      timelineModal.classList.remove('open');
-      timelineModal.classList.remove('active');
+      closeModalAnimated(timelineModal);
     }
-    loadWork();
+    const rowEl = document.querySelector(`tr[data-work-id="${workId}"]`) || document.querySelector(`.mobile-card[data-work-id="${workId}"]`);
+    if (rowEl) {
+      animateRowRemoval(rowEl, () => {
+        loadWork();
+      });
+    } else {
+      loadWork();
+    }
   } catch (err) {
     notify.error('Failed to delete application: ' + err.message);
   }
@@ -1017,14 +1027,20 @@ function printCitizenReceipt(work) {
 
 function closeAddModal() {
   const modal = document.getElementById('modal-add-app');
-  if (modal) modal.remove();
-  document.body.style.overflow = '';
+  if (modal) {
+    closeModalAnimated(modal, () => modal.remove());
+  } else {
+    document.body.style.overflow = '';
+  }
 }
 
 function closePayModal() {
   const modal = document.getElementById('modal-collect-pay');
-  if (modal) modal.remove();
-  document.body.style.overflow = '';
+  if (modal) {
+    closeModalAnimated(modal, () => modal.remove());
+  } else {
+    document.body.style.overflow = '';
+  }
 }
 
 function debounce(func, wait) {

@@ -7,6 +7,7 @@ import { auth } from './auth.js';
 import { notify } from '../components/notification.js';
 import { Modal } from '../components/modal.js';
 import { renderNavigation } from '../components/sidebar.js';
+import { shakeInput, triggerKbdShortcutFeedback } from './animations.js';
 
 class ThemeManager {
   constructor() {
@@ -599,8 +600,13 @@ class AppController {
     document.getElementById('form-quick-person')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
+      const nameVal = form.name.value.trim();
+      if (!nameVal) {
+        shakeInput(form.name);
+        return;
+      }
       const data = {
-        name: form.name.value.trim(),
+        name: nameVal,
         phone: form.phone.value.trim() || null,
         village: form.village.value.trim() || '',
         citizen_type: form.citizen_type.value || 'General',
@@ -617,19 +623,29 @@ class AppController {
         window.dispatchEvent(new CustomEvent('vce:refresh'));
       } catch (err) {
         notify.error(err.message);
+        shakeInput(form);
       }
     });
 
     document.getElementById('form-quick-work')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
+      if (!form.person_id.value) {
+        shakeInput(form.person_id);
+        return;
+      }
+      const titleVal = form.title.value.trim();
+      if (!titleVal) {
+        shakeInput(form.title);
+        return;
+      }
       const feeRupees = form.agreed_amount.value || '0';
       const portalRupees = form.portal_cost.value || '0';
       const gpRupees = form.panchayat_share.value || '0';
 
       const data = {
         person_id: parseInt(form.person_id.value, 10),
-        title: form.title.value.trim(),
+        title: titleVal,
         category: form.category.value,
         service_category: form.category.value,
         portal_name: form.portal_name.value.trim() || '',
@@ -648,12 +664,22 @@ class AppController {
         window.dispatchEvent(new CustomEvent('vce:refresh'));
       } catch (err) {
         notify.error(err.message);
+        shakeInput(form);
       }
     });
 
     document.getElementById('form-quick-payment')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
+      if (!form.person_id.value) {
+        shakeInput(form.person_id);
+        return;
+      }
+      const amt = parseFloat(form.amount.value || '0');
+      if (isNaN(amt) || amt <= 0) {
+        shakeInput(form.amount);
+        return;
+      }
       const data = {
         person_id: parseInt(form.person_id.value, 10),
         work_id: form.work_id.value ? parseInt(form.work_id.value, 10) : null,
@@ -673,14 +699,25 @@ class AppController {
         window.dispatchEvent(new CustomEvent('vce:refresh'));
       } catch (err) {
         notify.error(err.message);
+        shakeInput(form);
       }
     });
 
     document.getElementById('form-quick-expense')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
+      const titleVal = form.title.value.trim();
+      if (!titleVal) {
+        shakeInput(form.title);
+        return;
+      }
+      const amt = parseFloat(form.amount.value || '0');
+      if (isNaN(amt) || amt <= 0) {
+        shakeInput(form.amount);
+        return;
+      }
       const data = {
-        title: form.title.value.trim(),
+        title: titleVal,
         amount: rupeesToPaise(form.amount.value),
         category_id: form.category_id.value ? parseInt(form.category_id.value, 10) : null,
         payment_method: form.payment_method.value,
@@ -697,6 +734,7 @@ class AppController {
         window.dispatchEvent(new CustomEvent('vce:refresh'));
       } catch (err) {
         notify.error(err.message);
+        shakeInput(form);
       }
     });
   }
@@ -736,18 +774,23 @@ class AppController {
       const key = e.key.toLowerCase();
       if (key === 'w') {
         e.preventDefault();
+        triggerKbdShortcutFeedback('w');
         document.getElementById('qa-btn-work')?.click();
       } else if (key === 'p') {
         e.preventDefault();
+        triggerKbdShortcutFeedback('p');
         document.getElementById('qa-btn-payment')?.click();
       } else if (key === 'e') {
         e.preventDefault();
+        triggerKbdShortcutFeedback('e');
         document.getElementById('qa-btn-expense')?.click();
       } else if (key === 'c') {
         e.preventDefault();
+        triggerKbdShortcutFeedback('c');
         document.getElementById('qa-btn-person')?.click();
       } else if (key === '?' || (e.shiftKey && key === '/')) {
         e.preventDefault();
+        triggerKbdShortcutFeedback('?');
         this.helpModal.open();
       }
     });

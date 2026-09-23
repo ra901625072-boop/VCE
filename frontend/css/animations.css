@@ -1,18 +1,28 @@
 /* ==========================================================================
-   Functional Interactions & Micro-Transitions — VCE Pali e-Gram
-   Purposeful Motion: Fast, Crisp, Tactile & Non-Decorative (≤180ms)
+   Functional Interactions & Motion System — VCE Pali e-Gram
+   Purposeful Workstation Motion: Fast, Crisp, Tactile & Non-Decorative (80ms–240ms)
+   Strict Anti-Slop: Zero Neon Halos, Zero Artificial Staggers, Zero AI Clichés
    ========================================================================== */
 
-/* Fast Functional Transitions */
-@keyframes quickFadeIn {
-  from { opacity: 0; transform: translateY(3px); }
-  to { opacity: 1; transform: translateY(0); }
+:root {
+  --duration-instant: 80ms;
+  --duration-fast: 140ms;
+  --duration-normal: 200ms;
+  --duration-moderate: 260ms;
+
+  --ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quad: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-quad: cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-in-out-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes quickModalIn {
+/* --------------------------------------------------------------------------
+   Modal Dialog Transitions — State Machine: Enter, Active, Exit
+   -------------------------------------------------------------------------- */
+@keyframes modalEnter {
   from {
     opacity: 0;
-    transform: scale(0.97) translateY(-6px);
+    transform: scale(0.97) translateY(-8px);
   }
   to {
     opacity: 1;
@@ -20,10 +30,42 @@
   }
 }
 
+@keyframes modalExit {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98) translateY(6px);
+  }
+}
+
+.modal-backdrop.open .modal-dialog,
+.modal-backdrop.open .modal,
+.modal-backdrop.active .modal-dialog,
+.modal-backdrop.active .modal {
+  animation: modalEnter var(--duration-fast) var(--ease-snappy) forwards;
+}
+
+.modal-backdrop.closing {
+  opacity: 0 !important;
+  visibility: visible !important;
+  transition: opacity var(--duration-fast) ease-out !important;
+}
+
+.modal-backdrop.closing .modal-dialog,
+.modal-backdrop.closing .modal {
+  animation: modalExit var(--duration-fast) var(--ease-in-quad) forwards !important;
+}
+
+/* --------------------------------------------------------------------------
+   Toast Notifications — Directional Slide In, Pop Icon & Dismiss Slide Out
+   -------------------------------------------------------------------------- */
 @keyframes toastSlideIn {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
+    transform: translateY(14px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -31,19 +73,227 @@
   }
 }
 
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px) scale(0.96);
+  }
+}
+
+@keyframes toastIconPop {
+  0% {
+    transform: scale(0.65);
+    opacity: 0.5;
+  }
+  75% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.toast {
+  animation: toastSlideIn var(--duration-fast) var(--ease-snappy) both;
+}
+
+.toast.toast-exit {
+  animation: toastSlideOut var(--duration-fast) var(--ease-in-quad) forwards !important;
+}
+
+.toast-icon-wrap {
+  animation: toastIconPop var(--duration-normal) var(--ease-snappy) both;
+}
+
+/* --------------------------------------------------------------------------
+   Financial Ledger Pulse & Flash Indicators — State Change Confirmation
+   -------------------------------------------------------------------------- */
+@keyframes ledgerFlashGreen {
+  0% {
+    background-color: rgba(5, 150, 105, 0.28);
+    color: #10b981;
+    box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.35);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@keyframes ledgerFlashRed {
+  0% {
+    background-color: rgba(220, 38, 38, 0.28);
+    color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.35);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@keyframes ledgerFlashAmber {
+  0% {
+    background-color: rgba(217, 119, 6, 0.28);
+    color: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.35);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.flash-ledger-revenue {
+  animation: ledgerFlashGreen 0.75s var(--ease-out-quad) both;
+  border-radius: var(--radius-xs);
+}
+
+.flash-ledger-expense {
+  animation: ledgerFlashRed 0.75s var(--ease-out-quad) both;
+  border-radius: var(--radius-xs);
+}
+
+.flash-ledger-pending {
+  animation: ledgerFlashAmber 0.75s var(--ease-out-quad) both;
+  border-radius: var(--radius-xs);
+}
+
+/* --------------------------------------------------------------------------
+   Form Validation & Error Tactile Feedback (Micro-Shake)
+   -------------------------------------------------------------------------- */
+@keyframes fieldShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.input-error-shake {
+  animation: fieldShake 0.24s ease-in-out !important;
+  border-color: var(--expense) !important;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.25) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Table Row Lifecycle — Entry Insertion & Exit Removal
+   -------------------------------------------------------------------------- */
+@keyframes rowInsertHighlight {
+  0% {
+    background-color: rgba(194, 65, 12, 0.24);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.row-newly-added {
+  animation: rowInsertHighlight 1.1s var(--ease-out-quad) forwards;
+}
+
+.row-exit-collapse {
+  opacity: 0 !important;
+  transform: translateY(-4px) scaleY(0.85);
+  transition: opacity var(--duration-fast) ease-out, transform var(--duration-fast) ease-out !important;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Data Visualizations & Progress Transitions
+   -------------------------------------------------------------------------- */
+@keyframes barRise {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.trend-bar-animated {
+  transform-origin: bottom;
+  animation: barRise var(--duration-moderate) var(--ease-snappy) both;
+}
+
+.progress-bar-animated {
+  transition: width var(--duration-moderate) var(--ease-snappy);
+}
+
+/* --------------------------------------------------------------------------
+   Tactile Controls & Keyboard Shortcut Feedback
+   -------------------------------------------------------------------------- */
+button:active, .btn:active, .qa-card-btn:active, .mobile-nav-fab:active {
+  transform: translateY(1px) scale(0.99) !important;
+}
+
+.nav-kbd-hint {
+  transition: transform 0.08s ease, background-color 0.12s ease, color 0.12s ease;
+}
+
+.nav-kbd-hint.kbd-pressed {
+  background-color: var(--accent) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-border) !important;
+  transform: scale(0.9);
+}
+
+/* Quick Action card hover/press */
+.qa-card-btn {
+  transition: transform var(--duration-fast) var(--ease-snappy), border-color var(--duration-fast) ease, background-color var(--duration-fast) ease;
+}
+
+.qa-card-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Theme Switcher Micro-Rotation */
+.btn-theme-toggle .theme-icon {
+  display: inline-block;
+  transition: transform 0.28s var(--ease-snappy);
+}
+
+.btn-theme-toggle:hover .theme-icon {
+  transform: rotate(18deg) scale(1.08);
+}
+
+.btn-theme-toggle:active .theme-icon {
+  transform: rotate(-12deg) scale(0.94);
+}
+
+/* Status Badge State Transition */
+@keyframes badgeStatePop {
+  0% { transform: scale(0.92); }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.badge-state-pop {
+  animation: badgeStatePop 0.18s var(--ease-snappy);
+}
+
+/* Live Dot Pulse */
 @keyframes pulseLiveDot {
   0% { transform: scale(0.95); opacity: 0.8; }
   50% { transform: scale(1.2); opacity: 1; }
   100% { transform: scale(0.95); opacity: 0.8; }
 }
 
-/* Base Utility Classes */
-.animate-fade-in {
-  animation: quickFadeIn var(--duration-fast) var(--ease-snappy) both;
-}
-
 .pulse-dot {
   animation: pulseLiveDot 2.4s infinite ease-in-out;
+}
+
+/* General Fade In Utility */
+@keyframes quickFadeIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: quickFadeIn var(--duration-fast) var(--ease-snappy) both;
 }
 
 /* Smooth Theme Switching Transition Class */
@@ -54,17 +304,44 @@ html.theme-transition *::after {
   transition: background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease !important;
 }
 
-/* Tactile Button Press — Physical 1px mechanical depression */
-button:active, .btn:active, .qa-card-btn:active {
-  transform: translateY(1px) !important;
+/* Institutional Restrained Skeleton Loading Shimmer */
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
-/* Accessibility Strict Compliance */
+.skeleton-loading {
+  background: linear-gradient(90deg, var(--bg-surface-elevated) 25%, var(--bg-surface-hover) 50%, var(--bg-surface-elevated) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s infinite ease-in-out;
+  border-radius: var(--radius-xs);
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility: Strict Compliance with prefers-reduced-motion
+   Replaces spatial translation/scaling with immediate opacity/color updates
+   -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .modal-backdrop.open .modal-dialog,
+  .modal-backdrop.open .modal,
+  .toast,
+  .toast-icon-wrap,
+  .trend-bar-animated,
+  .badge-state-pop,
+  .pulse-dot,
+  .input-error-shake {
+    transform: none !important;
+    animation: none !important;
   }
 }

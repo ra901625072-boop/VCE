@@ -5,6 +5,8 @@
 import { api, formatINR, formatDate, rupeesToPaise } from './api.js';
 import { notify } from '../components/notification.js';
 import { EmptyState } from '../components/empty_state.js';
+import { closeModalAnimated } from '../components/modal.js';
+import { shakeInput, animateRowRemoval } from './animations.js';
 
 let activeType = 'all';
 let currentTransactions = [];
@@ -153,7 +155,7 @@ function renderTransactionsTable(records) {
       const methodClass = `badge-${r.method.toLowerCase().replace(' ', '-')}`;
 
       return `
-        <tr>
+        <tr data-trans-id="${r.id}" data-raw-type="${r.rawType}">
           <td>
             <div style="font-weight:500; color:var(--text-main); font-size:0.825rem;">${formatDate(r.date)}</div>
             <div style="font-size:0.725rem; color:var(--text-dim); font-family:var(--font-mono);">${r.time || ''}</div>
@@ -194,7 +196,7 @@ function renderTransactionsTable(records) {
       const methodClass = `badge-${r.method.toLowerCase().replace(' ', '-')}`;
 
       return `
-        <div class="mobile-card" style="padding:0.75rem 0.85rem;">
+        <div class="mobile-card" data-trans-id="${r.id}" data-raw-type="${r.rawType}" style="padding:0.75rem 0.85rem;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem;">
             <div style="display:flex; gap:0.55rem; align-items:center; flex:1;">
               <div class="avatar-chip" style="width:28px; height:28px; font-size:0.75rem;">${initials}</div>
@@ -393,8 +395,7 @@ async function openEditTransactionModal(id, rawType) {
   document.body.appendChild(modalBackdrop);
 
   const closeEditModal = () => {
-    modalBackdrop.remove();
-    document.body.style.overflow = '';
+    closeModalAnimated(modalBackdrop, () => modalBackdrop.remove());
   };
 
   document.getElementById('btn-close-edit-trans-modal').addEventListener('click', closeEditModal);
@@ -406,6 +407,10 @@ async function openEditTransactionModal(id, rawType) {
   document.getElementById('edit-trans-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const amtRupees = Number(document.getElementById('edit-trans-amt').value) || 0;
+    if (amtRupees <= 0) {
+      shakeInput(document.getElementById('edit-trans-amt'));
+      return;
+    }
 
     try {
       if (rawType === 'payment') {
@@ -420,8 +425,13 @@ async function openEditTransactionModal(id, rawType) {
         await api.put(`/payments/${id}`, payload);
         notify.success('Payment updated successfully!');
       } else {
+        const titleEl = document.getElementById('edit-trans-title');
+        if (titleEl && !titleEl.value.trim()) {
+          shakeInput(titleEl);
+          return;
+        }
         const payload = {
-          title: document.getElementById('edit-trans-title').value.trim(),
+          title: titleEl ? titleEl.value.trim() : 'Expense',
           vendor: document.getElementById('edit-trans-vendor').value.trim() || null,
           amount: rupeesToPaise(amtRupees),
           payment_method: document.getElementById('edit-trans-method').value,
@@ -456,7 +466,15 @@ async function deleteTransaction(id, rawType) {
       await api.delete(`/expenses/${id}`);
     }
     notify.success('Record deleted successfully.');
-    loadTransactions();
+    const rowEl = document.querySelector(`tr[data-trans-id="${id}"][data-raw-type="${rawType}"]`) ||
+                  document.querySelector(`.mobile-card[data-trans-id="${id}"][data-raw-type="${rawType}"]`);
+    if (rowEl) {
+      animateRowRemoval(rowEl, () => {
+        loadTransactions();
+      });
+    } else {
+      loadTransactions();
+    }
   } catch (err) {
     notify.error('Failed to delete record: ' + err.message);
   }

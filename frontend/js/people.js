@@ -3,6 +3,8 @@
  */
 import { api, formatINR, formatDate } from './api.js';
 import { notify } from '../components/notification.js';
+import { closeModalAnimated } from '../components/modal.js';
+import { shakeInput, animateRowRemoval } from './animations.js';
 
 let allCitizens = [];
 
@@ -22,9 +24,8 @@ function initPeoplePage() {
   // Close modals
   document.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.modal-backdrop').forEach(m => {
-        m.classList.remove('active');
-        m.classList.remove('open');
+      document.querySelectorAll('.modal-backdrop.open, .modal-backdrop.active').forEach(m => {
+        closeModalAnimated(m);
       });
     });
   });
@@ -32,8 +33,7 @@ function initPeoplePage() {
   const detailModal = document.getElementById('modal-person-detail');
   detailModal?.addEventListener('click', (e) => {
     if (e.target === detailModal) {
-      detailModal.classList.remove('active');
-      detailModal.classList.remove('open');
+      closeModalAnimated(detailModal);
     }
   });
 
@@ -99,7 +99,7 @@ function renderPeopleTable(people) {
       const isFarmer = (p.citizen_type || '').toLowerCase().includes('farmer');
 
       return `
-        <tr>
+        <tr data-person-id="${p.id}">
           <td>
             <div style="font-weight:600; color:var(--text-main); font-size:0.9rem;">${escapeHtml(p.name)}</div>
             <span class="badge ${isFarmer ? 'badge-completed' : 'badge-waiting'}" style="font-size:0.675rem; margin-top:0.2rem;">
@@ -158,7 +158,7 @@ function renderPeopleTable(people) {
       const isFarmer = (p.citizen_type || '').toLowerCase().includes('farmer');
 
       return `
-        <div class="mobile-card">
+        <div class="mobile-card" data-person-id="${p.id}">
           <div class="mobile-card-header">
             <div class="mobile-card-title-group">
               <div class="mobile-card-title">${escapeHtml(p.name)}</div>
@@ -439,8 +439,7 @@ async function openEditPersonModal(personId) {
   document.body.appendChild(modalBackdrop);
 
   const closeEditModal = () => {
-    modalBackdrop.remove();
-    document.body.style.overflow = '';
+    closeModalAnimated(modalBackdrop, () => modalBackdrop.remove());
   };
 
   document.getElementById('btn-close-edit-p-modal').addEventListener('click', closeEditModal);
@@ -451,8 +450,13 @@ async function openEditPersonModal(personId) {
 
   document.getElementById('edit-person-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const nameEl = document.getElementById('edit-p-name');
+    if (!nameEl.value.trim()) {
+      shakeInput(nameEl);
+      return;
+    }
     const payload = {
-      name: document.getElementById('edit-p-name').value.trim(),
+      name: nameEl.value.trim(),
       phone: document.getElementById('edit-p-phone').value.trim(),
       citizen_type: document.getElementById('edit-p-type').value,
       village: document.getElementById('edit-p-village').value.trim(),
@@ -491,10 +495,17 @@ async function deletePerson(personId) {
     notify.success(`Citizen "${name}" removed successfully.`);
     const detailModal = document.getElementById('modal-person-detail');
     if (detailModal) {
-      detailModal.classList.remove('open');
-      detailModal.classList.remove('active');
+      closeModalAnimated(detailModal);
     }
-    loadPeople();
+    const rowEl = document.querySelector(`tr[data-person-id="${personId}"]`) ||
+                  document.querySelector(`.mobile-card[data-person-id="${personId}"]`);
+    if (rowEl) {
+      animateRowRemoval(rowEl, () => {
+        loadPeople();
+      });
+    } else {
+      loadPeople();
+    }
   } catch (err) {
     notify.error('Failed to remove citizen: ' + err.message);
   }
@@ -583,14 +594,19 @@ function openAddPersonModal() {
 
   document.getElementById('add-person-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const nameEl = document.getElementById('input-p-name');
+    if (!nameEl.value.trim()) {
+      shakeInput(nameEl);
+      return;
+    }
     const payload = {
-      name: document.getElementById('input-p-name').value.trim(),
-      phone: document.getElementById('input-p-phone').value.trim(),
+      name: nameEl.value.trim(),
+      phone: document.getElementById('input-p-phone').value.trim() || null,
+      village: document.getElementById('input-p-village').value.trim() || '',
       citizen_type: document.getElementById('input-p-type').value,
-      village: document.getElementById('input-p-village').value.trim(),
-      khata_no: document.getElementById('input-p-khata').value.trim(),
-      ration_card_no: document.getElementById('input-p-ration').value.trim(),
-      aadhaar_last4: document.getElementById('input-p-aadhaar').value.trim(),
+      khata_no: document.getElementById('input-p-khata').value.trim() || '',
+      ration_card_no: document.getElementById('input-p-ration').value.trim() || '',
+      aadhaar_last4: document.getElementById('input-p-aadhaar').value.trim() || '',
       notes: document.getElementById('input-p-notes').value.trim()
     };
 
@@ -600,15 +616,18 @@ function openAddPersonModal() {
       notify.success('Citizen registered successfully!');
       loadPeople();
     } catch (err) {
-      alert('Error creating citizen: ' + err.message);
+      notify.error('Error creating citizen: ' + err.message);
     }
   });
 }
 
 function closePersonModal() {
   const modal = document.getElementById('modal-add-person-page');
-  if (modal) modal.remove();
-  document.body.style.overflow = '';
+  if (modal) {
+    closeModalAnimated(modal, () => modal.remove());
+  } else {
+    document.body.style.overflow = '';
+  }
 }
 
 function debounce(func, wait) {

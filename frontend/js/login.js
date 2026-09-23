@@ -3,6 +3,7 @@
  * Handles credential submission, 8-hour shift initialization, and password visibility.
  */
 import { auth } from './auth.js';
+import { shakeInput } from './animations.js';
 
 class LoginController {
   constructor() {
@@ -132,12 +133,12 @@ class LoginController {
 
     if (!username) {
       this.showAlert('Please enter your Operator ID / Username.', 'error');
-      this.usernameInput.focus();
+      shakeInput(this.usernameInput);
       return;
     }
     if (!password) {
       this.showAlert('Please enter your password.', 'error');
-      this.passwordInput.focus();
+      shakeInput(this.passwordInput);
       return;
     }
 
@@ -162,6 +163,7 @@ class LoginController {
     } catch (err) {
       this.setLoading(false);
       this.showAlert(err.message || 'Login failed. Please check your credentials.', 'error');
+      shakeInput(this.passwordInput);
       this.passwordInput.value = '';
       this.passwordInput.focus();
     }

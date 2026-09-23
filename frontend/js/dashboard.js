@@ -2,7 +2,7 @@
  * Dashboard Page Logic — VCE Pali e-Gram Center & Financial Ledger
  */
 import { api, vceApi, formatINR, formatDate, getTodayDateStr, rupeesToPaise } from './api.js';
-import { animateNumber } from './animations.js';
+import { animateNumber, flashMetric, animateProgressBar } from './animations.js';
 
 let currentPreset = 'this_month';
 let customStart = null;
@@ -51,10 +51,23 @@ function renderPanchayatHeader(profile) {
 }
 
 function renderMetrics(m) {
-  animateNumber(document.getElementById('val-today-revenue'), m.today_revenue);
-  animateNumber(document.getElementById('val-today-expenses'), m.today_expenses);
-  animateNumber(document.getElementById('val-today-profit'), m.today_profit);
-  animateNumber(document.getElementById('val-pending-udhar'), m.total_pending_udhar);
+  const revEl = document.getElementById('val-today-revenue');
+  const expEl = document.getElementById('val-today-expenses');
+  const profEl = document.getElementById('val-today-profit');
+  const udharEl = document.getElementById('val-pending-udhar');
+
+  animateNumber(revEl, m.today_revenue, 200, () => {
+    if (m.today_revenue > 0) flashMetric(revEl, 'revenue');
+  });
+  animateNumber(expEl, m.today_expenses, 200, () => {
+    if (m.today_expenses > 0) flashMetric(expEl, 'expense');
+  });
+  animateNumber(profEl, m.today_profit, 200, () => {
+    if (m.today_profit !== 0) flashMetric(profEl, m.today_profit > 0 ? 'revenue' : 'expense');
+  });
+  animateNumber(udharEl, m.total_pending_udhar, 200, () => {
+    if (m.total_pending_udhar > 0) flashMetric(udharEl, 'pending');
+  });
 
   // Cash vs UPI subtext
   const cashSub = document.getElementById('sub-dash-cash');
@@ -160,13 +173,17 @@ function renderPendingDeptOrders(orders, totalPending) {
               <span>${completed}/${target} units (${pct}%)</span>
             </div>
             <div style="width:100%; height:4px; background:var(--border-default); border-radius:2px; overflow:hidden;">
-              <div style="width:${pct}%; height:100%; background:#f59e0b;"></div>
+              <div class="dept-progress-bar" data-pct="${pct}" style="width:0%; height:100%; background:#f59e0b;"></div>
             </div>
           </div>
         `;
       }).join('')}
     </div>
   `;
+
+  container.querySelectorAll('.dept-progress-bar').forEach(bar => {
+    animateProgressBar(bar, parseFloat(bar.dataset.pct || 0));
+  });
 }
 
 function renderTrendBars(trendPoints) {
@@ -198,8 +215,8 @@ function renderTrendBars(trendPoints) {
     return `
       <div style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="${dateLabel}&#10;Inflow (આવક): ${revFormatted}&#10;Outflow (જાવક): ${expFormatted}">
         <div style="display:flex; gap:4px; align-items:flex-end; height:160px; width:100%; justify-content:center;">
-          <div style="width:14px; max-width:42%; height:${revH}px; background:var(--revenue); border-radius:2px 2px 0 0; transition:height 0.2s ease;"></div>
-          <div style="width:14px; max-width:42%; height:${expH}px; background:var(--expense); border-radius:2px 2px 0 0; transition:height 0.2s ease;"></div>
+          <div class="trend-bar-animated" style="width:14px; max-width:42%; height:${revH}px; background:var(--revenue); border-radius:2px 2px 0 0;"></div>
+          <div class="trend-bar-animated" style="width:14px; max-width:42%; height:${expH}px; background:var(--expense); border-radius:2px 2px 0 0;"></div>
         </div>
       </div>
     `;
@@ -233,12 +250,16 @@ function renderExpenseBreakdown(categories) {
             <span class="font-tabular" style="font-weight:600;">${formatINR(cat.amount)} <span style="color:var(--text-dim); font-size:0.75rem;">(${cat.percentage}%)</span></span>
           </div>
           <div style="width:100%; height:5px; background:var(--border-default); border-radius:3px; overflow:hidden;">
-            <div style="width:${cat.percentage}%; height:100%; background:#ef4444;"></div>
+            <div class="expense-progress-bar" data-pct="${cat.percentage}" style="width:0%; height:100%; background:#ef4444;"></div>
           </div>
         </div>
       `).join('')}
     </div>
   `;
+
+  container.querySelectorAll('.expense-progress-bar').forEach(bar => {
+    animateProgressBar(bar, parseFloat(bar.dataset.pct || 0));
+  });
 }
 
 function renderTodayWorkTable(workList) {

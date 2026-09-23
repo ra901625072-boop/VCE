@@ -4,6 +4,8 @@
 import { vceApi, formatINR, getTodayDateStr, rupeesToPaise } from './api.js';
 import { notify } from '../components/notification.js';
 import { auth } from './auth.js';
+import { closeModalAnimated } from '../components/modal.js';
+import { shakeInput } from './animations.js';
 
 let currentDate = getTodayDateStr();
 let currentRojmelData = null;
@@ -381,7 +383,12 @@ function openRemittanceModal() {
 
   document.getElementById('form-remittance')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const rupees = document.getElementById('remit-amount').value;
+    const remitAmtEl = document.getElementById('remit-amount');
+    const rupees = remitAmtEl ? remitAmtEl.value : '0';
+    if (parseFloat(rupees || '0') <= 0) {
+      if (remitAmtEl) shakeInput(remitAmtEl);
+      return;
+    }
     const method = document.getElementById('remit-method').value;
     const date = document.getElementById('remit-date').value;
     const rcpt = document.getElementById('remit-receipt-no').value.trim();
@@ -407,7 +414,7 @@ function openRemittanceModal() {
 
 function closeRemittanceModal() {
   const backdrop = document.getElementById('modal-remit-backdrop');
-  if (backdrop) backdrop.remove();
+  if (backdrop) closeModalAnimated(backdrop, () => backdrop.remove());
 }
 
 // ---------------------------------------------------------------------------
@@ -559,7 +566,7 @@ function openDayCloseModal() {
 
 function closeDayCloseModal() {
   const backdrop = document.getElementById('modal-close-backdrop');
-  if (backdrop) backdrop.remove();
+  if (backdrop) closeModalAnimated(backdrop, () => backdrop.remove());
 }
 
 function escapeHtml(str) {
