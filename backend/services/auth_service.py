@@ -16,7 +16,7 @@ class AuthService:
         with get_db() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT id, username, password_hash, salt, full_name, role, is_active FROM users WHERE username = ?",
+                "SELECT id, username, password_hash, salt, full_name, role, is_active FROM users WHERE LOWER(username) = LOWER(?)",
                 (username,)
             )
             row = cursor.fetchone()
@@ -79,7 +79,7 @@ class AuthService:
         with get_db() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT id, username, full_name, role, is_active FROM users WHERE username = ?",
+                "SELECT id, username, full_name, role, is_active FROM users WHERE LOWER(username) = LOWER(?)",
                 (username,)
             )
             row = cursor.fetchone()

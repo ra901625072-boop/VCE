@@ -345,7 +345,7 @@ def init_postgres(conn, now: str) -> None:
     from backend.core.security import hash_password
     default_op_id = getattr(settings, "DEFAULT_OPERATOR_ID", "akrajput2005")
     default_op_pass = getattr(settings, "DEFAULT_OPERATOR_PASS", "Akshay@05")
-    existing_user = conn.execute("SELECT id FROM users WHERE username = ?", (default_op_id,)).fetchone()
+    existing_user = conn.execute("SELECT id, password_hash, salt FROM users WHERE LOWER(username) = LOWER(?)", (default_op_id,)).fetchone()
     if not existing_user:
         hashed_pw, salt = hash_password(default_op_pass)
         conn.execute(
@@ -353,6 +353,17 @@ def init_postgres(conn, now: str) -> None:
                VALUES (?, ?, ?, ?, ?, 1, ?) ON CONFLICT (username) DO NOTHING""",
             (default_op_id, hashed_pw, salt, "Akshay Rajput", "VCE Operator", now)
         )
+    else:
+        # Auto-heal corrupted tuple string or bad hash format if present
+        raw_hash = existing_user.get("password_hash", "")
+        raw_salt = existing_user.get("salt", "")
+        if raw_hash.startswith("(") or "," in raw_hash or raw_salt.startswith("("):
+            clean_hash = raw_hash.strip("()\"' ").split(",")[0].strip("\"' ")
+            clean_salt = raw_salt.strip("()\"' ").split(",")[-1].strip("\"' ")
+            conn.execute(
+                "UPDATE users SET password_hash = ?, salt = ? WHERE id = ?",
+                (clean_hash, clean_salt, existing_user["id"])
+            )
 
     default_methods = [
         ("Online", 1, 1),

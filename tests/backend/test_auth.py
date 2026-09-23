@@ -74,3 +74,26 @@ def test_logout_endpoint(client):
     res = client.post("/api/auth/logout")
     assert res.status_code == 200
     assert res.json()["status"] == "ok"
+
+
+def test_login_case_insensitive_username(client):
+    """Test that username is case-insensitive (e.g. Akrajput2005 or AKRAJPUT2005)."""
+    for variant in ["Akrajput2005", "AKRAJPUT2005", "  akrajput2005  "]:
+        res = client.post("/api/auth/login", json={
+            "username": variant,
+            "password": "Akshay@05"
+        })
+        assert res.status_code == 200, f"Failed for variant {variant}: {res.text}"
+        data = res.json()
+        assert data["user"]["username"] == "akrajput2005"
+
+
+def test_verify_password_resilience():
+    """Test verify_password handles tuple-string format gracefully."""
+    from backend.core.security import hash_password, verify_password
+    h, s = hash_password("Akshay@05")
+    assert verify_password("Akshay@05", h, s) is True
+    # Corrupted tuple string representation
+    tuple_str = f"({h},{s})"
+    assert verify_password("Akshay@05", tuple_str, s) is True
+

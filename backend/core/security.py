@@ -31,13 +31,21 @@ def hash_password(password: str, salt: Optional[str] = None) -> tuple[str, str]:
 
 def verify_password(plain_password: str, hashed_password: str, salt: str) -> bool:
     """Verifies a plain password against the stored hash and salt."""
+    clean_hash = hashed_password.strip("()\"' ")
+    if "," in clean_hash:
+        clean_hash = clean_hash.split(",")[0].strip("\"' ")
+
+    clean_salt = salt.strip("()\"' ")
+    if "," in clean_salt:
+        clean_salt = clean_salt.split(",")[-1].strip("\"' ")
+
     hashed_attempt = hashlib.pbkdf2_hmac(
         "sha256",
         plain_password.encode("utf-8"),
-        salt.encode("utf-8"),
+        clean_salt.encode("utf-8"),
         100_000
     ).hex()
-    return hmac.compare_digest(hashed_attempt, hashed_password)
+    return hmac.compare_digest(hashed_attempt, clean_hash)
 
 
 def create_access_token(
