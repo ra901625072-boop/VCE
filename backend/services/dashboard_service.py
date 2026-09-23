@@ -70,7 +70,7 @@ class DashboardService:
                 SELECT COUNT(*) AS c 
                 FROM work 
                 WHERE is_archived = 0 
-                  AND (deadline = ? OR start_date = ? OR (status NOT IN ('Completed', 'Cancelled') AND created_at LIKE ?))
+                  AND (deadline = ? OR start_date = ? OR (status NOT IN ('Completed', 'Completed / Delivered', 'Cancelled', 'Cancelled / Rejected') AND created_at LIKE ?))
                 """,
                 (today, today, f"{today}%")
             ).fetchone()
@@ -104,7 +104,7 @@ class DashboardService:
             period_profit = period_revenue - period_expenses
 
             # Expected Profit = (Total Agreed Work Value in period) - (Period Expenses)
-            period_work_sql = "SELECT COALESCE(SUM(agreed_amount), 0) AS agreed FROM work WHERE is_archived = 0 AND status != 'Cancelled'"
+            period_work_sql = "SELECT COALESCE(SUM(agreed_amount), 0) AS agreed FROM work WHERE is_archived = 0 AND status NOT IN ('Cancelled', 'Cancelled / Rejected')"
             work_params = []
             if resolved_start:
                 period_work_sql += " AND (start_date >= ? OR created_at >= ?)"
@@ -132,7 +132,7 @@ class DashboardService:
                 WHERE payment_status = 'received' AND LOWER(payment_method) != 'udhar'
                 GROUP BY work_id
             ) paid ON paid.work_id = w.id
-            WHERE w.is_archived = 0 AND w.status != 'Cancelled';
+            WHERE w.is_archived = 0 AND w.status NOT IN ('Cancelled', 'Cancelled / Rejected');
             """
             work_pending_udhar = conn.execute(outstanding_sql).fetchone()["total_pending"]
             direct_udhar_row = conn.execute(
@@ -145,8 +145,8 @@ class DashboardService:
             work_counts = conn.execute(
                 """
                 SELECT 
-                    SUM(CASE WHEN status NOT IN ('Completed', 'Cancelled') THEN 1 ELSE 0 END) AS active_c,
-                    SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_c
+                    SUM(CASE WHEN status NOT IN ('Completed', 'Completed / Delivered', 'Cancelled', 'Cancelled / Rejected') THEN 1 ELSE 0 END) AS active_c,
+                    SUM(CASE WHEN status IN ('Completed', 'Completed / Delivered') THEN 1 ELSE 0 END) AS completed_c
                 FROM work
                 WHERE is_archived = 0
                 """
@@ -255,7 +255,7 @@ class DashboardService:
                 FROM work w
                 JOIN people p ON w.person_id = p.id
                 WHERE w.is_archived = 0 
-                  AND (w.deadline = ? OR w.start_date = ? OR (w.status NOT IN ('Completed', 'Cancelled') AND w.created_at LIKE ?))
+                  AND (w.deadline = ? OR w.start_date = ? OR (w.status NOT IN ('Completed', 'Completed / Delivered', 'Cancelled', 'Cancelled / Rejected') AND w.created_at LIKE ?))
                 ORDER BY w.deadline ASC
                 LIMIT 5
                 """,
@@ -269,7 +269,7 @@ class DashboardService:
                 FROM work w
                 JOIN people p ON w.person_id = p.id
                 WHERE w.is_archived = 0 
-                  AND w.status NOT IN ('Completed', 'Cancelled')
+                  AND w.status NOT IN ('Completed', 'Completed / Delivered', 'Cancelled', 'Cancelled / Rejected')
                   AND w.deadline >= ?
                 ORDER BY w.deadline ASC
                 LIMIT 5
@@ -343,7 +343,18 @@ class DashboardService:
                 dept_disb_sql += " AND disbursement_date <= ?"
                 dept_params.append(resolved_end)
             period_dept_received = conn.execute(dept_disb_sql, dept_params).fetchone()["total"]
-            net_commission_revenue = period_commission + period_dept_received
+
+            direct_comm_sql = "SELECT COALESCE(SUM(amount), 0) AS total FROM payments WHERE work_id IS NULL AND payment_status = 'received' AND LOWER(payment_method) != 'udhar'"
+            direct_comm_params = []
+            if resolved_start:
+                direct_comm_sql += " AND payment_date >= ?"
+                direct_comm_params.append(resolved_start)
+            if resolved_end:
+                direct_comm_sql += " AND payment_date <= ?"
+                direct_comm_params.append(resolved_end)
+            period_direct_commission = conn.execute(direct_comm_sql, direct_comm_params).fetchone()["total"]
+
+            net_commission_revenue = period_commission + period_dept_received + period_direct_commission
 
             prof_row = conn.execute("SELECT * FROM panchayat_profile WHERE id = 1").fetchone()
             panchayat_profile = dict(prof_row) if prof_row else None

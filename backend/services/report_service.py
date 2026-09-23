@@ -84,19 +84,50 @@ class ReportService:
                 sql = """
                 SELECT 
                     p.id, p.name, p.phone, p.company,
-                    COUNT(DISTINCT w.id) AS work_count,
-                    COALESCE(SUM(DISTINCT CASE WHEN w.status != 'Cancelled' THEN w.agreed_amount ELSE 0 END), 0) AS total_agreed,
-                    COALESCE(SUM(CASE WHEN pay.payment_status = 'received' AND LOWER(pay.payment_method) != 'udhar' THEN pay.amount ELSE 0 END), 0) AS total_received
+                    COALESCE(w_sub.work_count, 0) AS work_count,
+                    COALESCE(w_sub.work_agreed, 0) AS work_agreed,
+                    COALESCE(pay_sub.total_received, 0) AS total_received,
+                    COALESCE(pay_sub.direct_udhar, 0) AS direct_udhar,
+                    COALESCE(pay_sub.direct_received, 0) AS direct_received
                 FROM people p
-                LEFT JOIN work w ON w.person_id = p.id AND w.is_archived = 0
-                LEFT JOIN payments pay ON pay.person_id = p.id
+                LEFT JOIN (
+                    SELECT 
+                        person_id,
+                        COUNT(id) AS work_count,
+                        COALESCE(SUM(CASE WHEN status NOT IN ('Cancelled', 'Cancelled / Rejected') THEN agreed_amount ELSE 0 END), 0) AS work_agreed
+                    FROM work
+                    WHERE is_archived = 0
+                    GROUP BY person_id
+                ) w_sub ON w_sub.person_id = p.id
+                LEFT JOIN (
+                    SELECT 
+                        person_id,
+                        COALESCE(SUM(CASE WHEN payment_status = 'received' AND LOWER(payment_method) != 'udhar' THEN amount ELSE 0 END), 0) AS total_received,
+                        COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'udhar' AND work_id IS NULL THEN amount ELSE 0 END), 0) AS direct_udhar,
+                        COALESCE(SUM(CASE WHEN payment_status = 'received' AND LOWER(payment_method) != 'udhar' AND work_id IS NULL THEN amount ELSE 0 END), 0) AS direct_received
+                    FROM payments
+                    GROUP BY person_id
+                ) pay_sub ON pay_sub.person_id = p.id
                 WHERE p.is_archived = 0
-                GROUP BY p.id
-                ORDER BY total_agreed DESC
+                ORDER BY (COALESCE(w_sub.work_agreed, 0) + COALESCE(pay_sub.direct_udhar, 0) + COALESCE(pay_sub.direct_received, 0)) DESC
                 """
-                rows = conn.execute(sql).fetchall()
-                for r in rows:
-                    r["total_pending"] = max(0, r["total_agreed"] - r["total_received"])
+                raw_rows = conn.execute(sql).fetchall()
+                rows = []
+                for r in raw_rows:
+                    rd = dict(r)
+                    work_agreed = rd.pop("work_agreed", 0) or 0
+                    direct_udhar = rd.pop("direct_udhar", 0) or 0
+                    direct_received = rd.pop("direct_received", 0) or 0
+                    total_received = rd.get("total_received", 0) or 0
+
+                    total_agreed = work_agreed + direct_udhar + direct_received
+                    work_received = total_received - direct_received
+                    work_pending = max(0, work_agreed - work_received)
+                    total_pending = work_pending + direct_udhar
+
+                    rd["total_agreed"] = total_agreed
+                    rd["total_pending"] = total_pending
+                    rows.append(rd)
                 return {
                     "report_type": report_type,
                     "title": "Person-Wise Financial Summary",
@@ -140,14 +171,32 @@ class ReportService:
                 FROM work w
                 JOIN people p ON w.person_id = p.id
                 LEFT JOIN payments pay ON pay.work_id = w.id
-                WHERE w.is_archived = 0 AND w.status != 'Cancelled'
+                WHERE w.is_archived = 0 AND w.status NOT IN ('Cancelled', 'Cancelled / Rejected')
                 GROUP BY w.id, p.id
                 HAVING (w.agreed_amount - COALESCE(SUM(CASE WHEN pay.payment_status = 'received' AND LOWER(pay.payment_method) != 'udhar' THEN pay.amount ELSE 0 END), 0)) > 0
                 ORDER BY (w.agreed_amount - COALESCE(SUM(CASE WHEN pay.payment_status = 'received' AND LOWER(pay.payment_method) != 'udhar' THEN pay.amount ELSE 0 END), 0)) DESC
                 """
-                rows = conn.execute(sql).fetchall()
-                for r in rows:
-                    r["pending_amount"] = r["agreed_amount"] - r["received_amount"]
+                raw_rows = conn.execute(sql).fetchall()
+                rows = []
+                for r in raw_rows:
+                    rd = dict(r)
+                    rd["pending_amount"] = rd["agreed_amount"] - rd["received_amount"]
+                    rows.append(rd)
+
+                # Direct Udhar (work_id IS NULL)
+                direct_udhar_sql = """
+                SELECT 
+                    p.id, 'Direct Citizen Udhar / Service' AS title, per.name AS person_name, per.phone AS person_phone,
+                    p.amount AS agreed_amount, 0 AS received_amount, p.amount AS pending_amount
+                FROM payments p
+                JOIN people per ON p.person_id = per.id
+                WHERE LOWER(p.payment_method) = 'udhar' AND p.work_id IS NULL
+                ORDER BY p.payment_date DESC
+                """
+                direct_rows = conn.execute(direct_udhar_sql).fetchall()
+                for dr in direct_rows:
+                    rows.append(dict(dr))
+
                 total_pending = sum(r["pending_amount"] for r in rows)
                 return {
                     "report_type": report_type,
@@ -209,7 +258,7 @@ class ReportService:
                 sql = """
                 SELECT payment_method, COUNT(id) AS transaction_count, SUM(amount) AS total_amount
                 FROM payments
-                WHERE 1=1
+                WHERE payment_status = 'received'
                 """
                 params = []
                 if start_d:
@@ -250,9 +299,12 @@ class ReportService:
                     SELECT COALESCE(SUM(w.agreed_amount - COALESCE(p.paid, 0)), 0) AS s
                     FROM work w
                     LEFT JOIN (SELECT work_id, SUM(amount) AS paid FROM payments WHERE payment_status = 'received' AND LOWER(payment_method) != 'udhar' GROUP BY work_id) p ON p.work_id = w.id
-                    WHERE w.is_archived = 0 AND w.status != 'Cancelled' AND (w.agreed_amount - COALESCE(p.paid, 0)) > 0
+                    WHERE w.is_archived = 0 AND w.status NOT IN ('Cancelled', 'Cancelled / Rejected') AND (w.agreed_amount - COALESCE(p.paid, 0)) > 0
                 """).fetchone()["s"]
-                accounts_receivable = udhar_row
+                direct_udhar_val = conn.execute(
+                    "SELECT COALESCE(SUM(amount), 0) AS s FROM payments WHERE LOWER(payment_method) = 'udhar' AND work_id IS NULL"
+                ).fetchone()["s"]
+                accounts_receivable = udhar_row + direct_udhar_val
 
                 accrued_dept = conn.execute("SELECT COALESCE(SUM(total_claim_amount - amount_received - COALESCE(tds_deducted, 0) - COALESCE(disallowed_amount, 0)), 0) AS s FROM dept_work_orders WHERE claim_status != 'Disbursed'").fetchone()["s"]
                 tds_receivable = conn.execute("SELECT COALESCE(SUM(tds_deducted), 0) AS s FROM dept_work_orders").fetchone()["s"]
@@ -291,7 +343,7 @@ class ReportService:
                 }
 
             elif report_type == "accrual_pnl":
-                # Revenue: Commissions earned on completed work + Govt Claims
+                # Revenue: Commissions earned on completed work + Direct Counter Services + Govt Claims
                 comm_sql = "SELECT COALESCE(SUM(vce_commission), 0) AS s FROM work WHERE is_archived = 0 AND status IN ('Completed', 'Completed / Delivered')"
                 comm_params = []
                 if start_d:
@@ -312,7 +364,17 @@ class ReportService:
                     dept_params.append(end_d)
                 dept_rev = conn.execute(dept_sql, dept_params).fetchone()["s"]
 
-                total_operating_revenue = vce_comm + dept_rev
+                direct_sql = "SELECT COALESCE(SUM(amount), 0) AS s FROM payments WHERE work_id IS NULL AND payment_status = 'received' AND LOWER(payment_method) != 'udhar'"
+                direct_params = []
+                if start_d:
+                    direct_sql += " AND payment_date >= ?"
+                    direct_params.append(start_d)
+                if end_d:
+                    direct_sql += " AND payment_date <= ?"
+                    direct_params.append(end_d)
+                direct_rev = conn.execute(direct_sql, direct_params).fetchone()["s"]
+
+                total_operating_revenue = vce_comm + dept_rev + direct_rev
 
                 # Expenses in period
                 exp_sql = "SELECT COALESCE(SUM(amount), 0) AS s FROM expenses WHERE is_archived = 0"
@@ -330,6 +392,7 @@ class ReportService:
 
                 rows = [
                     {"component": "Operating Revenue", "detail": "e-Gram Service Commissions (AnyRoR, Digital Gujarat)", "amount": vce_comm},
+                    {"component": "Operating Revenue", "detail": "Direct Counter Walk-in Service Fees", "amount": direct_rev},
                     {"component": "Operating Revenue", "detail": "State Dept ₹20/Unit Survey Work Claims Disbursed", "amount": dept_rev},
                     {"component": "Operating Expense", "detail": "Center Consumables & Operational Expenses", "amount": total_exp},
                     {"component": "Net Operating Surplus", "detail": "Net Operating Profit Before Tax", "amount": net_operating_profit},

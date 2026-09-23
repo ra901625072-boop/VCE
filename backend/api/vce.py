@@ -348,8 +348,11 @@ def create_portal_wallet(payload: PortalWalletCreate):
             d = dict(row)
             d["is_low_balance"] = d["current_balance"] <= d["min_alert_balance"]
             return d
-        except sqlite3.IntegrityError:
-            raise HTTPException(status_code=400, detail="Wallet with this name already exists")
+        except Exception as e:
+            err_msg = str(e).lower()
+            if "unique" in err_msg or "duplicate" in err_msg or "integrity" in err_msg or "already exists" in err_msg:
+                raise HTTPException(status_code=400, detail="Wallet with this name already exists")
+            raise e
 
 
 @router.post("/wallets/{wallet_id}/topup", response_model=PortalWalletResponse)

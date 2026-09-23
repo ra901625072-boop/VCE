@@ -45,14 +45,14 @@ def get_person_financial_summary(conn: sqlite3.Connection, person_id: int) -> Di
     work_query = """
     SELECT 
         COUNT(id) AS work_count,
-        COALESCE(SUM(CASE WHEN status != 'Cancelled' THEN agreed_amount ELSE 0 END), 0) AS total_agreed,
-        COALESCE(SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END), 0) AS completed_work_count,
-        COALESCE(SUM(CASE WHEN status NOT IN ('Completed', 'Cancelled') THEN 1 ELSE 0 END), 0) AS active_work_count
+        COALESCE(SUM(CASE WHEN status NOT IN ('Cancelled', 'Cancelled / Rejected') THEN agreed_amount ELSE 0 END), 0) AS total_agreed,
+        COALESCE(SUM(CASE WHEN status IN ('Completed', 'Completed / Delivered') THEN 1 ELSE 0 END), 0) AS completed_work_count,
+        COALESCE(SUM(CASE WHEN status NOT IN ('Completed', 'Completed / Delivered', 'Cancelled', 'Cancelled / Rejected') THEN 1 ELSE 0 END), 0) AS active_work_count
     FROM work
     WHERE person_id = ? AND is_archived = 0;
     """
     w_row = conn.execute(work_query, (person_id,)).fetchone() or {}
-    total_agreed = int(w_row.get("total_agreed") or 0)
+    work_agreed = int(w_row.get("total_agreed") or 0)
     work_count = int(w_row.get("work_count") or 0)
     active_work_count = int(w_row.get("active_work_count") or 0)
     completed_work_count = int(w_row.get("completed_work_count") or 0)
@@ -61,6 +61,7 @@ def get_person_financial_summary(conn: sqlite3.Connection, person_id: int) -> Di
     SELECT 
         COALESCE(SUM(CASE WHEN payment_status = 'received' AND LOWER(payment_method) != 'udhar' THEN amount ELSE 0 END), 0) AS total_received,
         COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'udhar' AND work_id IS NULL THEN amount ELSE 0 END), 0) AS direct_udhar,
+        COALESCE(SUM(CASE WHEN payment_status = 'received' AND LOWER(payment_method) != 'udhar' AND work_id IS NULL THEN amount ELSE 0 END), 0) AS direct_received,
         MAX(payment_date) AS last_payment_date
     FROM payments
     WHERE person_id = ?;
@@ -68,9 +69,12 @@ def get_person_financial_summary(conn: sqlite3.Connection, person_id: int) -> Di
     p_row = conn.execute(pay_query, (person_id,)).fetchone() or {}
     total_received = int(p_row.get("total_received") or 0)
     direct_udhar = int(p_row.get("direct_udhar") or 0)
+    direct_received = int(p_row.get("direct_received") or 0)
 
-    total_pending = max(0, total_agreed - total_received) + direct_udhar
-    total_agreed = total_agreed + direct_udhar
+    total_agreed = work_agreed + direct_udhar + direct_received
+    work_received = total_received - direct_received
+    work_pending = max(0, work_agreed - work_received)
+    total_pending = work_pending + direct_udhar
 
     return {
         "work_count": work_count,

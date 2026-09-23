@@ -130,7 +130,7 @@ function renderWorkTable(items) {
     tbody.innerHTML = items.map(w => {
       let statusClass = 'badge-waiting';
       if (w.status === 'Ready / Printed') statusClass = 'badge-planned';
-      else if (w.status === 'Completed / Delivered') statusClass = 'badge-completed';
+      else if (w.status === 'Completed / Delivered' || w.status === 'Completed') statusClass = 'badge-completed';
       else if (w.status === 'In Progress') statusClass = 'badge-in-progress';
       else if (w.status.includes('Cancelled') || w.status.includes('Rejected')) statusClass = 'badge-cancelled';
 
@@ -194,7 +194,7 @@ function renderWorkTable(items) {
     mobileList.innerHTML = items.map(w => {
       let statusClass = 'badge-waiting';
       if (w.status === 'Ready / Printed') statusClass = 'badge-planned';
-      else if (w.status === 'Completed / Delivered') statusClass = 'badge-completed';
+      else if (w.status === 'Completed / Delivered' || w.status === 'Completed') statusClass = 'badge-completed';
       else if (w.status === 'In Progress') statusClass = 'badge-in-progress';
       else if (w.status.includes('Cancelled') || w.status.includes('Rejected')) statusClass = 'badge-cancelled';
 
