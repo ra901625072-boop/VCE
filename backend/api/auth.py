@@ -12,7 +12,7 @@ auth_service = AuthService()
 
 @router.post("/login", response_model=LoginResponse, summary="Operator Login (8-Hour Shift Session)")
 def login(credentials: LoginRequest):
-    """Authenticates operator credentials (e.g. akrajput2005 / Akshay@05) and returns an 8-hour JWT token."""
+    """Authenticates operator credentials and returns an 8-hour JWT session token."""
     return auth_service.authenticate(credentials)
 
 

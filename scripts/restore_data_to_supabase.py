@@ -1,6 +1,8 @@
+import os
 import psycopg2
+from backend.core.config import settings
 
-DATABASE_URL = "postgresql://postgres.nvoikqwbtwtvybjsssss:Akshay%40161005@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+DATABASE_URL = os.getenv("DATABASE_URL") or settings.DATABASE_URL
 
 def restore_data():
     conn = psycopg2.connect(DATABASE_URL)

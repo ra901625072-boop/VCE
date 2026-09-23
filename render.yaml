@@ -35,7 +35,7 @@ services:
       - key: DEFAULT_OPERATOR_ID
         value: akrajput2005
       - key: DEFAULT_OPERATOR_PASS
-        value: "Akshay@05"
+        sync: false
       - key: FRONTEND_URL
         value: "https://vce-xi.vercel.app"
       - key: SERVE_FRONTEND

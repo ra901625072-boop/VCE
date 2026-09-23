@@ -1,9 +1,11 @@
+import os
 import urllib.request
 import json
 import psycopg2
 from psycopg2.extras import execute_values
+from backend.core.config import settings
 
-DATABASE_URL = "postgresql://postgres.nvoikqwbtwtvybjsssss:Akshay%40161005@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+DATABASE_URL = os.getenv("DATABASE_URL") or settings.DATABASE_URL
 
 def get_live_data(endpoint):
     url = f"https://vce-pali-backend.onrender.com/api{endpoint}"

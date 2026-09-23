@@ -69,7 +69,7 @@ If your Render backend was assigned a custom URL (e.g., `https://my-custom-vce.o
 
 ### Option A: Via Settings Page (No Redeployment Needed)
 1. Open your deployed Vercel site in your browser.
-2. Log in using your operator credentials (`akrajput2005` / `Akshay@05`).
+2. Log in using your operator credentials.
 3. Navigate to **Settings** (`/pages/settings.html`).
 4. Scroll to the **Cloud Backend Connection** card.
 5. Paste your Render backend URL (e.g. `https://my-custom-vce.onrender.com`).

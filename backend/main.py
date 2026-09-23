@@ -31,11 +31,16 @@ async def lifespan(app: FastAPI):
     yield
 
 
+is_prod = (settings.APP_ENV == "production" and not settings.DEBUG)
+
 app = FastAPI(
     title=settings.APP_NAME,
     version="2.0.0",
     description="VCE Pali — e-Gram Center & Financial Ledger",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url=None if is_prod else "/docs",
+    redoc_url=None if is_prod else "/redoc",
+    openapi_url=None if is_prod else "/openapi.json"
 )
 
 # CORS Middleware (Supports Vercel frontend, local dev, and custom domains)
