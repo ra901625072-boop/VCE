@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional
 from backend.database.connection import get_db
 from backend.database.queries import get_person_financial_summary, log_activity
 from backend.schemas.person import PersonCreate, PersonUpdate
-from backend.core.exceptions import NotFoundException, BusinessRuleException
+from backend.core.exceptions import NotFoundException
 from backend.utils.dates import now_utc_iso
 
 

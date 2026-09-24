@@ -4,7 +4,7 @@ import secrets
 from datetime import datetime, timezone, timedelta
 from typing import Optional, Dict, Any
 import jwt
-from fastapi import HTTPException, Security, status, Depends
+from fastapi import HTTPException, Security, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from backend.core.config import settings

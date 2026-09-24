@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional
 from backend.database.connection import get_db
 from backend.database.queries import log_activity, get_work_with_balances
 from backend.schemas.payment import PaymentCreate, PaymentUpdate
-from backend.core.exceptions import NotFoundException, BusinessRuleException
+from backend.core.exceptions import NotFoundException
 from backend.utils.dates import now_utc_iso
 from backend.utils.money import format_inr
 

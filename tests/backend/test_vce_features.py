@@ -1,5 +1,4 @@
 """Tests for VCE Pali specific features and e-Gram workflows."""
-import pytest
 from fastapi.testclient import TestClient
 
 

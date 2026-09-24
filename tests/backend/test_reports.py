@@ -68,7 +68,7 @@ def test_advanced_reporting_and_reconciliation(temp_db):
     
     # 2 work orders of identical amount (₹500 each = 50000 paise)
     w1 = w_service.create(WorkCreate(person_id=client["id"], title="7/12 RoR", agreed_amount=50000, status="Completed / Delivered"))
-    w2 = w_service.create(WorkCreate(person_id=client["id"], title="8-A RoR", agreed_amount=50000, status="In Progress"))
+    w_service.create(WorkCreate(person_id=client["id"], title="8-A RoR", agreed_amount=50000, status="In Progress"))
 
     # Work 1 paid in 2 installments of ₹250 each (25000 paise)
     pay_service.create(PaymentCreate(

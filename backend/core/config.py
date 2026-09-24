@@ -1,6 +1,7 @@
 """Application Configuration Module."""
-import os
 from pathlib import Path
+from typing import Union, List, Optional
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 # Base Directories
@@ -10,10 +11,6 @@ DATABASE_DIR = ROOT_DIR / "database"
 DATABASE_DIR.mkdir(parents=True, exist_ok=True)
 DEFAULT_DB_PATH = DATABASE_DIR / "vce.db"
 FRONTEND_DIR = ROOT_DIR / "frontend"
-
-
-from typing import Union, List, Optional
-from pydantic import field_validator
 
 class Settings(BaseSettings):
     APP_NAME: str = "VCE Pali — e-Gram Seva & Financial Ledger"

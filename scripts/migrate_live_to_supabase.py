@@ -2,7 +2,6 @@ import os
 import urllib.request
 import json
 import psycopg2
-from psycopg2.extras import execute_values
 from backend.core.config import settings
 
 DATABASE_URL = os.getenv("DATABASE_URL") or settings.DATABASE_URL

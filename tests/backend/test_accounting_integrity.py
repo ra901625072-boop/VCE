@@ -1,5 +1,4 @@
 """Accounting integrity, dual-entry principles, and statutory compliance test suite."""
-import pytest
 from datetime import date
 from fastapi.testclient import TestClient
 from backend.utils.dates import get_date_range, get_current_fy_label

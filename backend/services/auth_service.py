@@ -1,10 +1,10 @@
 """Authentication and session service for VCE Pali e-Gram."""
 from datetime import datetime, timezone, timedelta
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 from fastapi import HTTPException, status
 
 from backend.database.connection import get_db
-from backend.core.security import verify_password, hash_password, create_access_token, DEFAULT_SESSION_DURATION_HOURS
+from backend.core.security import verify_password, create_access_token, DEFAULT_SESSION_DURATION_HOURS
 from backend.schemas.auth import LoginRequest, LoginResponse, UserInfo, VerifyResponse
 
 

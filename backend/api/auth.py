@@ -1,5 +1,5 @@
 """API router for authentication and session management."""
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
 from typing import Dict, Any
 
 from backend.schemas.auth import LoginRequest, LoginResponse, VerifyResponse

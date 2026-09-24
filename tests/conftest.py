@@ -8,14 +8,6 @@ from fastapi.testclient import TestClient
 from backend.database.migrations import init_db
 from backend.main import app
 from backend.core.config import settings
-from backend.services.person_service import PersonService
-from backend.services.work_service import WorkService
-from backend.services.payment_service import PaymentService
-from backend.services.expense_service import ExpenseService
-from backend.services.savings_service import SavingsService
-from backend.services.dashboard_service import DashboardService
-from backend.services.report_service import ReportService
-from backend.services.search_service import SearchService
 
 
 @pytest.fixture

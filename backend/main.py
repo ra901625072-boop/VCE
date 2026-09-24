@@ -1,11 +1,10 @@
 """Main FastAPI application entry point for VCE Work & Money Flow Tracker."""
-import os
 from pathlib import Path
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 
 from backend.core.config import settings, FRONTEND_DIR
 from backend.database.migrations import init_db

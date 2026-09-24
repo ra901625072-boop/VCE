@@ -1,6 +1,5 @@
 """Script to seed the SQLite database with realistic Gujarat e-Gram VCE demo data."""
 import json
-import os
 import sys
 from datetime import date, timedelta
 from pathlib import Path
@@ -22,12 +21,10 @@ from backend.services.person_service import PersonService
 from backend.services.work_service import WorkService
 from backend.services.payment_service import PaymentService
 from backend.services.expense_service import ExpenseService
-from backend.services.savings_service import SavingsService
 from backend.schemas.person import PersonCreate
 from backend.schemas.work import WorkCreate
 from backend.schemas.payment import PaymentCreate
 from backend.schemas.expense import ExpenseCreate
-from backend.schemas.savings import SavingsCreate
 from backend.utils.money import rupees_to_paise
 from backend.utils.dates import current_time_str, now_utc_iso
 
@@ -66,7 +63,6 @@ def seed():
     work_service = WorkService(settings.DB_PATH)
     payment_service = PaymentService(settings.DB_PATH)
     expense_service = ExpenseService(settings.DB_PATH)
-    savings_service = SavingsService(settings.DB_PATH)
 
     today = date.today()
 

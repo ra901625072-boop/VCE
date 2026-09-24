@@ -4,7 +4,6 @@ Checks implementation compliance against:
 - REQUIREMENTS.md
 - ARCHITECTURE.md
 """
-import os
 import sys
 import sqlite3
 from pathlib import Path

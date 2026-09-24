@@ -1,5 +1,4 @@
 """API endpoints for VCE Pali e-Gram operations, wallets, dept claims, and Rojmel."""
-import sqlite3
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query, status
 from backend.database.connection import get_db
@@ -10,7 +9,6 @@ from backend.schemas.vce import (
     PanchayatProfileUpdate,
     PortalWalletResponse,
     PortalWalletCreate,
-    PortalWalletUpdate,
     WalletTopupRequest,
     WalletTransactionResponse,
     DeptWorkOrderCreate,

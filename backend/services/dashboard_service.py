@@ -1,6 +1,6 @@
 """Service for Dashboard analytics, cash-flow metrics, and charts."""
-from typing import Dict, Any, Optional
-from datetime import datetime, date, timedelta
+from typing import Optional
+from datetime import date, timedelta
 from backend.database.connection import get_db
 from backend.schemas.dashboard import DashboardResponse, MetricSummary, BreakdownItem, TrendPoint
 from backend.utils.dates import current_date_str, get_date_range

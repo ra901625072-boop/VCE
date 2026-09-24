@@ -1,5 +1,4 @@
 """Database Connection and Transaction Manager supporting both Supabase PostgreSQL and SQLite."""
-import re
 import sqlite3
 import threading
 from contextlib import contextmanager

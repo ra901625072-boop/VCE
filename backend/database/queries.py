@@ -1,6 +1,6 @@
 """Reusable parameterized SQL queries and helper routines."""
 import sqlite3
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional
 from backend.utils.dates import now_utc_iso
 
 

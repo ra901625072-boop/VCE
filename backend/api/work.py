@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query, status
 from backend.schemas.work import WorkCreate, WorkUpdate, WorkResponse
 from backend.services.work_service import WorkService
-from backend.core.exceptions import NotFoundException, BusinessRuleException
+from backend.core.exceptions import NotFoundException
 
 router = APIRouter(prefix="/work", tags=["Work"])
 service = WorkService()

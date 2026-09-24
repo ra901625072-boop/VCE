@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 from backend.database.connection import get_db
 from backend.database.queries import get_work_with_balances, log_activity
 from backend.schemas.work import WorkCreate, WorkUpdate
-from backend.core.exceptions import NotFoundException, BusinessRuleException
+from backend.core.exceptions import NotFoundException
 from backend.utils.dates import now_utc_iso, current_date_str
 
 

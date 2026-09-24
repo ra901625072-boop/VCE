@@ -1,6 +1,4 @@
 """Tests for VCE Operator Authentication and 8-Hour Session Lifetime."""
-import pytest
-from datetime import datetime, timezone
 
 
 def test_login_success(client):

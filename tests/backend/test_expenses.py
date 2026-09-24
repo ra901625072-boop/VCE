@@ -1,6 +1,6 @@
 """Unit tests for Expense tracking."""
 from backend.services.expense_service import ExpenseService
-from backend.schemas.expense import ExpenseCreate, ExpenseUpdate
+from backend.schemas.expense import ExpenseCreate
 
 
 def test_expense_flow(temp_db):

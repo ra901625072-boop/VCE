@@ -1,6 +1,5 @@
 """Authentication schemas for VCE Pali e-Gram."""
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class LoginRequest(BaseModel):

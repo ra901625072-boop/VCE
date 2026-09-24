@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query, status
 from backend.schemas.person import PersonCreate, PersonUpdate, PersonResponse
 from backend.services.person_service import PersonService
-from backend.core.exceptions import NotFoundException, BusinessRuleException
+from backend.core.exceptions import NotFoundException
 
 router = APIRouter(prefix="/people", tags=["People"])
 service = PersonService()

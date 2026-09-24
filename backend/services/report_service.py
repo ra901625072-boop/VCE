@@ -1,5 +1,5 @@
 """Service for financial reporting, summaries, and file export formatting."""
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from backend.database.connection import get_db
 from backend.utils.dates import get_date_range
 from backend.utils.money import paise_to_rupees, format_inr

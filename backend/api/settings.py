@@ -1,5 +1,5 @@
 """API Endpoints for Categories, Payment Methods, Statuses, and Application Settings."""
-from typing import List, Dict
+from typing import List
 from fastapi import APIRouter, HTTPException, status
 from backend.schemas.settings import (
     CategoryCreate, CategoryResponse,
