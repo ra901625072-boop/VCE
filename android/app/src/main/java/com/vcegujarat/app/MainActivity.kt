@@ -214,6 +214,7 @@ class MainActivity : AppCompatActivity() {
                 layoutErrorOverlay.visibility = View.GONE
                 setConnectionStatus(Status.CONNECTED)
                 injectHideApkScript(view)
+                view?.settings?.cacheMode = WebSettings.LOAD_DEFAULT
             }
 
             override fun onReceivedError(
@@ -233,11 +234,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         swipeRefreshLayout.setOnRefreshListener {
+            webView.clearCache(true)
+            webView.settings.cacheMode = WebSettings.LOAD_NO_CACHE
             webView.reload()
         }
 
         btnErrorRetry.setOnClickListener {
             layoutErrorOverlay.visibility = View.GONE
+            webView.clearCache(true)
             loadServerUrl()
         }
     }
