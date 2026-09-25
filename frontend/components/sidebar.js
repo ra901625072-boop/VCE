@@ -35,7 +35,7 @@ export function renderNavigation(activePage = 'dashboard') {
         <!-- VCE Pali Civic Brand Mark & Drawer Close for Mobile -->
         <div class="sidebar-brand">
           <div style="display:flex; align-items:center; gap:0.75rem; flex:1; overflow:hidden;">
-            <img src="/assets/vce-logo.svg?v=2" alt="VCE Logo" style="height:26px; width:auto; object-fit:contain; filter:drop-shadow(0 2px 8px rgba(234,88,12,0.45));" />
+            <img src="/assets/vce-logo.svg?v=3" alt="VCE Logo" style="height:26px; width:auto; object-fit:contain; filter:drop-shadow(0 2px 8px rgba(234,88,12,0.45));" />
             <div style="height:18px; width:1px; background:var(--border-strong);"></div>
             <div class="brand-text-block">
               <span class="brand-title" style="font-size:0.85rem;">Pali</span>
