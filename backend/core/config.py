@@ -10,7 +10,8 @@ ROOT_DIR = BACKEND_DIR.parent
 DATABASE_DIR = ROOT_DIR / "database"
 DATABASE_DIR.mkdir(parents=True, exist_ok=True)
 DEFAULT_DB_PATH = DATABASE_DIR / "vce.db"
-FRONTEND_DIR = ROOT_DIR / "frontend"
+DIST_DIR = ROOT_DIR / "frontend" / "dist"
+FRONTEND_DIR = DIST_DIR if DIST_DIR.exists() else (ROOT_DIR / "frontend")
 
 class Settings(BaseSettings):
     APP_NAME: str = "VCE Pali — e-Gram Seva & Financial Ledger"

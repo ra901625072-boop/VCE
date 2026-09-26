@@ -1,0 +1,667 @@
+/* ==========================================================================
+   Institutional Civic Workstation Layout — VCE Pali e-Gram
+   Exact CSS ported from original login.html
+   ========================================================================== */
+
+.is-native-app .apk-download-option,
+.is-native-app #card-apk-distribution,
+.is-native-app [href*="/download/apk"],
+.is-native-app [download*=".apk"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.login-viewport {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-canvas);
+  background-image: 
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(194, 65, 12, 0.12) 0%, transparent 65%),
+    radial-gradient(circle at 90% 90%, rgba(5, 150, 105, 0.05) 0%, transparent 45%),
+    linear-gradient(var(--border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+  background-position: 0 0, 0 0, -1px -1px, -1px -1px;
+  position: relative;
+}
+
+[data-theme="light"] .login-viewport {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(194, 65, 12, 0.09) 0%, transparent 65%),
+    radial-gradient(circle at 90% 90%, rgba(5, 150, 105, 0.04) 0%, transparent 45%),
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
+
+/* Top Administrative Banner */
+.login-top-bar {
+  padding: 0.85rem 2rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-surface);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.brand-crest-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background: var(--accent);
+  border: 1px solid #ea580c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(194, 65, 12, 0.35);
+  flex-shrink: 0;
+}
+
+.brand-meta-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-main);
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.brand-meta-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: var(--font-gujarati), sans-serif;
+  line-height: 1.3;
+}
+
+.top-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.live-clock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.3rem 0.65rem;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+/* Main Gateway Workspace */
+.login-main-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+}
+
+.login-grid-shell {
+  width: 100%;
+  max-width: 1060px;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 2.25rem;
+  align-items: stretch;
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Left Hero / Civic Identity Column */
+.civic-hero-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.civic-hero-panel::before {
+  content: '';
+  position: absolute;
+  top: -120px;
+  left: -120px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(194, 65, 12, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.civic-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(194, 65, 12, 0.1);
+  border: 1px solid rgba(194, 65, 12, 0.3);
+  border-radius: 999px;
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 1.25rem;
+  width: fit-content;
+}
+
+.civic-hero-title {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  margin: 0 0 0.5rem 0;
+}
+
+.civic-hero-gujarati {
+  font-family: var(--font-gujarati), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.85rem;
+  line-height: 1.4;
+}
+
+.civic-hero-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-bottom: 2rem;
+}
+
+/* Civic Features List */
+.civic-features-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.civic-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.civic-feature-item:hover {
+  border-color: var(--border-strong);
+  transform: translateX(2px);
+}
+
+.feature-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: rgba(194, 65, 12, 0.12);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.feature-text-block h4 {
+  margin: 0 0 0.15rem 0;
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.feature-text-block p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* System Status Footer */
+.civic-status-bar {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.status-live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--revenue-light);
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--revenue);
+  box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
+  animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(5, 150, 105, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+}
+
+/* Right Terminal Card */
+.terminal-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.terminal-header {
+  padding: 2rem 2rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, var(--bg-surface-elevated) 0%, var(--bg-surface) 100%);
+}
+
+.terminal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.675rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+
+.terminal-title {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 0.3rem 0;
+  letter-spacing: -0.02em;
+}
+
+.terminal-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.terminal-body {
+  padding: 1.75rem 2rem 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Form Fields with Icon Wrappers */
+.input-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-lead-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: var(--text-dim);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.form-input-stylish {
+  width: 100%;
+  padding: 0.72rem 1rem 0.72rem 2.65rem;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.form-input-stylish:focus {
+  outline: none;
+  border-color: var(--accent);
+  background-color: var(--bg-input-focus);
+  box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.2);
+}
+
+.input-field-wrap:focus-within .field-lead-icon {
+  color: var(--accent);
+}
+
+.btn-toggle-eye {
+  position: absolute;
+  right: 0.65rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.btn-toggle-eye:hover {
+  color: var(--text-main);
+  background-color: var(--bg-surface-elevated);
+}
+
+/* Shift Duty Banner */
+.shift-duty-card {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.9rem;
+  margin: 1.25rem 0 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.shift-duty-card h5 {
+  margin: 0 0 0.15rem 0;
+  font-size: 0.785rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.shift-duty-card p {
+  margin: 0;
+  font-size: 0.725rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Login Alert Box */
+.login-alert {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.825rem;
+  line-height: 1.4;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.login-alert.error {
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  color: #fca5a5;
+}
+
+.login-alert.info {
+  background: rgba(194, 65, 12, 0.12);
+  border: 1px solid rgba(194, 65, 12, 0.35);
+  color: #fdba74;
+}
+
+.login-alert.success {
+  background: rgba(5, 150, 105, 0.12);
+  border: 1px solid rgba(5, 150, 105, 0.35);
+  color: #86efac;
+}
+
+.caps-indicator {
+  display: flex;
+  font-size: 0.725rem;
+  color: #f59e0b;
+  margin-top: 0.35rem;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Submit Button Enhanced */
+.btn-submit-workstation {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.925rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  background-color: var(--accent);
+  color: #ffffff;
+  border: 1px solid var(--accent-border);
+  box-shadow: 0 4px 12px rgba(194, 65, 12, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.btn-submit-workstation:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(194, 65, 12, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-submit-workstation:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(194, 65, 12, 0.25);
+}
+
+.btn-loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Terminal Footer Assistance */
+.terminal-footer-notes {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.725rem;
+  color: var(--text-dim);
+}
+
+.mobile-only-break {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .login-grid-shell {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+    gap: 1.5rem;
+  }
+
+  .civic-hero-panel {
+    display: none !important;
+  }
+
+  .terminal-header {
+    padding: 1.5rem 1.5rem 1rem;
+  }
+
+  .terminal-body {
+    padding: 1.5rem;
+  }
+
+  .live-clock-badge {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-only-break {
+    display: inline;
+  }
+
+  .login-viewport {
+    overflow-x: hidden;
+  }
+
+  .login-top-bar {
+    padding: 0.65rem 0.85rem;
+    gap: 0.5rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .brand-group {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .brand-group a {
+    min-width: 0;
+    gap: 0.55rem !important;
+  }
+
+  .login-brand-logo {
+    height: 24px !important;
+  }
+
+  .brand-meta-title {
+    font-size: 0.75rem !important;
+    line-height: 1.15 !important;
+    white-space: normal;
+  }
+
+  .brand-meta-sub {
+    display: none;
+  }
+
+  .top-controls-group {
+    flex-shrink: 0;
+    gap: 0.35rem;
+  }
+
+  .btn-theme-toggle {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.775rem;
+  }
+
+  .btn-theme-toggle .theme-text {
+    display: inline;
+  }
+
+  .login-main-container {
+    padding: 1.15rem 0.85rem;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .login-grid-shell {
+    display: block !important;
+    max-width: 380px !important;
+    width: 100% !important;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  .civic-hero-panel {
+    display: none !important;
+  }
+
+  .terminal-card {
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .terminal-header {
+    padding: 1.25rem 1.15rem 0.85rem;
+  }
+
+  .terminal-title {
+    font-size: 1.25rem;
+  }
+
+  .terminal-body {
+    padding: 1.15rem;
+  }
+
+  .form-input-stylish {
+    min-height: 46px;
+    font-size: 1rem;
+    padding-right: 2.85rem !important;
+  }
+
+  .btn-toggle-eye {
+    width: 42px;
+    height: 42px;
+    right: 0.35rem;
+  }
+
+  .btn-submit-workstation {
+    min-height: 48px;
+    font-size: 0.95rem;
+  }
+
+  .terminal-footer-notes {
+    flex-direction: column;
+    gap: 0.45rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  .terminal-footer-notes span {
+    white-space: nowrap;
+  }
+}

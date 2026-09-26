@@ -1,0 +1,63 @@
+/* ==========================================================================
+   VCE Pali — Global Master Stylesheet (React SPA)
+   Unified Design System & Institutional Financial Workstation
+   ========================================================================== */
+
+@import './reset.css';
+@import './variables.css';
+@import './layout.css';
+@import './components.css';
+@import './animations.css';
+@import './responsive.css';
+@import './print.css';
+@import './login.css';
+
+/* Modern SPA Transitions & Utility Tweaks */
+html, body {
+  background-color: var(--bg-canvas);
+  color: var(--text-main);
+  font-family: var(--font-display);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* React Router active link styling */
+.nav-item.active {
+  background: var(--bg-surface-active);
+  color: var(--text-main);
+  border-left: 3px solid var(--accent);
+  font-weight: 600;
+}
+
+.mobile-nav-item.active {
+  color: var(--accent);
+}
+
+.mobile-nav-item.active svg {
+  stroke: var(--accent);
+}
+
+/* Smooth fade-in for route view changes */
+.page-fade-in {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

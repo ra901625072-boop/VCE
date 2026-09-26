@@ -95,9 +95,10 @@ if APK_DIR.exists():
 @app.get("/api/download/apk", tags=["Mobile App"])
 async def download_latest_apk():
     """Download the latest compiled VCE Pali Android APK."""
-    # Check if primary VCE_Pali APK exists in apk/ or frontend/apk/
+    # Check if primary VCE_Pali APK exists in apk/, frontend/public/apk/, or frontend/apk/
     candidates = [
         APK_FILE_PALI,
+        BASE_DIR / "frontend" / "public" / "apk" / "VCE_Pali.apk",
         BASE_DIR / "frontend" / "apk" / "VCE_Pali.apk",
         BASE_DIR / "android" / "app" / "build" / "outputs" / "apk" / "debug" / "app-debug.apk"
     ]
@@ -117,6 +118,7 @@ async def get_apk_info():
     """Get metadata about the latest compiled APK."""
     candidates = [
         APK_FILE_PALI,
+        BASE_DIR / "frontend" / "public" / "apk" / "VCE_Pali.apk",
         BASE_DIR / "frontend" / "apk" / "VCE_Pali.apk",
         BASE_DIR / "android" / "app" / "build" / "outputs" / "apk" / "debug" / "app-debug.apk"
     ]
@@ -146,13 +148,17 @@ async def get_apk_info():
 
 # Conditional Frontend Serving vs Dedicated Headless API Server
 if settings.SERVE_FRONTEND and FRONTEND_DIR.exists():
-    for subdir in ["css", "js", "components", "pages", "assets"]:
+    for subdir in ["assets", "apk"]:
         subpath = FRONTEND_DIR / subdir
         if subpath.exists():
             app.mount(f"/{subdir}", StaticFiles(directory=str(subpath)), name=subdir)
 
     @app.get("/")
-    async def serve_index():
+    @app.get("/{full_path:path}")
+    async def serve_spa_frontend(full_path: str = ""):
+        # Don't intercept API or download routes
+        if full_path.startswith("api/") or full_path.startswith("download/") or full_path.startswith("apk-files/"):
+            raise HTTPException(status_code=404, detail="Not found")
         index_file = FRONTEND_DIR / "index.html"
         if index_file.exists():
             return FileResponse(str(index_file))
