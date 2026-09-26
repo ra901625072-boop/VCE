@@ -92,8 +92,16 @@ export const LoginPage: React.FC = () => {
       const redirect = searchParams.get('redirect') || '/dashboard';
       navigate(redirect, { replace: true });
     } catch (err: any) {
+      let message = 'Invalid username or password. Please try again.';
+      if (typeof err?.message === 'string') {
+        message = err.message;
+      } else if (typeof err === 'string') {
+        message = err;
+      } else if (err?.detail && typeof err.detail === 'string') {
+        message = err.detail;
+      }
       setAlert({
-        message: err.message || 'Invalid username or password. Please try again.',
+        message,
         type: 'error',
       });
     } finally {

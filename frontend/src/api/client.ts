@@ -98,7 +98,17 @@ async function request<T>(
       }
     }
     const errData = await response.json().catch(() => ({ detail: response.statusText }));
-    throw new Error(errData.detail || `Request failed with status ${response.status}`);
+    let errorMsg = `Request failed with status ${response.status}`;
+    if (typeof errData.detail === 'string') {
+      errorMsg = errData.detail;
+    } else if (Array.isArray(errData.detail) && errData.detail.length > 0) {
+      errorMsg = errData.detail
+        .map((e: any) => e.msg || e.message || (typeof e === 'string' ? e : JSON.stringify(e)))
+        .join('; ');
+    } else if (errData.message && typeof errData.message === 'string') {
+      errorMsg = errData.message;
+    }
+    throw new Error(errorMsg);
   }
 
   if (response.status === 204) {

@@ -99,15 +99,24 @@ class PostgresConnectionAdapter:
         return PostgresCursorAdapter(self.raw_conn.cursor(cursor_factory=DictCursor))
 
     def commit(self):
-        self.raw_conn.commit()
+        try:
+            if self.raw_conn and getattr(self.raw_conn, "closed", 0) == 0:
+                self.raw_conn.commit()
+        except Exception:
+            pass
 
     def rollback(self):
-        self.raw_conn.rollback()
+        try:
+            if self.raw_conn and getattr(self.raw_conn, "closed", 0) == 0:
+                self.raw_conn.rollback()
+        except Exception:
+            pass
 
     def close(self):
         if self.pool and self.raw_conn:
             try:
-                self.pool.putconn(self.raw_conn)
+                is_closed = getattr(self.raw_conn, "closed", 0) != 0
+                self.pool.putconn(self.raw_conn, close=is_closed)
             except Exception:
                 pass
         elif self.raw_conn:

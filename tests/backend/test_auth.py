@@ -95,3 +95,24 @@ def test_verify_password_resilience():
     tuple_str = f"({h},{s})"
     assert verify_password("Akshay@05", tuple_str, s) is True
 
+
+def test_login_form_urlencoded_success(client):
+    """Test login with application/x-www-form-urlencoded form data."""
+    res = client.post(
+        "/api/auth/login",
+        data={"username": "akrajput2005", "password": "Akshay@05"}
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert "access_token" in data
+    assert data["user"]["username"] == "akrajput2005"
+    assert data["expires_in"] == 28800
+
+
+def test_login_missing_fields_validation(client):
+    """Test 422 validation response when fields are missing."""
+    res = client.post("/api/auth/login", json={})
+    assert res.status_code == 422
+    assert "required" in res.json()["detail"]
+
+

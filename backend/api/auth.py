@@ -1,5 +1,6 @@
 """API router for authentication and session management."""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request, HTTPException, status
+from pydantic import ValidationError
 from typing import Dict, Any
 
 from backend.schemas.auth import LoginRequest, LoginResponse, VerifyResponse
@@ -10,9 +11,61 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 auth_service = AuthService()
 
 
-@router.post("/login", response_model=LoginResponse, summary="Operator Login (8-Hour Shift Session)")
-def login(credentials: LoginRequest):
-    """Authenticates operator credentials and returns an 8-hour JWT session token."""
+@router.post(
+    "/login",
+    response_model=LoginResponse,
+    summary="Operator Login (8-Hour Shift Session)",
+    openapi_extra={
+        "requestBody": {
+            "required": True,
+            "content": {
+                "application/json": {
+                    "schema": LoginRequest.model_json_schema()
+                },
+                "application/x-www-form-urlencoded": {
+                    "schema": LoginRequest.model_json_schema()
+                }
+            }
+        }
+    }
+)
+async def login(request: Request):
+    """Authenticates operator credentials and returns an 8-hour JWT session token.
+    Supports both JSON and application/x-www-form-urlencoded payloads.
+    """
+    content_type = request.headers.get("content-type", "").lower()
+    username = None
+    password = None
+
+    if "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+        form = await request.form()
+        username = form.get("username")
+        password = form.get("password")
+    else:
+        try:
+            body = await request.json()
+            if isinstance(body, dict):
+                username = body.get("username")
+                password = body.get("password")
+        except Exception:
+            pass
+
+    if not username or not password:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Operator ID (username) and password are required."
+        )
+
+    try:
+        credentials = LoginRequest(username=str(username), password=str(password))
+    except ValidationError as val_err:
+        errors = val_err.errors()
+        err_msg = "; ".join([str(e.get("msg", "invalid")) for e in errors])
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=err_msg
+        )
+
     return auth_service.authenticate(credentials)
 
 

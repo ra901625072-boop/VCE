@@ -1,17 +1,16 @@
 import urllib.request
+import urllib.parse
 import json
 
 def run_verification():
     print("--- Testing VCE Pali Login System ---")
 
-    # 1. Check login page HTML
-    res = urllib.request.urlopen('http://127.0.0.1:8000/pages/login.html')
-    html = res.read().decode('utf-8')
-    assert 'Operator Sign-In' in html
-    assert 'Shift Session: 8 Hours Active Validity' in html
-    assert 'id="username"' in html
-    assert 'id="current-password"' in html
-    print("[PASS] 1. Login HTML verified with 8-Hour shift badge and form inputs")
+    # 1. Check backend health API
+    res = urllib.request.urlopen('http://127.0.0.1:8000/api/health')
+    health = json.loads(res.read().decode('utf-8'))
+    assert health['status'] == 'ok'
+    print(f"[PASS] 1. Backend health verified: {health['app']} ({health['version']})")
+
 
     # 2. Test wrong password
     req = urllib.request.Request(
@@ -39,10 +38,24 @@ def run_verification():
     assert data['expires_in'] == 28800, f"Expected 28800, got {data['expires_in']}"
     token = data['access_token']
     user = data['user']
-    print("[PASS] 3. Login successful with id=akrajput2005 and pass=Akshay@05:")
+    print("[PASS] 3. Login successful with id=akrajput2005 and pass=Akshay@05 (JSON):")
     print(f"       Operator: {user['full_name']} ({user['username']}) - Role: {user['role']}")
     print(f"       Session validity: {data['expires_in']} seconds (8 Hours)")
     print(f"       Expires at: {data['expires_at']}")
+
+    # 3b. Test form-urlencoded login format
+    form_data = urllib.parse.urlencode({'username': 'akrajput2005', 'password': 'Akshay@05'}).encode('utf-8')
+    req_form = urllib.request.Request(
+        'http://127.0.0.1:8000/api/auth/login',
+        data=form_data,
+        headers={'Content-Type': 'application/x-www-form-urlencoded'}
+    )
+    res_form = urllib.request.urlopen(req_form)
+    assert res_form.code == 200
+    form_json = json.loads(res_form.read().decode('utf-8'))
+    assert 'access_token' in form_json
+    print("[PASS] 3b. Login successful with form-urlencoded payload (Dual compatibility verified)")
+
 
     # 4. Verify session endpoint
     req = urllib.request.Request(

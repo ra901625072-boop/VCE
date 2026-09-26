@@ -76,22 +76,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token, calculateShiftRemaining, logout]);
 
   const login = async ({ username, password }: { username: string; password: string }) => {
-    const formData = new URLSearchParams();
-    formData.append('username', username.trim());
-    formData.append('password', password);
-
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: formData.toString(),
+      body: JSON.stringify({
+        username: username.trim(),
+        password,
+      }),
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: 'Login failed' }));
-      throw new Error(err.detail || 'Invalid username or password');
+      let errorMsg = 'Invalid username or password';
+      try {
+        const err = await res.json();
+        if (typeof err.detail === 'string') {
+          errorMsg = err.detail;
+        } else if (Array.isArray(err.detail) && err.detail.length > 0) {
+          errorMsg = err.detail
+            .map((e: any) => e.msg || e.message || (typeof e === 'string' ? e : JSON.stringify(e)))
+            .join('; ');
+        } else if (err.message && typeof err.message === 'string') {
+          errorMsg = err.message;
+        }
+      } catch {
+        errorMsg = res.statusText || 'Login failed';
+      }
+      throw new Error(errorMsg);
     }
 
     const data: AuthSession = await res.json();
