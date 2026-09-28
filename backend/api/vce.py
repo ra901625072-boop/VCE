@@ -752,8 +752,11 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
                 category="Citizen Credit (બાકી ખાતું)" if is_udhar_item else "Citizen Collection",
                 title=f"{r['person_name']} — {r['work_title'] or 'Service Fee'}",
                 method=r["payment_method"],
+                payment_method=r["payment_method"],
+                payment_mode=r["payment_method"],
                 amount=r["amount"],
                 time=r["payment_time"] or "10:00",
+                created_at=f"{date_str}T{r['payment_time'] or '10:00:00'}",
                 reference=r["transaction_reference"]
             ))
 
@@ -769,8 +772,11 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
                 category="State Dept Disbursal",
                 title=f"{d['dept_name']} — {d['scheme_name']}",
                 method="Bank Transfer",
+                payment_method="Bank Transfer",
+                payment_mode="Bank Transfer",
                 amount=d["amount_received"],
                 time="11:30",
+                created_at=f"{date_str}T11:30:00",
                 reference=d["order_ref"]
             ))
 
@@ -789,8 +795,11 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
                 category=r["cat_name"] or "Center Expense",
                 title=r["title"],
                 method=r["payment_method"],
+                payment_method=r["payment_method"],
+                payment_mode=r["payment_method"],
                 amount=r["amount"],
                 time=r["expense_time"] or "12:00",
+                created_at=f"{date_str}T{r['expense_time'] or '12:00:00'}",
                 reference=None
             ))
 
@@ -809,8 +818,11 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
                 category="Portal Float Recharge",
                 title=f"Recharge: {w['portal_name']}",
                 method=method,
+                payment_method=method,
+                payment_mode=method,
                 amount=w["amount"],
                 time="14:00",
+                created_at=f"{date_str}T14:00:00",
                 reference=w["reference_no"]
             ))
 
@@ -826,8 +838,11 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
                 category="Panchayat Royalty Remittance",
                 title=f"Remitted to Gram Panchayat (Talati Rcpt: {rm['talati_receipt_no']})",
                 method=rm["payment_method"],
+                payment_method=rm["payment_method"],
+                payment_mode=rm["payment_method"],
                 amount=rm["amount"],
                 time="16:00",
+                created_at=f"{date_str}T16:00:00",
                 reference=rm["talati_receipt_no"]
             ))
 
@@ -839,16 +854,27 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
             d_close["is_locked"] = bool(d_close["is_locked"])
             day_close_info = RojmelDayCloseResponse(**d_close)
 
+        aavak_entries = [e for e in entries if e.type == "aavak"]
+        javak_entries = [e for e in entries if e.type == "javak"]
+        is_day_closed = bool(day_close_info and day_close_info.is_locked)
+
         return RojmelSummary(
             date=date_str,
+            target_date=date_str,
             opening_cash=opening_cash,
             opening_bank=opening_bank,
+            opening_drawer_cash=opening_cash,
+            opening_bank_balance=opening_bank,
             today_citizen_cash=today_cash_in,
             today_citizen_upi=today_upi_in,
+            aavak_cash=today_cash_in,
+            aavak_upi=today_upi_in,
             today_dept_received=today_dept_in,
             total_aavak=total_aavak,
             today_expenses_cash=today_exp_cash,
             today_expenses_online=today_exp_online,
+            javak_cash=today_exp_cash,
+            javak_upi=today_exp_online,
             today_wallet_topups=today_wallet_topups,
             today_wallet_recharges_cash=today_wallet_recharges_cash,
             today_wallet_recharges_online=today_wallet_recharges_online,
@@ -856,11 +882,18 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
             total_javak=total_javak,
             closing_cash=closing_cash,
             closing_bank=closing_bank,
+            closing_drawer_cash=closing_cash,
+            closing_bank_balance=closing_bank,
             is_cash_deficit=is_cash_deficit,
             today_net_earnings=today_cash_surplus,
             net_commission_earned=net_commission_earned,
             today_udhar_given=today_udhar_given,
             today_udhar_recovered=today_udhar_recovered,
             day_close_info=day_close_info,
-            entries=entries
+            is_day_closed=is_day_closed,
+            entries=entries,
+            aavak_entries=aavak_entries,
+            javak_entries=javak_entries,
+            inflows=aavak_entries,
+            outflows=javak_entries,
         )

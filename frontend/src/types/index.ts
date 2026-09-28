@@ -184,24 +184,36 @@ export interface RojmelOutflow {
 }
 
 export interface RojmelData {
-  target_date: string;
+  target_date?: string;
+  date?: string;
   panchayat_profile?: PanchayatProfile;
-  opening_drawer_cash: number; // paise
-  opening_bank_balance: number; // paise
+  opening_drawer_cash?: number; // paise
+  opening_bank_balance?: number; // paise
+  opening_cash?: number; // paise
+  opening_bank?: number; // paise
   total_aavak: number; // paise
   total_javak: number; // paise
-  aavak_cash: number; // paise
-  aavak_upi: number; // paise
-  javak_cash: number; // paise
-  javak_upi: number; // paise
-  closing_drawer_cash: number; // paise
-  closing_bank_balance: number; // paise
+  aavak_cash?: number; // paise
+  aavak_upi?: number; // paise
+  today_citizen_cash?: number; // paise
+  today_citizen_upi?: number; // paise
+  javak_cash?: number; // paise
+  javak_upi?: number; // paise
+  today_expenses_cash?: number; // paise
+  today_expenses_online?: number; // paise
+  closing_drawer_cash?: number; // paise
+  closing_bank_balance?: number; // paise
+  closing_cash?: number; // paise
+  closing_bank?: number; // paise
   gross_cash_surplus?: number; // paise
+  today_net_earnings?: number; // paise
   inflows?: RojmelInflow[];
   outflows?: RojmelOutflow[];
   aavak_entries?: RojmelInflow[];
   javak_entries?: RojmelOutflow[];
+  entries?: any[];
   is_day_closed?: boolean;
+  day_close_info?: any;
   closed_at?: string;
   closed_by?: string;
 }

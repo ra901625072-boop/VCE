@@ -77,26 +77,33 @@ export const DailyRojmelPage: React.FC = () => {
     },
   });
 
-  const r = rojmel || {
-    target_date: targetDate,
-    opening_drawer_cash: 0,
-    opening_bank_balance: 0,
-    total_aavak: 0,
-    total_javak: 0,
-    aavak_cash: 0,
-    aavak_upi: 0,
-    javak_cash: 0,
-    javak_upi: 0,
-    closing_drawer_cash: 0,
-    closing_bank_balance: 0,
-    is_day_closed: false,
-    aavak_entries: [],
-    javak_entries: [],
-  };
+  const r = (rojmel as any) || {};
 
-  const aavakList = r.aavak_entries || r.inflows || [];
-  const javakList = r.javak_entries || r.outflows || [];
-  const isDeficit = (r.closing_drawer_cash || 0) < 0;
+  const openingDrawerCash = r.opening_drawer_cash ?? r.opening_cash ?? 0;
+  const openingBankBalance = r.opening_bank_balance ?? r.opening_bank ?? 0;
+  const totalAavak = r.total_aavak ?? 0;
+  const totalJavak = r.total_javak ?? 0;
+  const aavakCash = r.aavak_cash ?? r.today_citizen_cash ?? 0;
+  const aavakUpi = r.aavak_upi ?? r.today_citizen_upi ?? 0;
+  const javakCash = r.javak_cash ?? r.today_expenses_cash ?? 0;
+  const javakUpi = r.javak_upi ?? r.today_expenses_online ?? 0;
+  const closingDrawerCash = r.closing_drawer_cash ?? r.closing_cash ?? 0;
+  const closingBankBalance = r.closing_bank_balance ?? r.closing_bank ?? 0;
+  const isDayClosed = Boolean(r.is_day_closed || r.day_close_info?.is_locked);
+
+  const aavakList = (r.aavak_entries && r.aavak_entries.length > 0)
+    ? r.aavak_entries
+    : (r.entries && r.entries.length > 0)
+    ? r.entries.filter((e: any) => e.type === 'aavak')
+    : (r.inflows || []);
+
+  const javakList = (r.javak_entries && r.javak_entries.length > 0)
+    ? r.javak_entries
+    : (r.entries && r.entries.length > 0)
+    ? r.entries.filter((e: any) => e.type === 'javak')
+    : (r.outflows || []);
+
+  const isDeficit = closingDrawerCash < 0;
 
   const handlePrint = () => {
     window.print();
@@ -141,12 +148,12 @@ export const DailyRojmelPage: React.FC = () => {
             <span>Remit GP</span>
           </button>
 
-          {!r.is_day_closed ? (
+          {!isDayClosed ? (
             <button
               className="btn btn-primary btn-sm"
               id="btn-open-day-close"
               onClick={() => {
-                setClosingCashInput(((r.closing_drawer_cash || 0) / 100).toFixed(2));
+                setClosingCashInput(((closingDrawerCash || 0) / 100).toFixed(2));
                 setIsDayCloseOpen(true);
               }}
               type="button"
@@ -234,14 +241,14 @@ export const DailyRojmelPage: React.FC = () => {
           <div>
             <strong style={{ fontSize: '0.925rem' }}>Cash Drawer Deficit Warning!</strong>
             <span style={{ fontSize: '0.825rem', opacity: 0.9, display: 'block' }}>
-              Calculated closing cash in drawer is negative ({formatINR(r.closing_drawer_cash)}). Unrecorded citizen receipts or out-of-sequence payments detected.
+              Calculated closing cash in drawer is negative ({formatINR(closingDrawerCash)}). Unrecorded citizen receipts or out-of-sequence payments detected.
             </span>
           </div>
         </div>
       )}
 
       {/* Day Close / Locked Status Banner */}
-      {r.is_day_closed && (
+      {isDayClosed && (
         <div
           id="rojmel-lock-banner"
           style={{
@@ -279,13 +286,13 @@ export const DailyRojmelPage: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.775rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
               <span>Cash Drawer:</span>
               <span className="font-tabular" style={{ fontWeight: 700, color: 'var(--text-main)' }}>
-                {formatINR(r.opening_drawer_cash)}
+                {formatINR(openingDrawerCash)}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.775rem', color: 'var(--text-muted)' }}>
               <span>Bank / UPI:</span>
               <span className="font-tabular" style={{ fontWeight: 700, color: 'var(--text-main)' }}>
-                {formatINR(r.opening_bank_balance)}
+                {formatINR(openingBankBalance)}
               </span>
             </div>
           </div>
@@ -298,14 +305,14 @@ export const DailyRojmelPage: React.FC = () => {
             <span className="stat-pill revenue">+ Aavak (આવક)</span>
           </div>
           <span className="stat-value font-tabular" id="val-today-aavak">
-            {formatINR(r.total_aavak)}
+            {formatINR(totalAavak)}
           </span>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
             <span>
-              Cash: <b className="font-tabular" style={{ color: 'var(--text-main)' }}>{formatINR(r.aavak_cash)}</b>
+              Cash: <b className="font-tabular" style={{ color: 'var(--text-main)' }}>{formatINR(aavakCash)}</b>
             </span>
             <span>
-              UPI: <b className="font-tabular" style={{ color: 'var(--text-main)' }}>{formatINR(r.aavak_upi)}</b>
+              UPI: <b className="font-tabular" style={{ color: 'var(--text-main)' }}>{formatINR(aavakUpi)}</b>
             </span>
           </div>
         </div>
@@ -317,14 +324,14 @@ export const DailyRojmelPage: React.FC = () => {
             <span className="stat-pill expense">- Javak (જાવક)</span>
           </div>
           <span className="stat-value font-tabular" id="val-today-javak">
-            {formatINR(r.total_javak)}
+            {formatINR(totalJavak)}
           </span>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
             <span>
-              Cash: <b className="font-tabular" style={{ color: 'var(--text-main)' }}>{formatINR(r.javak_cash)}</b>
+              Cash: <b className="font-tabular" style={{ color: 'var(--text-main)' }}>{formatINR(javakCash)}</b>
             </span>
             <span>
-              UPI: <b className="font-tabular" style={{ color: 'var(--text-main)' }}>{formatINR(r.javak_upi)}</b>
+              UPI: <b className="font-tabular" style={{ color: 'var(--text-main)' }}>{formatINR(javakUpi)}</b>
             </span>
           </div>
         </div>
@@ -336,12 +343,12 @@ export const DailyRojmelPage: React.FC = () => {
             <span className="stat-pill profit">Akhar (આખર સિલક)</span>
           </div>
           <span className="stat-value font-tabular" style={{ color: isDeficit ? 'var(--expense)' : 'var(--text-main)' }}>
-            {formatINR(r.closing_drawer_cash)}
+            {formatINR(closingDrawerCash)}
           </span>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
             <span>Cash on Hand</span>
             <span>
-              Bank: <b className="font-tabular" style={{ color: 'var(--text-main)' }}>{formatINR(r.closing_bank_balance)}</b>
+              Bank: <b className="font-tabular" style={{ color: 'var(--text-main)' }}>{formatINR(closingBankBalance)}</b>
             </span>
           </div>
         </div>
@@ -377,7 +384,7 @@ export const DailyRojmelPage: React.FC = () => {
               <h2 className="card-title">Inflows / Receipts (આવક)</h2>
             </div>
             <span className="badge badge-cash font-tabular" id="badge-total-aavak">
-              {formatINR(r.total_aavak)}
+              {formatINR(totalAavak)}
             </span>
           </div>
           <div className="table-container hide-on-mobile">
@@ -401,14 +408,16 @@ export const DailyRojmelPage: React.FC = () => {
                   aavakList.map((item: any, idx: number) => (
                     <tr key={idx}>
                       <td style={{ fontSize: '0.8rem', color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
-                        {item.created_at ? new Date(item.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                        {item.time || (item.created_at ? new Date(item.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—')}
                       </td>
                       <td>
                         <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem' }}>{item.title}</div>
-                        {item.person_name && <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>{item.person_name}</div>}
+                        {(item.category || item.person_name) && (
+                          <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>{item.category || item.person_name}</div>
+                        )}
                       </td>
                       <td>
-                        <span className="badge badge-waiting">{item.payment_method || 'Cash'}</span>
+                        <span className="badge badge-waiting">{item.method || item.payment_method || item.payment_mode || 'Cash'}</span>
                       </td>
                       <td className="font-tabular" style={{ textAlign: 'right', fontWeight: 700, color: 'var(--revenue)' }}>
                         {formatINR(item.amount)}
@@ -429,7 +438,7 @@ export const DailyRojmelPage: React.FC = () => {
               <h2 className="card-title">Outflows / Payments (જાવક)</h2>
             </div>
             <span className="badge badge-cancelled font-tabular" id="badge-total-javak">
-              {formatINR(r.total_javak)}
+              {formatINR(totalJavak)}
             </span>
           </div>
           <div className="table-container hide-on-mobile">
@@ -453,14 +462,14 @@ export const DailyRojmelPage: React.FC = () => {
                   javakList.map((item: any, idx: number) => (
                     <tr key={idx}>
                       <td style={{ fontSize: '0.8rem', color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
-                        {item.created_at ? new Date(item.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                        {item.time || (item.created_at ? new Date(item.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—')}
                       </td>
                       <td>
                         <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem' }}>{item.title}</div>
                         {item.category && <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>{item.category}</div>}
                       </td>
                       <td>
-                        <span className="badge badge-waiting">{item.payment_method || 'Cash'}</span>
+                        <span className="badge badge-waiting">{item.method || item.payment_method || item.payment_mode || 'Cash'}</span>
                       </td>
                       <td className="font-tabular" style={{ textAlign: 'right', fontWeight: 700, color: 'var(--expense)' }}>
                         {formatINR(item.amount)}
@@ -571,7 +580,7 @@ export const DailyRojmelPage: React.FC = () => {
                     required
                   />
                   <small style={{ color: 'var(--text-muted)' }}>
-                    System expected drawer cash: {formatINR(r.closing_drawer_cash)}
+                    System expected drawer cash: {formatINR(closingDrawerCash)}
                   </small>
                 </div>
 

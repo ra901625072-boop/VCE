@@ -207,6 +207,7 @@ export const SettingsPage: React.FC = () => {
                   placeholder="e.g. Pali Gram Panchayat"
                   value={profData.gram_panchayat}
                   onChange={(e) => setProfData({ ...profData, gram_panchayat: e.target.value })}
+                  spellCheck={false}
                   required
                 />
               </div>
@@ -219,6 +220,7 @@ export const SettingsPage: React.FC = () => {
                   placeholder="e.g. EGRAM-GJ-0142"
                   value={profData.center_id}
                   onChange={(e) => setProfData({ ...profData, center_id: e.target.value })}
+                  spellCheck={false}
                   required
                 />
               </div>
@@ -233,6 +235,7 @@ export const SettingsPage: React.FC = () => {
                   className="form-control"
                   value={profData.taluka}
                   onChange={(e) => setProfData({ ...profData, taluka: e.target.value })}
+                  spellCheck={false}
                   required
                 />
               </div>
@@ -244,6 +247,7 @@ export const SettingsPage: React.FC = () => {
                   className="form-control"
                   value={profData.district}
                   onChange={(e) => setProfData({ ...profData, district: e.target.value })}
+                  spellCheck={false}
                   required
                 />
               </div>
@@ -258,6 +262,7 @@ export const SettingsPage: React.FC = () => {
                   className="form-control"
                   value={profData.vce_name}
                   onChange={(e) => setProfData({ ...profData, vce_name: e.target.value })}
+                  spellCheck={false}
                   required
                 />
               </div>
@@ -269,6 +274,7 @@ export const SettingsPage: React.FC = () => {
                   className="form-control font-tabular"
                   value={profData.vce_phone}
                   onChange={(e) => setProfData({ ...profData, vce_phone: e.target.value })}
+                  spellCheck={false}
                   required
                 />
               </div>
@@ -280,6 +286,7 @@ export const SettingsPage: React.FC = () => {
                   className="form-control"
                   value={profData.talati_name}
                   onChange={(e) => setProfData({ ...profData, talati_name: e.target.value })}
+                  spellCheck={false}
                 />
               </div>
             </div>

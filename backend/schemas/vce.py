@@ -197,21 +197,31 @@ class RojmelDayRow(BaseModel):
     category: str
     title: str
     method: str
+    payment_method: Optional[str] = None
+    payment_mode: Optional[str] = None
     amount: int  # in paise
     time: str
+    created_at: Optional[str] = None
     reference: Optional[str] = None
 
 
 class RojmelSummary(BaseModel):
     date: str
+    target_date: Optional[str] = None
     opening_cash: int
     opening_bank: int
+    opening_drawer_cash: Optional[int] = None
+    opening_bank_balance: Optional[int] = None
     today_citizen_cash: int
     today_citizen_upi: int
+    aavak_cash: Optional[int] = None
+    aavak_upi: Optional[int] = None
     today_dept_received: int
     total_aavak: int
     today_expenses_cash: int
     today_expenses_online: int
+    javak_cash: Optional[int] = None
+    javak_upi: Optional[int] = None
     today_wallet_topups: int
     today_wallet_recharges_cash: int = 0
     today_wallet_recharges_online: int = 0
@@ -219,10 +229,17 @@ class RojmelSummary(BaseModel):
     total_javak: int
     closing_cash: int
     closing_bank: int
+    closing_drawer_cash: Optional[int] = None
+    closing_bank_balance: Optional[int] = None
     is_cash_deficit: bool = False
     today_net_earnings: int
     net_commission_earned: int = 0
     today_udhar_given: int
     today_udhar_recovered: int
     day_close_info: Optional[RojmelDayCloseResponse] = None
+    is_day_closed: bool = False
     entries: List[RojmelDayRow]
+    aavak_entries: Optional[List[RojmelDayRow]] = None
+    javak_entries: Optional[List[RojmelDayRow]] = None
+    inflows: Optional[List[RojmelDayRow]] = None
+    outflows: Optional[List[RojmelDayRow]] = None
