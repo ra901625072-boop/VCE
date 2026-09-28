@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { workApi, peopleApi, vceApi, formatINR, formatDate, rupeesToPaise } from '../api/client';
 import { WorkItem, Citizen, ServiceItem } from '../types';
 import { useToast } from '../context/ToastContext';
+import { Skeleton } from '../components/common/Skeleton';
 
 export const ApplicationsPage: React.FC = () => {
   const [search, setSearch] = useState('');
@@ -34,6 +35,7 @@ export const ApplicationsPage: React.FC = () => {
   const { data: workItems = [], isLoading } = useQuery({
     queryKey: ['work', search, statusFilter, categoryFilter],
     queryFn: () => workApi.getAll({ query: search || undefined, status: statusFilter || undefined, category: categoryFilter || undefined }),
+    placeholderData: (previousData) => previousData,
   });
 
   const { data: citizens = [] } = useQuery({
@@ -262,12 +264,35 @@ export const ApplicationsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody id="work-table-body">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                    Loading applications...
-                  </td>
-                </tr>
+              {isLoading && workItems.length === 0 ? (
+                Array.from({ length: 6 }).map((_, rIdx) => (
+                  <tr key={rIdx} className="skeleton-row" aria-hidden="true">
+                    <td><Skeleton width="85px" height="22px" variant="rounded" /></td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <Skeleton width="130px" height="0.85rem" variant="text" />
+                        <Skeleton width="75px" height="0.7rem" variant="text" />
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <Skeleton width="160px" height="0.85rem" variant="text" />
+                        <Skeleton width="85px" height="0.7rem" variant="text" />
+                      </div>
+                    </td>
+                    <td><Skeleton width="85px" height="22px" variant="rounded" style={{ borderRadius: '12px' }} /></td>
+                    <td><Skeleton width="75px" height="0.8rem" variant="text" /></td>
+                    <td style={{ textAlign: 'right' }}><Skeleton width="60px" height="0.85rem" variant="text" style={{ marginLeft: 'auto' }} /></td>
+                    <td style={{ textAlign: 'right' }}><Skeleton width="60px" height="0.85rem" variant="text" style={{ marginLeft: 'auto' }} /></td>
+                    <td style={{ textAlign: 'right' }}><Skeleton width="60px" height="0.85rem" variant="text" style={{ marginLeft: 'auto' }} /></td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                        <Skeleton width="60px" height="26px" variant="rounded" />
+                        <Skeleton width="60px" height="26px" variant="rounded" />
+                      </div>
+                    </td>
+                  </tr>
+                ))
               ) : workItems.length === 0 ? (
                 <tr>
                   <td colSpan={9} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-dim)' }}>
@@ -414,57 +439,78 @@ export const ApplicationsPage: React.FC = () => {
 
         {/* Mobile Adaptive Feed Cards */}
         <div className="mobile-card-list show-on-mobile-only" id="mobile-work-list" style={{ padding: '0.75rem' }}>
-          {workItems.map((w) => {
-            const token = w.token_no || w.token_number || `TK-${w.id}`;
-            const fee = w.agreed_amount || 0;
-            const received = w.received_amount || 0;
-            const pending = Math.max(0, fee - received);
-            const statusClass = getStatusClass(w.status);
-
-            return (
-              <div className="mobile-card" key={w.id} onClick={() => openTimeline(w)}>
-                <div className="mobile-card-header">
-                  <div className="mobile-card-title-group">
-                    <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-light)', fontSize: '0.825rem' }}>
-                      {token}
-                    </span>
-                    <div className="mobile-card-title">{w.person_name || 'Walk-in Citizen'}</div>
-                  </div>
-                  <span className={`badge ${statusClass}`}>{w.status}</span>
+          {isLoading && workItems.length === 0 ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div className="mobile-card" key={i} style={{ minHeight: '115px' }} aria-hidden="true">
+                <div className="mobile-card-header" style={{ marginBottom: '0.5rem' }}>
+                  <Skeleton width="85px" height="20px" variant="rounded" />
+                  <Skeleton width="75px" height="20px" variant="rounded" style={{ borderRadius: '12px' }} />
                 </div>
-                <div className="mobile-card-body">
-                  <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem' }}>{w.title}</div>
-                  <div className="mobile-card-subtitle">
-                    <span>{w.service_category || w.category || 'General'}</span>
-                    {w.portal_name && (
-                      <>
-                        <span>&bull;</span>
-                        <span style={{ color: '#f59e0b', fontWeight: 600 }}>{w.portal_name}</span>
-                      </>
-                    )}
-                  </div>
-                  <div className="mobile-card-metric-row">
-                    <div>
-                      <div className="mobile-card-metric-label">Total Fee</div>
-                      <div className="mobile-card-metric-val">{formatINR(fee)}</div>
-                    </div>
-                    <div>
-                      <div className="mobile-card-metric-label">Received</div>
-                      <div className="mobile-card-metric-val" style={{ color: 'var(--revenue)' }}>
-                        {formatINR(received)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="mobile-card-metric-label">Pending</div>
-                      <div className="mobile-card-metric-val" style={{ color: pending > 0 ? 'var(--expense)' : 'var(--revenue)' }}>
-                        {formatINR(pending)}
-                      </div>
-                    </div>
-                  </div>
+                <Skeleton width="70%" height="1rem" variant="text" style={{ marginBottom: '0.45rem' }} />
+                <Skeleton width="45%" height="0.8rem" variant="text" style={{ marginBottom: '0.75rem' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.5rem' }}>
+                  <Skeleton width="65px" height="0.85rem" variant="text" />
+                  <Skeleton width="65px" height="0.85rem" variant="text" />
                 </div>
               </div>
-            );
-          })}
+            ))
+          ) : workItems.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-dim)' }}>
+              No applications found. Click "+ New Application" above to add one.
+            </div>
+          ) : (
+            workItems.map((w) => {
+              const token = w.token_no || w.token_number || `TK-${w.id}`;
+              const fee = w.agreed_amount || 0;
+              const received = w.received_amount || 0;
+              const pending = Math.max(0, fee - received);
+              const statusClass = getStatusClass(w.status);
+
+              return (
+                <div className="mobile-card" key={w.id} onClick={() => openTimeline(w)}>
+                  <div className="mobile-card-header">
+                    <div className="mobile-card-title-group">
+                      <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-light)', fontSize: '0.825rem' }}>
+                        {token}
+                      </span>
+                      <div className="mobile-card-title">{w.person_name || 'Walk-in Citizen'}</div>
+                    </div>
+                    <span className={`badge ${statusClass}`}>{w.status}</span>
+                  </div>
+                  <div className="mobile-card-body">
+                    <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem' }}>{w.title}</div>
+                    <div className="mobile-card-subtitle">
+                      <span>{w.service_category || w.category || 'General'}</span>
+                      {w.portal_name && (
+                        <>
+                          <span>&bull;</span>
+                          <span style={{ color: '#f59e0b', fontWeight: 600 }}>{w.portal_name}</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="mobile-card-metric-row">
+                      <div>
+                        <div className="mobile-card-metric-label">Total Fee</div>
+                        <div className="mobile-card-metric-val">{formatINR(fee)}</div>
+                      </div>
+                      <div>
+                        <div className="mobile-card-metric-label">Received</div>
+                        <div className="mobile-card-metric-val" style={{ color: 'var(--revenue)' }}>
+                          {formatINR(received)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="mobile-card-metric-label">Pending</div>
+                        <div className="mobile-card-metric-val" style={{ color: pending > 0 ? 'var(--expense)' : 'var(--revenue)' }}>
+                          {formatINR(pending)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

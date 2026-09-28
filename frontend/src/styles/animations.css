@@ -252,7 +252,6 @@ button:active, .btn:active, .qa-card-btn:active, .mobile-nav-fab:active {
 
 /* Theme Switcher Micro-Rotation */
 .btn-theme-toggle .theme-icon {
-  display: inline-block;
   transition: transform 0.28s var(--ease-snappy);
 }
 
@@ -307,18 +306,30 @@ html.theme-transition *::after {
 /* Institutional Restrained Skeleton Loading Shimmer */
 @keyframes skeletonShimmer {
   0% {
-    background-position: -200% 0;
+    background-position: 200% 0;
   }
   100% {
-    background-position: 200% 0;
+    background-position: -200% 0;
   }
 }
 
-.skeleton-loading {
-  background: linear-gradient(90deg, var(--bg-surface-elevated) 25%, var(--bg-surface-hover) 50%, var(--bg-surface-elevated) 75%);
+.skeleton-loading,
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface-elevated) 0%,
+    var(--bg-surface-hover) 50%,
+    var(--bg-surface-elevated) 100%
+  );
   background-size: 200% 100%;
-  animation: skeletonShimmer 1.4s infinite ease-in-out;
-  border-radius: var(--radius-xs);
+  animation: skeletonShimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  border-radius: var(--radius-xs, 3px);
+  will-change: background-position;
+}
+
+.skeleton-card {
+  position: relative;
+  overflow: hidden;
 }
 
 /* --------------------------------------------------------------------------

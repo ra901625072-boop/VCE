@@ -4,6 +4,7 @@ import { vceApi, settingsApi, formatINR, rupeesToPaise } from '../api/client';
 import { PanchayatProfile, PortalWallet } from '../types';
 import { useToast } from '../context/ToastContext';
 import { useTheme } from '../context/ThemeContext';
+import { SettingsSkeleton } from '../components/common/PageSkeletons';
 
 export const SettingsPage: React.FC = () => {
   const toast = useToast();
@@ -11,14 +12,16 @@ export const SettingsPage: React.FC = () => {
   const { theme, setTheme } = useTheme();
 
   // Queries
-  const { data: profile } = useQuery<PanchayatProfile>({
+  const { data: profile, isLoading: isProfileLoading } = useQuery<PanchayatProfile>({
     queryKey: ['vce-profile'],
     queryFn: () => vceApi.getProfile(),
+    placeholderData: (previousData) => previousData,
   });
 
   const { data: wallets = [] } = useQuery<PortalWallet[]>({
     queryKey: ['portal-wallets'],
     queryFn: () => vceApi.getWallets(),
+    placeholderData: (previousData) => previousData,
   });
 
   const { data: workCategories = [] } = useQuery({
@@ -174,8 +177,12 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <>
-      {/* Gram Panchayat Center Profile Card */}
-      <div className="card" style={{ marginBottom: '1.65rem' }}>
+      {isProfileLoading && !profile ? (
+        <SettingsSkeleton />
+      ) : (
+        <>
+          {/* Gram Panchayat Center Profile Card */}
+          <div className="card" style={{ marginBottom: '1.65rem' }}>
         <div className="card-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <span style={{ fontSize: '1.25rem' }}>🏛️</span>
@@ -529,6 +536,8 @@ export const SettingsPage: React.FC = () => {
           </div>
         </div>
       </div>
+        </>
+      )}
 
       {/* Add Portal Wallet Modal */}
       {isAddWalletOpen && (

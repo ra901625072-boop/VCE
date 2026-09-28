@@ -20,43 +20,22 @@ class DashboardService:
         today = current_date_str()
 
         with get_db(self.db_path) as conn:
-            # 1. Today's Metrics
-            today_rev_row = conn.execute(
+            # 1. Today's Metrics (Batched into single query)
+            today_pay_row = conn.execute(
                 """
-                SELECT COALESCE(SUM(amount), 0) AS rev
+                SELECT 
+                    COALESCE(SUM(CASE WHEN LOWER(payment_method) != 'udhar' THEN amount ELSE 0 END), 0) AS rev,
+                    COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'cash' THEN amount ELSE 0 END), 0) AS cash_rev,
+                    COALESCE(SUM(CASE WHEN LOWER(payment_method) NOT IN ('cash', 'udhar') THEN amount ELSE 0 END), 0) AS upi_rev
                 FROM payments
                 WHERE payment_date = ? 
-                  AND payment_status = 'received' 
-                  AND LOWER(payment_method) != 'udhar'
+                  AND payment_status = 'received'
                 """,
                 (today,)
             ).fetchone()
-            today_revenue = today_rev_row["rev"] if today_rev_row else 0
-
-            today_cash_row = conn.execute(
-                """
-                SELECT COALESCE(SUM(amount), 0) AS rev
-                FROM payments
-                WHERE payment_date = ? 
-                  AND payment_status = 'received' 
-                  AND LOWER(payment_method) = 'cash'
-                """,
-                (today,)
-            ).fetchone()
-            today_citizen_cash = today_cash_row["rev"] if today_cash_row else 0
-
-            today_upi_row = conn.execute(
-                """
-                SELECT COALESCE(SUM(amount), 0) AS rev
-                FROM payments
-                WHERE payment_date = ? 
-                  AND payment_status = 'received' 
-                  AND LOWER(payment_method) != 'cash'
-                  AND LOWER(payment_method) != 'udhar'
-                """,
-                (today,)
-            ).fetchone()
-            today_citizen_upi = today_upi_row["rev"] if today_upi_row else 0
+            today_revenue = today_pay_row["rev"] if today_pay_row else 0
+            today_citizen_cash = today_pay_row["cash_rev"] if today_pay_row else 0
+            today_citizen_upi = today_pay_row["upi_rev"] if today_pay_row else 0
 
             today_exp_row = conn.execute(
                 "SELECT COALESCE(SUM(amount), 0) AS exp FROM expenses WHERE expense_date = ? AND is_archived = 0",
@@ -154,21 +133,41 @@ class DashboardService:
             active_work_count = work_counts["active_c"] or 0
             completed_work_count = work_counts["completed_c"] or 0
 
-            # 4. Trend Data: Last 7 days or filtered range
-            trend_points = []
-            # Calculate daily points for the last 7 days up to today
+            # 4. Trend Data: Last 7 days or filtered range (Batched into 2 queries instead of 14)
             today_d = date.today()
+            start_7d = (today_d - timedelta(days=6)).strftime("%Y-%m-%d")
+            end_7d = today_d.strftime("%Y-%m-%d")
+
+            rev_rows = conn.execute(
+                """
+                SELECT payment_date, COALESCE(SUM(amount), 0) AS s 
+                FROM payments 
+                WHERE payment_date >= ? AND payment_date <= ? 
+                  AND payment_status = 'received' 
+                  AND LOWER(payment_method) != 'udhar'
+                GROUP BY payment_date
+                """,
+                (start_7d, end_7d)
+            ).fetchall()
+            rev_map = {r["payment_date"]: r["s"] for r in rev_rows}
+
+            exp_rows = conn.execute(
+                """
+                SELECT expense_date, COALESCE(SUM(amount), 0) AS s 
+                FROM expenses 
+                WHERE expense_date >= ? AND expense_date <= ? 
+                  AND is_archived = 0
+                GROUP BY expense_date
+                """,
+                (start_7d, end_7d)
+            ).fetchall()
+            exp_map = {r["expense_date"]: r["s"] for r in exp_rows}
+
+            trend_points = []
             for i in range(6, -1, -1):
-                day_d = today_d - timedelta(days=i)
-                day_str = day_d.strftime("%Y-%m-%d")
-                day_rev = conn.execute(
-                    "SELECT COALESCE(SUM(amount), 0) AS s FROM payments WHERE payment_date = ? AND payment_status = 'received' AND LOWER(payment_method) != 'udhar'",
-                    (day_str,)
-                ).fetchone()["s"]
-                day_exp = conn.execute(
-                    "SELECT COALESCE(SUM(amount), 0) AS s FROM expenses WHERE expense_date = ? AND is_archived = 0",
-                    (day_str,)
-                ).fetchone()["s"]
+                day_str = (today_d - timedelta(days=i)).strftime("%Y-%m-%d")
+                day_rev = rev_map.get(day_str, 0)
+                day_exp = exp_map.get(day_str, 0)
                 trend_points.append(TrendPoint(
                     date=day_str,
                     revenue=day_rev,

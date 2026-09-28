@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, paymentsApi, expensesApi, formatINR, formatDate, rupeesToPaise } from '../api/client';
 import { useToast } from '../context/ToastContext';
+import { Skeleton } from '../components/common/Skeleton';
 
 export const TransactionsPage: React.FC = () => {
   const [activeType, setActiveType] = useState<'all' | 'payment' | 'expense' | 'udhar'>('all');
@@ -97,6 +98,7 @@ export const TransactionsPage: React.FC = () => {
 
       return combined;
     },
+    placeholderData: (previousData) => previousData,
   });
 
   const transactions = searchResults || [];
@@ -367,13 +369,28 @@ export const TransactionsPage: React.FC = () => {
                 <th style={{ width: '110px', minWidth: '110px', textAlign: 'right' }}>Amount (₹)</th>
               </tr>
             </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                    Loading transactions...
-                  </td>
-                </tr>
+            <tbody id="transactions-table-body">
+              {isLoading && transactions.length === 0 ? (
+                Array.from({ length: 6 }).map((_, rIdx) => (
+                  <tr key={rIdx} className="skeleton-row" aria-hidden="true">
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <Skeleton width="85px" height="0.85rem" variant="text" />
+                        <Skeleton width="55px" height="0.7rem" variant="text" />
+                      </div>
+                    </td>
+                    <td><Skeleton width="75px" height="22px" variant="rounded" style={{ borderRadius: '10px' }} /></td>
+                    <td><Skeleton width="140px" height="0.9rem" variant="text" /></td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <Skeleton width="160px" height="0.85rem" variant="text" />
+                        <Skeleton width="90px" height="0.7rem" variant="text" />
+                      </div>
+                    </td>
+                    <td><Skeleton width="70px" height="0.85rem" variant="text" /></td>
+                    <td style={{ textAlign: 'right' }}><Skeleton width="75px" height="1rem" variant="text" style={{ marginLeft: 'auto' }} /></td>
+                  </tr>
+                ))
               ) : transactions.length === 0 ? (
                 <tr>
                   <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-dim)' }}>
@@ -432,35 +449,58 @@ export const TransactionsPage: React.FC = () => {
 
         {/* Mobile Feed */}
         <div className="mobile-card-list show-on-mobile-only" style={{ padding: '0.75rem' }}>
-          {transactions.map((t, idx) => (
-            <div className="mobile-card" key={idx}>
-              <div className="mobile-card-header">
-                <div className="mobile-card-title-group">
-                  <div className="mobile-card-title">{t.entity}</div>
-                  <div className="mobile-card-subtitle">{formatDate(t.date)} &bull; {t.method}</div>
+          {isLoading && transactions.length === 0 ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div className="mobile-card" key={i} style={{ minHeight: '110px' }} aria-hidden="true">
+                <div className="mobile-card-header" style={{ marginBottom: '0.5rem' }}>
+                  <div style={{ width: '65%' }}>
+                    <Skeleton width="80%" height="1.05rem" variant="text" style={{ marginBottom: '4px' }} />
+                    <Skeleton width="50%" height="0.75rem" variant="text" />
+                  </div>
+                  <Skeleton width="65px" height="20px" variant="rounded" style={{ borderRadius: '10px' }} />
                 </div>
-                <span className={`badge ${t.rawType === 'expense' ? 'badge-cancelled' : 'badge-completed'}`}>
-                  {t.type}
-                </span>
+                <Skeleton width="75%" height="0.85rem" variant="text" style={{ marginBottom: '0.5rem' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.5rem' }}>
+                  <Skeleton width="60px" height="0.8rem" variant="text" />
+                  <Skeleton width="70px" height="0.95rem" variant="text" />
+                </div>
               </div>
-              <div className="mobile-card-body">
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', marginBottom: '0.4rem' }}>{t.work}</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t.notes || '—'}</span>
-                  <span
-                    className="font-tabular"
-                    style={{
-                      fontWeight: 700,
-                      fontSize: '1rem',
-                      color: t.rawType === 'expense' ? 'var(--expense)' : 'var(--revenue)',
-                    }}
-                  >
-                    {t.rawType === 'expense' ? `-${formatINR(t.amount)}` : `+${formatINR(t.amount)}`}
+            ))
+          ) : transactions.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-dim)' }}>
+              No transactions found for the selected filter.
+            </div>
+          ) : (
+            transactions.map((t, idx) => (
+              <div className="mobile-card" key={idx}>
+                <div className="mobile-card-header">
+                  <div className="mobile-card-title-group">
+                    <div className="mobile-card-title">{t.entity}</div>
+                    <div className="mobile-card-subtitle">{formatDate(t.date)} &bull; {t.method}</div>
+                  </div>
+                  <span className={`badge ${t.rawType === 'expense' ? 'badge-cancelled' : 'badge-completed'}`}>
+                    {t.type}
                   </span>
                 </div>
+                <div className="mobile-card-body">
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', marginBottom: '0.4rem' }}>{t.work}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t.notes || '—'}</span>
+                    <span
+                      className="font-tabular"
+                      style={{
+                        fontWeight: 700,
+                        fontSize: '1rem',
+                        color: t.rawType === 'expense' ? 'var(--expense)' : 'var(--revenue)',
+                      }}
+                    >
+                      {t.rawType === 'expense' ? `-${formatINR(t.amount)}` : `+${formatINR(t.amount)}`}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 

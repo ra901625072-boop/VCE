@@ -576,18 +576,17 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
     date_str = target_date or today_date_str()
 
     with get_db() as conn:
-        # Opening balances: sum of all payments & receipts prior to this date
-        prior_cash_in = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM payments 
-               WHERE payment_date < ? AND payment_status = 'received' AND LOWER(payment_method) = 'cash'""",
+        # Opening balances: sum of all payments & receipts prior to this date (Batched per table)
+        prior_pay_row = conn.execute(
+            """SELECT 
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'cash' THEN amount ELSE 0 END), 0) AS cash_in,
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) NOT IN ('cash', 'udhar') THEN amount ELSE 0 END), 0) AS online_in
+               FROM payments 
+               WHERE payment_date < ? AND payment_status = 'received'""",
             (date_str,)
-        ).fetchone()["total"]
-
-        prior_online_in = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM payments 
-               WHERE payment_date < ? AND payment_status = 'received' AND LOWER(payment_method) != 'cash' AND LOWER(payment_method) != 'udhar'""",
-            (date_str,)
-        ).fetchone()["total"]
+        ).fetchone()
+        prior_cash_in = prior_pay_row["cash_in"] if prior_pay_row else 0
+        prior_online_in = prior_pay_row["online_in"] if prior_pay_row else 0
 
         prior_dept_in = conn.execute(
             """SELECT COALESCE(SUM(amount_received), 0) AS total FROM dept_work_orders 
@@ -595,58 +594,54 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
             (date_str,)
         ).fetchone()["total"]
 
-        prior_cash_out = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM expenses 
-               WHERE expense_date < ? AND is_archived = 0 AND LOWER(payment_method) = 'cash'""",
+        prior_exp_row = conn.execute(
+            """SELECT 
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'cash' THEN amount ELSE 0 END), 0) AS cash_out,
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) != 'cash' THEN amount ELSE 0 END), 0) AS online_out
+               FROM expenses 
+               WHERE expense_date < ? AND is_archived = 0""",
             (date_str,)
-        ).fetchone()["total"]
+        ).fetchone()
+        prior_cash_out = prior_exp_row["cash_out"] if prior_exp_row else 0
+        prior_online_out = prior_exp_row["online_out"] if prior_exp_row else 0
 
-        prior_online_out = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM expenses 
-               WHERE expense_date < ? AND is_archived = 0 AND LOWER(payment_method) != 'cash'""",
+        prior_wallet_row = conn.execute(
+            """SELECT 
+                COALESCE(SUM(CASE WHEN (LOWER(notes) LIKE '%[cash]%' OR LOWER(notes) LIKE '%cash%') THEN amount ELSE 0 END), 0) AS w_cash,
+                COALESCE(SUM(CASE WHEN NOT (LOWER(notes) LIKE '%[cash]%' OR LOWER(notes) LIKE '%cash%') THEN amount ELSE 0 END), 0) AS w_online
+               FROM wallet_transactions 
+               WHERE transaction_date < ? AND transaction_type = 'topup'""",
             (date_str,)
-        ).fetchone()["total"]
+        ).fetchone()
+        prior_wallet_cash = prior_wallet_row["w_cash"] if prior_wallet_row else 0
+        prior_wallet_online = prior_wallet_row["w_online"] if prior_wallet_row else 0
 
-        prior_wallet_cash = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM wallet_transactions 
-               WHERE transaction_date < ? AND transaction_type = 'topup' AND (LOWER(notes) LIKE '%[cash]%' OR LOWER(notes) LIKE '%cash%')""",
+        prior_remit_row = conn.execute(
+            """SELECT 
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'cash' THEN amount ELSE 0 END), 0) AS r_cash,
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) != 'cash' THEN amount ELSE 0 END), 0) AS r_online
+               FROM panchayat_remittances 
+               WHERE remittance_date < ?""",
             (date_str,)
-        ).fetchone()["total"]
-
-        prior_wallet_online = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM wallet_transactions 
-               WHERE transaction_date < ? AND transaction_type = 'topup' AND NOT (LOWER(notes) LIKE '%[cash]%' OR LOWER(notes) LIKE '%cash%')""",
-            (date_str,)
-        ).fetchone()["total"]
-
-        prior_remit_cash = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM panchayat_remittances 
-               WHERE remittance_date < ? AND LOWER(payment_method) = 'cash'""",
-            (date_str,)
-        ).fetchone()["total"]
-
-        prior_remit_online = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM panchayat_remittances 
-               WHERE remittance_date < ? AND LOWER(payment_method) != 'cash'""",
-            (date_str,)
-        ).fetchone()["total"]
+        ).fetchone()
+        prior_remit_cash = prior_remit_row["r_cash"] if prior_remit_row else 0
+        prior_remit_online = prior_remit_row["r_online"] if prior_remit_row else 0
 
         # Exact opening positions without zero-clamping
         opening_cash = prior_cash_in - (prior_cash_out + prior_wallet_cash + prior_remit_cash)
         opening_bank = (prior_online_in + prior_dept_in) - (prior_online_out + prior_wallet_online + prior_remit_online)
 
-        # Today's Citizen Inflows
-        today_cash_in = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM payments 
-               WHERE payment_date = ? AND payment_status = 'received' AND LOWER(payment_method) = 'cash'""",
+        # Today's Citizen Inflows (Batched)
+        today_pay_row = conn.execute(
+            """SELECT 
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'cash' THEN amount ELSE 0 END), 0) AS cash_in,
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) IN ('online', 'upi', 'bank transfer') THEN amount ELSE 0 END), 0) AS upi_in
+               FROM payments 
+               WHERE payment_date = ? AND payment_status = 'received'""",
             (date_str,)
-        ).fetchone()["total"]
-
-        today_upi_in = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM payments 
-               WHERE payment_date = ? AND payment_status = 'received' AND LOWER(payment_method) IN ('online', 'upi', 'bank transfer')""",
-            (date_str,)
-        ).fetchone()["total"]
+        ).fetchone()
+        today_cash_in = today_pay_row["cash_in"] if today_pay_row else 0
+        today_upi_in = today_pay_row["upi_in"] if today_pay_row else 0
 
         today_dept_in = conn.execute(
             """SELECT COALESCE(SUM(amount_received), 0) AS total FROM dept_work_orders 
@@ -654,42 +649,39 @@ def get_daily_rojmel(target_date: Optional[str] = Query(None, description="Date 
             (date_str,)
         ).fetchone()["total"]
 
-        # Today's Outflows
-        today_exp_cash = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM expenses 
-               WHERE expense_date = ? AND is_archived = 0 AND LOWER(payment_method) = 'cash'""",
+        # Today's Outflows (Batched)
+        today_exp_row = conn.execute(
+            """SELECT 
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'cash' THEN amount ELSE 0 END), 0) AS cash_out,
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) != 'cash' THEN amount ELSE 0 END), 0) AS online_out
+               FROM expenses 
+               WHERE expense_date = ? AND is_archived = 0""",
             (date_str,)
-        ).fetchone()["total"]
+        ).fetchone()
+        today_exp_cash = today_exp_row["cash_out"] if today_exp_row else 0
+        today_exp_online = today_exp_row["online_out"] if today_exp_row else 0
 
-        today_exp_online = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM expenses 
-               WHERE expense_date = ? AND is_archived = 0 AND LOWER(payment_method) != 'cash'""",
+        today_wallet_row = conn.execute(
+            """SELECT 
+                COALESCE(SUM(CASE WHEN (LOWER(notes) LIKE '%[cash]%' OR LOWER(notes) LIKE '%cash%') THEN amount ELSE 0 END), 0) AS w_cash,
+                COALESCE(SUM(CASE WHEN NOT (LOWER(notes) LIKE '%[cash]%' OR LOWER(notes) LIKE '%cash%') THEN amount ELSE 0 END), 0) AS w_online
+               FROM wallet_transactions 
+               WHERE transaction_date = ? AND transaction_type = 'topup'""",
             (date_str,)
-        ).fetchone()["total"]
+        ).fetchone()
+        today_wallet_recharges_cash = today_wallet_row["w_cash"] if today_wallet_row else 0
+        today_wallet_recharges_online = today_wallet_row["w_online"] if today_wallet_row else 0
 
-        today_wallet_recharges_cash = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM wallet_transactions 
-               WHERE transaction_date = ? AND transaction_type = 'topup' AND (LOWER(notes) LIKE '%[cash]%' OR LOWER(notes) LIKE '%cash%')""",
+        today_remit_row = conn.execute(
+            """SELECT 
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'cash' THEN amount ELSE 0 END), 0) AS r_cash,
+                COALESCE(SUM(CASE WHEN LOWER(payment_method) != 'cash' THEN amount ELSE 0 END), 0) AS r_online
+               FROM panchayat_remittances 
+               WHERE remittance_date = ?""",
             (date_str,)
-        ).fetchone()["total"]
-
-        today_wallet_recharges_online = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM wallet_transactions 
-               WHERE transaction_date = ? AND transaction_type = 'topup' AND NOT (LOWER(notes) LIKE '%[cash]%' OR LOWER(notes) LIKE '%cash%')""",
-            (date_str,)
-        ).fetchone()["total"]
-
-        today_remit_cash = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM panchayat_remittances 
-               WHERE remittance_date = ? AND LOWER(payment_method) = 'cash'""",
-            (date_str,)
-        ).fetchone()["total"]
-
-        today_remit_online = conn.execute(
-            """SELECT COALESCE(SUM(amount), 0) AS total FROM panchayat_remittances 
-               WHERE remittance_date = ? AND LOWER(payment_method) != 'cash'""",
-            (date_str,)
-        ).fetchone()["total"]
+        ).fetchone()
+        today_remit_cash = today_remit_row["r_cash"] if today_remit_row else 0
+        today_remit_online = today_remit_row["r_online"] if today_remit_row else 0
 
         today_wallet_topups = today_wallet_recharges_cash + today_wallet_recharges_online
         today_panchayat_remitted = today_remit_cash + today_remit_online

@@ -222,20 +222,29 @@
   border-color: var(--border-strong);
 }
 
+.btn-theme-toggle .theme-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
 .btn-theme-toggle .sun-icon {
   display: inline-block;
   vertical-align: middle;
 }
 .btn-theme-toggle .moon-icon {
-  display: none;
+  display: none !important;
   vertical-align: middle;
 }
 
 [data-theme="light"] .btn-theme-toggle .sun-icon {
-  display: none;
+  display: none !important;
 }
 [data-theme="light"] .btn-theme-toggle .moon-icon {
-  display: inline-block;
+  display: inline-block !important;
 }
 
 /* --------------------------------------------------------------------------

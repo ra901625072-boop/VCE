@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ThemeToggleButton } from '../context/ThemeContext';
 
 export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('akrajput2005');
@@ -10,9 +11,6 @@ export const LoginPage: React.FC = () => {
   const [alert, setAlert] = useState<{ message: string; type: 'error' | 'info' | 'success' } | null>(null);
   const [loading, setLoading] = useState(false);
   const [timeStr, setTimeStr] = useState('');
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    return (localStorage.getItem('vce_theme') as 'dark' | 'light') || 'dark';
-  });
 
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -41,16 +39,6 @@ export const LoginPage: React.FC = () => {
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
   }, []);
-
-  // Theme
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('vce_theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
-  };
 
   // Redirect if authenticated
   useEffect(() => {
@@ -172,16 +160,7 @@ export const LoginPage: React.FC = () => {
             </a>
           )}
 
-          <button
-            className="btn-theme-toggle"
-            id="btn-theme-switch-login"
-            onClick={toggleTheme}
-            title="Toggle Light / Dark Mode"
-            aria-label="Toggle Theme"
-          >
-            <span className="theme-icon sun-icon">{theme === 'dark' ? '☀️' : '🌙'}</span>
-            <span className="theme-text">Mode</span>
-          </button>
+          <ThemeToggleButton id="btn-theme-switch-login" />
         </div>
       </header>
 

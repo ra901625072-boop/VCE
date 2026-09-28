@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { peopleApi, paymentsApi, formatINR, formatDate, rupeesToPaise } from '../api/client';
 import { Citizen } from '../types';
 import { useToast } from '../context/ToastContext';
+import { Skeleton } from '../components/common/Skeleton';
 
 export const CitizensPage: React.FC = () => {
   const [search, setSearch] = useState('');
@@ -23,6 +24,7 @@ export const CitizensPage: React.FC = () => {
   const { data: citizens = [], isLoading } = useQuery({
     queryKey: ['citizens', search, typeFilter, onlyUdhar],
     queryFn: () => peopleApi.getAll({ query: search || undefined, type: typeFilter || undefined, only_udhar: onlyUdhar }),
+    placeholderData: (previousData) => previousData,
   });
 
   const totalVillageUdhar = citizens.reduce((acc, c) => acc + (c.total_pending || 0), 0);
@@ -254,12 +256,30 @@ export const CitizensPage: React.FC = () => {
               </tr>
             </thead>
             <tbody id="people-table-body">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                    Loading citizens directory...
-                  </td>
-                </tr>
+              {isLoading && citizens.length === 0 ? (
+                Array.from({ length: 6 }).map((_, rIdx) => (
+                  <tr key={rIdx} className="skeleton-row" aria-hidden="true">
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <Skeleton width="140px" height="0.9rem" variant="text" />
+                        <Skeleton width="70px" height="18px" variant="rounded" style={{ borderRadius: '10px' }} />
+                      </div>
+                    </td>
+                    <td><Skeleton width="110px" height="0.85rem" variant="text" /></td>
+                    <td><Skeleton width="95px" height="0.85rem" variant="text" /></td>
+                    <td><Skeleton width="105px" height="0.85rem" variant="text" /></td>
+                    <td style={{ textAlign: 'center' }}><Skeleton width="45px" height="20px" variant="rounded" style={{ margin: '0 auto' }} /></td>
+                    <td style={{ textAlign: 'right' }}><Skeleton width="60px" height="0.85rem" variant="text" style={{ marginLeft: 'auto' }} /></td>
+                    <td style={{ textAlign: 'right' }}><Skeleton width="60px" height="0.85rem" variant="text" style={{ marginLeft: 'auto' }} /></td>
+                    <td style={{ textAlign: 'right' }}><Skeleton width="65px" height="0.85rem" variant="text" style={{ marginLeft: 'auto' }} /></td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                        <Skeleton width="60px" height="26px" variant="rounded" />
+                        <Skeleton width="26px" height="26px" variant="rounded" />
+                      </div>
+                    </td>
+                  </tr>
+                ))
               ) : citizens.length === 0 ? (
                 <tr>
                   <td colSpan={9} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-dim)' }}>
@@ -395,45 +415,68 @@ export const CitizensPage: React.FC = () => {
 
         {/* Mobile Feed */}
         <div className="mobile-card-list show-on-mobile-only" style={{ padding: '0.75rem' }}>
-          {citizens.map((p) => {
-            const pending = p.total_pending || 0;
-            const isFarmer = (p.citizen_type || '').toLowerCase().includes('farmer');
-
-            return (
-              <div className="mobile-card" key={p.id} onClick={() => openKhataLedger(p)}>
-                <div className="mobile-card-header">
-                  <div className="mobile-card-title-group">
-                    <div className="mobile-card-title">{p.name}</div>
-                    <div className="mobile-card-subtitle">
-                      <span>{p.village || 'Main Village'}</span>
-                      {p.phone && <span>&bull; {p.phone}</span>}
-                    </div>
+          {isLoading && citizens.length === 0 ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div className="mobile-card" key={i} style={{ minHeight: '115px' }} aria-hidden="true">
+                <div className="mobile-card-header" style={{ marginBottom: '0.5rem' }}>
+                  <div style={{ width: '65%' }}>
+                    <Skeleton width="80%" height="1.05rem" variant="text" style={{ marginBottom: '4px' }} />
+                    <Skeleton width="50%" height="0.75rem" variant="text" />
                   </div>
-                  <span className={`badge ${isFarmer ? 'badge-completed' : 'badge-waiting'}`}>
-                    {p.citizen_type || 'General'}
-                  </span>
+                  <Skeleton width="65px" height="20px" variant="rounded" style={{ borderRadius: '10px' }} />
                 </div>
-                <div className="mobile-card-body">
-                  <div className="mobile-card-metric-row">
-                    <div>
-                      <div className="mobile-card-metric-label">Total Services</div>
-                      <div className="mobile-card-metric-val">{p.work_count || 0}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.5rem', marginTop: '0.65rem' }}>
+                  <Skeleton width="65px" height="0.85rem" variant="text" />
+                  <Skeleton width="65px" height="0.85rem" variant="text" />
+                  <Skeleton width="65px" height="0.85rem" variant="text" />
+                </div>
+              </div>
+            ))
+          ) : citizens.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-dim)' }}>
+              No citizen records found.
+            </div>
+          ) : (
+            citizens.map((p) => {
+              const pending = p.total_pending || 0;
+              const isFarmer = (p.citizen_type || '').toLowerCase().includes('farmer');
+
+              return (
+                <div className="mobile-card" key={p.id} onClick={() => openKhataLedger(p)}>
+                  <div className="mobile-card-header">
+                    <div className="mobile-card-title-group">
+                      <div className="mobile-card-title">{p.name}</div>
+                      <div className="mobile-card-subtitle">
+                        <span>{p.village || 'Main Village'}</span>
+                        {p.phone && <span>&bull; {p.phone}</span>}
+                      </div>
                     </div>
-                    <div>
-                      <div className="mobile-card-metric-label">Total Fees</div>
-                      <div className="mobile-card-metric-val">{formatINR(p.total_agreed || 0)}</div>
-                    </div>
-                    <div>
-                      <div className="mobile-card-metric-label">Pending Udhar</div>
-                      <div className="mobile-card-metric-val" style={{ color: pending > 0 ? 'var(--expense)' : 'var(--revenue)' }}>
-                        {formatINR(pending)}
+                    <span className={`badge ${isFarmer ? 'badge-completed' : 'badge-waiting'}`}>
+                      {p.citizen_type || 'General'}
+                    </span>
+                  </div>
+                  <div className="mobile-card-body">
+                    <div className="mobile-card-metric-row">
+                      <div>
+                        <div className="mobile-card-metric-label">Total Services</div>
+                        <div className="mobile-card-metric-val">{p.work_count || 0}</div>
+                      </div>
+                      <div>
+                        <div className="mobile-card-metric-label">Total Fees</div>
+                        <div className="mobile-card-metric-val">{formatINR(p.total_agreed || 0)}</div>
+                      </div>
+                      <div>
+                        <div className="mobile-card-metric-label">Pending Udhar</div>
+                        <div className="mobile-card-metric-val" style={{ color: pending > 0 ? 'var(--expense)' : 'var(--revenue)' }}>
+                          {formatINR(pending)}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
 

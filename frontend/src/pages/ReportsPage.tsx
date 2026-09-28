@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { reportsApi, vceApi, formatINR, formatDate } from '../api/client';
 import { ReportData } from '../types';
+import { Skeleton } from '../components/common/Skeleton';
 
 export const ReportsPage: React.FC = () => {
   const [reportType, setReportType] = useState('revenue');
@@ -17,6 +18,7 @@ export const ReportsPage: React.FC = () => {
   const { data: report, isLoading, refetch } = useQuery<ReportData>({
     queryKey: ['reports', reportType, preset, startDate, endDate],
     queryFn: () => reportsApi.get(reportType, preset, startDate, endDate),
+    placeholderData: (previousData) => previousData,
   });
 
   const handlePrint = () => {
@@ -235,13 +237,21 @@ export const ReportsPage: React.FC = () => {
                 ))}
               </tr>
             </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={columns.length || 5} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                    Generating statement...
-                  </td>
-                </tr>
+            <tbody id="report-table-body">
+              {isLoading && rows.length === 0 ? (
+                Array.from({ length: 6 }).map((_, rIdx) => (
+                  <tr key={rIdx} className="skeleton-row" aria-hidden="true">
+                    {(columns.length > 0 ? columns : Array.from({ length: 5 })).map((_, cIdx) => (
+                      <td key={cIdx} style={{ padding: '0.85rem' }}>
+                        <Skeleton
+                          width={cIdx === 0 ? '70%' : cIdx === 1 ? '90%' : '65%'}
+                          height="0.85rem"
+                          variant="text"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))
               ) : rows.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length || 5} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>

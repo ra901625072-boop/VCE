@@ -49,19 +49,21 @@ export const ThemeToggleButton: React.FC<{ id?: string; className?: string }> = 
   id = 'btn-theme-switch-top',
   className = '',
 }) => {
-  const { toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   return (
     <button
       className={`btn-theme-toggle ${className}`}
       id={id}
       onClick={toggleTheme}
-      title="Toggle Light / Dark Mode"
-      aria-label="Toggle Theme"
+      title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+      aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
       type="button"
     >
-      <span className="theme-icon sun-icon">☀️</span>
-      <span className="theme-icon moon-icon">🌙</span>
+      <span className="theme-icon" aria-hidden="true">
+        {isDark ? '☀️' : '🌙'}
+      </span>
       <span className="theme-text">Mode</span>
     </button>
   );

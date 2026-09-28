@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { vceApi, formatINR, formatDate, getTodayDateStr, rupeesToPaise } from '../api/client';
 import { RojmelData } from '../types';
 import { useToast } from '../context/ToastContext';
+import { RojmelSkeleton } from '../components/common/PageSkeletons';
 
 export const DailyRojmelPage: React.FC = () => {
   const [targetDate, setTargetDate] = useState<string>(getTodayDateStr());
@@ -27,6 +28,7 @@ export const DailyRojmelPage: React.FC = () => {
   const { data: rojmel, isLoading } = useQuery<RojmelData>({
     queryKey: ['rojmel', targetDate],
     queryFn: () => vceApi.getRojmel(targetDate),
+    placeholderData: (previousData) => previousData,
   });
 
   const { data: profile } = useQuery({
@@ -180,8 +182,12 @@ export const DailyRojmelPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Official Printable Letterhead (visible ONLY in print) */}
-      <div className="print-only-header">
+      {isLoading && !rojmel ? (
+        <RojmelSkeleton />
+      ) : (
+        <>
+          {/* Official Printable Letterhead (visible ONLY in print) */}
+          <div className="print-only-header">
         <div className="print-header-top">
           <div>
             <h1 className="print-header-title">ગુજરાત સરકાર • પંચાયત, ગ્રામ ગૃહનિર્માણ અને ગ્રામ વિકાસ વિભાગ</h1>
@@ -467,6 +473,8 @@ export const DailyRojmelPage: React.FC = () => {
           </div>
         </div>
       </div>
+        </>
+      )}
 
       {/* Remit GP Modal */}
       {isRemitOpen && (

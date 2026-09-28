@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { dashboardApi, vceApi, formatINR, rupeesToPaise } from '../api/client';
 import { useToast } from '../context/ToastContext';
 import { QuickEntryModal } from '../components/common/QuickEntryModal';
+import { DashboardSkeleton } from '../components/common/PageSkeletons';
 
 export const DashboardPage: React.FC = () => {
   const [preset, setPreset] = useState<string>('this_month');
@@ -26,6 +27,7 @@ export const DashboardPage: React.FC = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard', preset, customStart, customEnd],
     queryFn: () => dashboardApi.get(preset, customStart || undefined, customEnd || undefined),
+    placeholderData: (previousData) => previousData,
     refetchInterval: 30000,
   });
 
@@ -199,10 +201,14 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Metric Cards Grid — Clean, Solid, Grounded VCE Palette */}
-      <section className="metrics-grid">
-        {/* Today's Citizen Revenue */}
-        <div className="stat-card">
+      {isLoading && !data ? (
+        <DashboardSkeleton />
+      ) : (
+        <>
+          {/* Metric Cards Grid — Clean, Solid, Grounded VCE Palette */}
+          <section className="metrics-grid">
+            {/* Today's Citizen Revenue */}
+            <div className="stat-card">
           <div className="stat-card-header">
             <span className="stat-label">Today's Revenue</span>
             <span className="stat-pill revenue">+ Inflows (આવક)</span>
@@ -584,6 +590,8 @@ export const DashboardPage: React.FC = () => {
           })}
         </div>
       </div>
+        </>
+      )}
 
       {/* Wallet Top-up Modal (1:1 with dashboard.js modal) */}
       {walletModalOpen && (
