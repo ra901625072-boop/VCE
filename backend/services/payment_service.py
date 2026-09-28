@@ -92,7 +92,10 @@ class PaymentService:
 
             amount_fmt = format_inr(data.amount)
             display_entity = data.person_name or person['name']
-            desc = f"Received {amount_fmt} via {data.payment_method} from {display_entity}"
+            if data.payment_method and data.payment_method.lower() == 'udhar':
+                desc = f"Recorded direct Udhar of {amount_fmt} to {display_entity}"
+            else:
+                desc = f"Received {amount_fmt} via {data.payment_method} from {display_entity}"
             if work_title:
                 desc += f" for work '{work_title}'"
             log_activity(conn, "payment", payment_id, "created", desc)

@@ -94,3 +94,26 @@ def test_walkin_and_other_income_receipts(temp_db):
     registered_person = p_service.get_by_id(receipt3["person_id"])
     assert registered_person["name"] == "Rameshbhai Thakor"
 
+
+def test_direct_udhar_creation(temp_db):
+    pay_service = PaymentService(temp_db)
+    p_service = PersonService(temp_db)
+
+    citizen = p_service.create(PersonCreate(name="Bhavik Patel", village="Pali"))
+
+    # Direct Udhar given to Bhavik (work_id=None, payment_method="Udhar")
+    udhar_entry = pay_service.create(PaymentCreate(
+        person_id=citizen["id"],
+        amount=15000,
+        payment_method="Udhar",
+        notes="7/12 Land record copy credit"
+    ))
+    assert udhar_entry["amount"] == 15000
+    assert udhar_entry["payment_method"] == "Udhar"
+
+    # Check Bhavik's financial summary
+    summary = p_service.get_by_id(citizen["id"])
+    assert summary["total_pending"] == 15000
+    assert summary["total_agreed"] == 15000
+    assert summary["total_received"] == 0
+

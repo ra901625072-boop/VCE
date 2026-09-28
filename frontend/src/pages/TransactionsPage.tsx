@@ -16,6 +16,15 @@ const INCOME_PRESETS = [
   { label: 'Miscellaneous', guj: 'પરચૂરણ આવક', icon: '💰', notes: 'General center cash receipt' },
 ];
 
+const UDHAR_PRESETS = [
+  { label: '7/12 & 8-A Nakal', guj: '૭/૧૨ નકલ', icon: '📜', notes: '7/12 land record copy fees pending' },
+  { label: 'Govt Scheme Form', guj: 'યોજના અરજી', icon: '📝', notes: 'Online scheme application form fee' },
+  { label: 'Aadhaar / Voter ID', guj: 'આધાર / ચૂંટણી કાર્ડ', icon: '🪪', notes: 'Card download & PVC print charge' },
+  { label: 'iKhedut Scheme', guj: 'ખેડૂત અરજી', icon: '🌾', notes: 'iKhedut subsidy application fee' },
+  { label: 'Photocopy / Print', guj: 'ઝેરોક્ષ / પ્રિન્ટ', icon: '🖨️', notes: 'Photocopies and document printouts' },
+  { label: 'Electricity / Bill', guj: 'લાઈટ બિલ ચલણ', icon: '⚡', notes: 'Utility bill submission charge' },
+];
+
 export const TransactionsPage: React.FC = () => {
   const [activeType, setActiveType] = useState<'all' | 'payment' | 'expense' | 'udhar'>('all');
   const [search, setSearch] = useState('');
@@ -121,6 +130,7 @@ export const TransactionsPage: React.FC = () => {
   const transactions = searchResults || [];
   const totalInflows = transactions.filter((t) => t.is_income).reduce((acc, t) => acc + (t.amount || 0), 0);
   const totalOutflows = transactions.filter((t) => !t.is_income && t.type !== 'Udhar').reduce((acc, t) => acc + (t.amount || 0), 0);
+  const totalUdhar = transactions.filter((t) => t.type === 'Udhar').reduce((acc, t) => acc + (t.amount || 0), 0);
   const netBalance = totalInflows - totalOutflows;
 
   // Fetch registered citizens for selection
@@ -141,20 +151,26 @@ export const TransactionsPage: React.FC = () => {
     setRcptNotes('');
   };
 
-  // Create Receipt Mutation
+  // Create Receipt or Udhar Mutation
   const createReceiptMutation = useMutation({
     mutationFn: async () => {
       const numAmt = parseFloat(rcptAmount);
       if (isNaN(numAmt) || numAmt <= 0) {
-        throw new Error('Please enter a valid receipt amount in rupees');
+        throw new Error('Please enter a valid amount in rupees');
       }
 
       const isCitizenMode = rcptSourceType === 'citizen';
+      const isUdhar = rcptMethod === 'Udhar';
+
+      if (isUdhar && !isCitizenMode && !rcptAutoCreatePerson && !rcptCitizenId) {
+        throw new Error('Udhar credit must be linked to a citizen. Please select a registered citizen or check "Register as new Citizen".');
+      }
+
       if (isCitizenMode && !rcptCitizenId) {
         throw new Error('Please select a registered citizen from the list');
       }
       if (!isCitizenMode && !rcptCustomSource.trim()) {
-        throw new Error('Please enter a walk-in citizen name or income source');
+        throw new Error('Please enter a citizen name or income source');
       }
 
       const selectedCitizen = isCitizenMode ? citizens.find((c) => c.id === rcptCitizenId) : null;
@@ -163,7 +179,7 @@ export const TransactionsPage: React.FC = () => {
       return paymentsApi.create({
         person_id: isCitizenMode ? Number(rcptCitizenId) : undefined,
         person_name: personName,
-        auto_create_person: !isCitizenMode && rcptAutoCreatePerson,
+        auto_create_person: !isCitizenMode && (rcptAutoCreatePerson || isUdhar),
         amount: rupeesToPaise(rcptAmount),
         payment_method: rcptMethod,
         transaction_reference: rcptRef.trim() || undefined,
@@ -173,7 +189,7 @@ export const TransactionsPage: React.FC = () => {
       });
     },
     onSuccess: () => {
-      toast.success('Receipt recorded successfully!');
+      toast.success(rcptMethod === 'Udhar' ? 'Udhar credit recorded to citizen khata!' : 'Receipt recorded successfully!');
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['citizens'] });
       queryClient.invalidateQueries({ queryKey: ['citizens-list'] });
@@ -183,7 +199,7 @@ export const TransactionsPage: React.FC = () => {
       resetReceiptForm();
     },
     onError: (err: any) => {
-      toast.error(err.message || 'Failed to record receipt');
+      toast.error(err.message || 'Failed to record transaction');
     },
   });
 
@@ -229,12 +245,16 @@ export const TransactionsPage: React.FC = () => {
 
   return (
     <>
-      {/* Action Strip: Record Receipt & Record Expense */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem', marginBottom: '1.25rem' }}>
+      {/* Action Strip: Record Receipt, Record Udhar & Record Expense */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
         <button
           className="btn btn-primary btn-sm"
           id="btn-add-pay-top"
-          onClick={() => setIsReceiptModalOpen(true)}
+          onClick={() => {
+            resetReceiptForm();
+            setRcptMethod('Cash');
+            setIsReceiptModalOpen(true);
+          }}
           type="button"
           style={{ fontWeight: 700 }}
         >
@@ -244,6 +264,34 @@ export const TransactionsPage: React.FC = () => {
           </svg>
           <span>Record Receipt (આવક)</span>
         </button>
+
+        <button
+          className="btn btn-sm"
+          id="btn-add-udhar-top"
+          onClick={() => {
+            resetReceiptForm();
+            setRcptMethod('Udhar');
+            setRcptSourceType('citizen');
+            setIsReceiptModalOpen(true);
+          }}
+          type="button"
+          style={{
+            fontWeight: 700,
+            color: '#f59e0b',
+            background: 'rgba(217, 119, 6, 0.12)',
+            border: '1px solid rgba(217, 119, 6, 0.38)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span>Record Udhar (ઉધાર આપો)</span>
+        </button>
+
         <button
           className="btn btn-outline btn-sm"
           id="btn-add-exp-top"
@@ -420,9 +468,26 @@ export const TransactionsPage: React.FC = () => {
               {transactions.length} Entries
             </span>
           </div>
-          <span className="badge badge-completed font-tabular" id="trans-net-badge">
-            Net Surplus: {formatINR(netBalance)}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {activeType === 'udhar' ? (
+              <span
+                className="badge font-tabular"
+                id="trans-udhar-badge"
+                style={{
+                  color: '#f59e0b',
+                  background: 'rgba(217, 119, 6, 0.15)',
+                  border: '1px solid rgba(217, 119, 6, 0.35)',
+                  fontWeight: 700,
+                }}
+              >
+                Total Udhar: {formatINR(totalUdhar)}
+              </span>
+            ) : (
+              <span className="badge badge-completed font-tabular" id="trans-net-badge">
+                Net Surplus: {formatINR(netBalance)}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="table-container hide-on-mobile">
@@ -505,7 +570,7 @@ export const TransactionsPage: React.FC = () => {
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {isExp ? `-${formatINR(t.amount)}` : `+${formatINR(t.amount)}`}
+                        {isExp ? `-${formatINR(t.amount)}` : isUdh ? `⚠️ ${formatINR(t.amount)}` : `+${formatINR(t.amount)}`}
                       </td>
                     </tr>
                   );
@@ -546,7 +611,7 @@ export const TransactionsPage: React.FC = () => {
                     <div className="mobile-card-title">{t.entity}</div>
                     <div className="mobile-card-subtitle">{formatDate(t.date)} &bull; {t.method}</div>
                   </div>
-                  <span className={`badge ${t.rawType === 'expense' ? 'badge-cancelled' : 'badge-completed'}`}>
+                  <span className={`badge ${t.rawType === 'expense' ? 'badge-cancelled' : t.type === 'Udhar' ? 'badge-waiting' : 'badge-completed'}`}>
                     {t.type}
                   </span>
                 </div>
@@ -559,10 +624,10 @@ export const TransactionsPage: React.FC = () => {
                       style={{
                         fontWeight: 700,
                         fontSize: '1rem',
-                        color: t.rawType === 'expense' ? 'var(--expense)' : 'var(--revenue)',
+                        color: t.rawType === 'expense' ? 'var(--expense)' : t.type === 'Udhar' ? 'var(--pending)' : 'var(--revenue)',
                       }}
                     >
-                      {t.rawType === 'expense' ? `-${formatINR(t.amount)}` : `+${formatINR(t.amount)}`}
+                      {t.rawType === 'expense' ? `-${formatINR(t.amount)}` : t.type === 'Udhar' ? `⚠️ ${formatINR(t.amount)}` : `+${formatINR(t.amount)}`}
                     </span>
                   </div>
                 </div>
@@ -576,14 +641,29 @@ export const TransactionsPage: React.FC = () => {
       {isReceiptModalOpen && (
         <div className="modal-backdrop open" onClick={() => { setIsReceiptModalOpen(false); resetReceiptForm(); }}>
           <div className="modal-dialog" style={{ maxWidth: '520px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header" style={{ paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-subtle)' }}>
+            <div
+              className="modal-header"
+              style={{
+                paddingBottom: '0.75rem',
+                borderBottom: '1px solid var(--border-subtle)',
+                background: rcptMethod === 'Udhar' ? 'rgba(217, 119, 6, 0.05)' : undefined,
+              }}
+            >
               <div>
                 <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-                  <span style={{ color: 'var(--revenue)' }}>✦</span>
-                  <span>Record Direct Receipt (આવક પાવતી)</span>
+                  <span style={{ color: rcptMethod === 'Udhar' ? '#f59e0b' : 'var(--revenue)' }}>
+                    {rcptMethod === 'Udhar' ? '⏳' : '✦'}
+                  </span>
+                  <span>
+                    {rcptMethod === 'Udhar'
+                      ? 'Record Direct Udhar Credit (ઉધાર નોંધણી / ખાતામાં બાકી)'
+                      : 'Record Direct Receipt (આવક પાવતી)'}
+                  </span>
                 </h3>
                 <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  e-Gram Center Revenue &amp; Citizen Fee Ledger
+                  {rcptMethod === 'Udhar'
+                    ? 'Village Resident Credit & Outstanding Ledger'
+                    : 'e-Gram Center Revenue & Citizen Fee Ledger'}
                 </p>
               </div>
               <button
@@ -775,24 +855,49 @@ export const TransactionsPage: React.FC = () => {
 
                         <div>
                           {selectedCitizen.total_pending && selectedCitizen.total_pending > 0 ? (
-                            <span
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.25rem',
-                                padding: '0.2rem 0.5rem',
-                                background: 'rgba(217,119,6,0.15)',
-                                color: '#f59e0b',
-                                border: '1px solid rgba(217,119,6,0.3)',
-                                borderRadius: '4px',
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              <span>⚠️ બાકી ઉધાર:</span>
-                              <span className="font-tabular">{formatINR(selectedCitizen.total_pending)}</span>
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <span
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.25rem',
+                                  padding: '0.2rem 0.5rem',
+                                  background: 'rgba(217,119,6,0.15)',
+                                  color: '#f59e0b',
+                                  border: '1px solid rgba(217,119,6,0.3)',
+                                  borderRadius: '4px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                <span>⚠️ બાકી ઉધાર:</span>
+                                <span className="font-tabular">{formatINR(selectedCitizen.total_pending)}</span>
+                              </span>
+                              {rcptMethod !== 'Udhar' && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setRcptAmount(String(((selectedCitizen.total_pending || 0) / 100).toFixed(0)));
+                                    setRcptNotes(`Udhar settlement for ${selectedCitizen.name}`);
+                                  }}
+                                  title="Fill outstanding amount to settle Udhar"
+                                  style={{
+                                    padding: '0.2rem 0.45rem',
+                                    background: 'rgba(5, 150, 105, 0.15)',
+                                    border: '1px solid rgba(5, 150, 105, 0.3)',
+                                    borderRadius: '4px',
+                                    color: 'var(--revenue)',
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  Settle (જમા)
+                                </button>
+                              )}
+                            </div>
                           ) : (
                             <span
                               style={{
@@ -1018,29 +1123,39 @@ export const TransactionsPage: React.FC = () => {
 
                 {/* Payment Method */}
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.785rem', fontWeight: 600, marginBottom: '0.35rem', display: 'block' }}>
-                    Payment Mode (ચુકવણી પદ્ધતિ) *
+                  <label className="form-label" style={{ fontSize: '0.785rem', fontWeight: 600, marginBottom: '0.35rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Payment / Credit Mode (ચુકવણી પદ્ધતિ) *</span>
+                    {rcptMethod === 'Udhar' && (
+                      <span style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 700 }}>
+                        ● Added to Citizen Udhar Khata
+                      </span>
+                    )}
                   </label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
                     {[
-                      { id: 'Cash', label: 'Cash (રોકડ)', icon: '💵' },
-                      { id: 'UPI', label: 'UPI / QR', icon: '📱' },
-                      { id: 'Bank Transfer', label: 'Bank (બેંક)', icon: '🏦' },
+                      { id: 'Cash', label: 'Cash (રોકડ)', icon: '💵', color: 'var(--revenue)', bg: 'rgba(5, 150, 105, 0.15)', activeColor: 'var(--revenue-light)' },
+                      { id: 'UPI', label: 'UPI / QR', icon: '📱', color: 'var(--revenue)', bg: 'rgba(5, 150, 105, 0.15)', activeColor: 'var(--revenue-light)' },
+                      { id: 'Bank Transfer', label: 'Bank (બેંક)', icon: '🏦', color: 'var(--revenue)', bg: 'rgba(5, 150, 105, 0.15)', activeColor: 'var(--revenue-light)' },
+                      { id: 'Udhar', label: 'Udhar (ઉધાર)', icon: '⏳', color: '#f59e0b', bg: 'rgba(217, 119, 6, 0.18)', activeColor: '#f59e0b' },
                     ].map((m) => {
                       const isSelected = rcptMethod === m.id;
                       return (
                         <button
                           key={m.id}
                           type="button"
-                          onClick={() => setRcptMethod(m.id)}
+                          onClick={() => {
+                            setRcptMethod(m.id);
+                            if (m.id === 'Udhar' && rcptSourceType === 'other') {
+                              setRcptAutoCreatePerson(true);
+                            }
+                          }}
                           style={{
-                            flex: 1,
-                            padding: '0.55rem 0.4rem',
+                            padding: '0.55rem 0.25rem',
                             borderRadius: 'var(--radius-sm)',
-                            background: isSelected ? 'rgba(5, 150, 105, 0.15)' : 'var(--bg-surface-elevated)',
-                            border: `1px solid ${isSelected ? 'var(--revenue)' : 'var(--border-subtle)'}`,
-                            color: isSelected ? 'var(--revenue-light)' : 'var(--text-secondary)',
-                            fontSize: '0.8rem',
+                            background: isSelected ? m.bg : 'var(--bg-surface-elevated)',
+                            border: `1px solid ${isSelected ? m.color : 'var(--border-subtle)'}`,
+                            color: isSelected ? m.activeColor : 'var(--text-secondary)',
+                            fontSize: '0.78rem',
                             fontWeight: isSelected ? 700 : 500,
                             cursor: 'pointer',
                             textAlign: 'center',
@@ -1052,15 +1167,80 @@ export const TransactionsPage: React.FC = () => {
                           }}
                         >
                           <span style={{ fontSize: '1.1rem' }}>{m.icon}</span>
-                          <span>{m.label}</span>
+                          <span style={{ whiteSpace: 'nowrap' }}>{m.label}</span>
                         </button>
                       );
                     })}
                   </div>
                 </div>
 
+                {/* Udhar Context & Warning Notice */}
+                {rcptMethod === 'Udhar' && (
+                  <div
+                    style={{
+                      background: 'rgba(217, 119, 6, 0.1)',
+                      border: '1px solid rgba(217, 119, 6, 0.35)',
+                      borderRadius: 'var(--radius-xs)',
+                      padding: '0.65rem 0.85rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
+                      fontSize: '0.75rem',
+                      color: 'var(--text-main)',
+                    }}
+                  >
+                    <span style={{ fontSize: '1.25rem', color: '#f59e0b' }}>⚠️</span>
+                    <div>
+                      <strong style={{ display: 'block', color: '#f59e0b', marginBottom: '2px' }}>
+                        Citizen Khata Credit (ઉધાર ખાતામાં બાકી રકમ તરીકે નોંધાશે)
+                      </strong>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.72rem' }}>
+                        This will increase the citizen's pending balance in their village ledger. Today's cash box will not be increased until payment is settled.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Udhar Purpose Presets */}
+                {rcptMethod === 'Udhar' && (
+                  <div>
+                    <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem', display: 'block' }}>
+                      Udhar Service / Reason (ઉધારનું કારણ):
+                    </label>
+                    <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                      {UDHAR_PRESETS.map((p) => {
+                        const isSelected = rcptNotes === p.notes;
+                        return (
+                          <button
+                            key={p.label}
+                            type="button"
+                            onClick={() => setRcptNotes(p.notes)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.3rem',
+                              padding: '0.25rem 0.5rem',
+                              borderRadius: 'var(--radius-xs)',
+                              fontSize: '0.725rem',
+                              fontWeight: isSelected ? 700 : 500,
+                              background: isSelected ? 'rgba(217, 119, 6, 0.2)' : 'var(--bg-surface-elevated)',
+                              border: `1px solid ${isSelected ? '#f59e0b' : 'var(--border-subtle)'}`,
+                              color: isSelected ? '#f59e0b' : 'var(--text-secondary)',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease',
+                            }}
+                          >
+                            <span>{p.icon}</span>
+                            <span>{p.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Transaction Reference (if UPI or Bank) */}
-                {rcptMethod !== 'Cash' && (
+                {rcptMethod !== 'Cash' && rcptMethod !== 'Udhar' && (
                   <div className="form-group" style={{ margin: 0 }}>
                     <label className="form-label" style={{ fontSize: '0.785rem', fontWeight: 600, marginBottom: '0.35rem', display: 'block' }}>
                       Reference / UTR / Transaction No. (ઓપ્શનલ)
@@ -1104,10 +1284,19 @@ export const TransactionsPage: React.FC = () => {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  style={{ fontWeight: 700, minWidth: '130px' }}
+                  style={{
+                    fontWeight: 700,
+                    minWidth: '140px',
+                    background: rcptMethod === 'Udhar' ? '#d97706' : undefined,
+                    borderColor: rcptMethod === 'Udhar' ? '#d97706' : undefined,
+                  }}
                   disabled={createReceiptMutation.isPending}
                 >
-                  {createReceiptMutation.isPending ? 'Recording...' : 'Save Receipt (આવક)'}
+                  {createReceiptMutation.isPending
+                    ? 'Recording...'
+                    : rcptMethod === 'Udhar'
+                    ? 'Save Udhar (ઉધાર નોંધો)'
+                    : 'Save Receipt (આવક)'}
                 </button>
               </div>
             </form>
