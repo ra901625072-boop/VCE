@@ -62,7 +62,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!token) return;
 
-    setShiftRemainingFormatted(calculateShiftRemaining());
+    const initialRemaining = calculateShiftRemaining();
+    setShiftRemainingFormatted(initialRemaining);
+    if (initialRemaining === 'Expired') {
+      logout('expired');
+      return;
+    }
 
     const timer = setInterval(() => {
       const remaining = calculateShiftRemaining();

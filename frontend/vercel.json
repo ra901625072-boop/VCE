@@ -22,7 +22,7 @@
       "destination": "https://vce-pali-backend.onrender.com/download/:path*"
     },
     {
-      "source": "/((?!api|download|assets|favicon\\.png|.*\\..*).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],

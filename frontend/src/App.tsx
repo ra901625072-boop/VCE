@@ -37,14 +37,24 @@ export const App: React.FC = () => {
                 {/* Public Route */}
                 <Route path="/login" element={<LoginPage />} />
 
-                {/* Legacy HTML redirects for complete backwards compatibility */}
+                {/* Legacy HTML and clean-URL redirects for complete backwards compatibility */}
+                <Route path="/pages/login" element={<Navigate to="/login" replace />} />
                 <Route path="/pages/login.html" element={<Navigate to="/login" replace />} />
+                <Route path="/pages/dashboard" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/pages/dashboard.html" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/pages/work" element={<Navigate to="/work" replace />} />
                 <Route path="/pages/work.html" element={<Navigate to="/work" replace />} />
+                <Route path="/pages/people" element={<Navigate to="/citizens" replace />} />
                 <Route path="/pages/people.html" element={<Navigate to="/citizens" replace />} />
+                <Route path="/pages/citizens" element={<Navigate to="/citizens" replace />} />
+                <Route path="/pages/citizens.html" element={<Navigate to="/citizens" replace />} />
+                <Route path="/pages/rojmel" element={<Navigate to="/rojmel" replace />} />
                 <Route path="/pages/rojmel.html" element={<Navigate to="/rojmel" replace />} />
+                <Route path="/pages/transactions" element={<Navigate to="/transactions" replace />} />
                 <Route path="/pages/transactions.html" element={<Navigate to="/transactions" replace />} />
+                <Route path="/pages/reports" element={<Navigate to="/reports" replace />} />
                 <Route path="/pages/reports.html" element={<Navigate to="/reports" replace />} />
+                <Route path="/pages/settings" element={<Navigate to="/settings" replace />} />
                 <Route path="/pages/settings.html" element={<Navigate to="/settings" replace />} />
                 <Route path="/index.html" element={<Navigate to="/dashboard" replace />} />
 
