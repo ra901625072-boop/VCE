@@ -8,17 +8,52 @@ from backend.utils.dates import now_utc_iso
 from backend.utils.money import format_inr
 
 
+from backend.schemas.person import PersonCreate
+from backend.services.person_service import PersonService
+
+
 class PaymentService:
     def __init__(self, db_path: str = None):
         self.db_path = db_path
 
     def create(self, data: PaymentCreate) -> Dict[str, Any]:
         now = now_utc_iso()
+        payment_date = data.payment_date or now[:10]
+        payment_time = data.payment_time or now[11:19]
         with get_db(self.db_path) as conn:
+            person_id = data.person_id
+
+            # If person_name is provided with auto_create_person = True, register new citizen
+            if not person_id and data.person_name and data.auto_create_person:
+                cleaned_name = data.person_name.strip()
+                existing = conn.execute("SELECT id FROM people WHERE name = ?", (cleaned_name,)).fetchone()
+                if existing:
+                    person_id = existing["id"]
+                else:
+                    new_p = PersonService(self.db_path).create(PersonCreate(
+                        name=cleaned_name,
+                        village="Pali",
+                        notes="Registered via direct receipt"
+                    ))
+                    person_id = new_p["id"]
+
+            # If still no person_id, attach to default Walk-in / General citizen record
+            if not person_id:
+                walkin = conn.execute("SELECT id, name FROM people WHERE name LIKE '%Walk-in%' OR name LIKE '%સામાન્ય%'").fetchone()
+                if not walkin:
+                    new_w = PersonService(self.db_path).create(PersonCreate(
+                        name="Walk-in Citizen (સામાન્ય આવક)",
+                        village="Pali",
+                        notes="System walk-in citizen for direct receipts and counter services"
+                    ))
+                    person_id = new_w["id"]
+                else:
+                    person_id = walkin["id"]
+
             # Verify person
-            person = conn.execute("SELECT id, name FROM people WHERE id = ?", (data.person_id,)).fetchone()
+            person = conn.execute("SELECT id, name FROM people WHERE id = ?", (person_id,)).fetchone()
             if not person:
-                raise NotFoundException(f"Person with ID {data.person_id} does not exist.")
+                raise NotFoundException(f"Person with ID {person_id} does not exist.")
 
             work_title = None
             if data.work_id:
@@ -34,6 +69,11 @@ class PaymentService:
                         # Allow with warning log, or check if user meant to overpay
                         pass
 
+            # Prepare notes with custom source if provided
+            notes = data.notes or ""
+            if data.person_name and data.person_name.strip() != person["name"]:
+                notes = f"Source: {data.person_name.strip()}" + (f" | {notes}" if notes else "")
+
             cur = conn.execute(
                 """
                 INSERT INTO payments (
@@ -43,15 +83,16 @@ class PaymentService:
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    data.person_id, data.work_id, data.amount, data.payment_method,
-                    data.payment_status, data.transaction_reference, data.payment_date,
-                    data.payment_time, data.notes, now, now
+                    person_id, data.work_id, data.amount, data.payment_method,
+                    data.payment_status, data.transaction_reference, payment_date,
+                    payment_time, notes, now, now
                 )
             )
             payment_id = cur.lastrowid
 
             amount_fmt = format_inr(data.amount)
-            desc = f"Received {amount_fmt} via {data.payment_method} from {person['name']}"
+            display_entity = data.person_name or person['name']
+            desc = f"Received {amount_fmt} via {data.payment_method} from {display_entity}"
             if work_title:
                 desc += f" for work '{work_title}'"
             log_activity(conn, "payment", payment_id, "created", desc)

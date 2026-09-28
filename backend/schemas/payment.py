@@ -4,14 +4,16 @@ from pydantic import BaseModel, Field
 
 
 class PaymentBase(BaseModel):
-    person_id: int = Field(..., description="Person who made the payment")
+    person_id: Optional[int] = Field(None, description="Person who made the payment, or None for walk-in/other sources")
+    person_name: Optional[str] = Field(None, description="Optional custom person or income source name")
+    auto_create_person: Optional[bool] = Field(False, description="If True and person_name is provided, creates a registered person record")
     work_id: Optional[int] = Field(None, description="Optional linked work item")
     amount: int = Field(..., gt=0, description="Payment amount in integer paise")
-    payment_method: str = Field(default="Online", description="Online, Cash, Udhar, UPI, Bank Transfer, Cheque, etc.")
+    payment_method: str = Field(default="Cash", description="Online, Cash, Udhar, UPI, Bank Transfer, Cheque, etc.")
     payment_status: str = Field(default="received", description="received or pending")
     transaction_reference: Optional[str] = Field(None, max_length=100)
-    payment_date: str = Field(..., description="Actual payment date in YYYY-MM-DD")
-    payment_time: str = Field(..., description="Actual payment time in HH:MM:SS or HH:MM")
+    payment_date: Optional[str] = Field(None, description="Actual payment date in YYYY-MM-DD")
+    payment_time: Optional[str] = Field(None, description="Actual payment time in HH:MM:SS or HH:MM")
     notes: Optional[str] = None
 
 

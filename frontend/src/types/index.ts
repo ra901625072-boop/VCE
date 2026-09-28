@@ -94,6 +94,7 @@ export interface PaymentItem {
   work_id?: number;
   person_id?: number;
   person_name?: string;
+  auto_create_person?: boolean;
   work_title?: string;
   amount: number; // paise
   payment_date: string;

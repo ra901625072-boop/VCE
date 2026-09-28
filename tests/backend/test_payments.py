@@ -54,3 +54,43 @@ def test_partial_payments_and_balance_calculation(temp_db):
     assert person_summary["total_agreed"] == 1000000
     assert person_summary["total_received"] == 500000
     assert person_summary["total_pending"] == 500000
+
+
+def test_walkin_and_other_income_receipts(temp_db):
+    pay_service = PaymentService(temp_db)
+    p_service = PersonService(temp_db)
+
+    # 1. Direct walk-in without person_id
+    receipt1 = pay_service.create(PaymentCreate(
+        amount=5000,
+        payment_method="Cash",
+        person_name="Walk-in Citizen",
+        notes="Photocopy 5 copies"
+    ))
+    assert receipt1["amount"] == 5000
+    assert receipt1["person_id"] is not None
+    assert "Walk-in" in receipt1["person_name"]
+
+    # 2. Other income source (e.g. CSC Commission)
+    receipt2 = pay_service.create(PaymentCreate(
+        amount=25000,
+        payment_method="UPI",
+        person_name="CSC Portal Commission",
+        notes="Monthly commission bonus"
+    ))
+    assert receipt2["amount"] == 25000
+    assert "CSC Portal Commission" in receipt2["notes"]
+
+    # 3. New citizen auto-created
+    receipt3 = pay_service.create(PaymentCreate(
+        amount=10000,
+        payment_method="Cash",
+        person_name="Rameshbhai Thakor",
+        auto_create_person=True,
+        notes="Income certificate application"
+    ))
+    assert receipt3["amount"] == 10000
+    # Ensure person was registered in people table
+    registered_person = p_service.get_by_id(receipt3["person_id"])
+    assert registered_person["name"] == "Rameshbhai Thakor"
+
